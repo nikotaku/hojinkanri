@@ -40,6 +40,27 @@ export const ACCOUNT_SERVICES = [
   "GMO",
 ] as const;
 
+/** タクシー関連ステータスの選択肢 */
+export const TAXI_STATUS_OPTIONS = [
+  "未着手",
+  "審査依頼中",
+  "登録完了",
+  "使用中",
+  "限度額まで使用",
+  "審査落ち",
+] as const;
+
+/** 口座関連ステータスの選択肢 */
+export const ACCOUNT_STATUS_OPTIONS = [
+  "未着手",
+  "進行中",
+  "事業実態確認書類準備中",
+  "審査中",
+  "開設済み",
+  "使用中",
+  "審査落ち",
+] as const;
+
 /** 案件 */
 export interface Case {
   id: string;

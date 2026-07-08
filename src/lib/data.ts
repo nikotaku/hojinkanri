@@ -102,6 +102,47 @@ export async function createCompany(input: CompanyInput): Promise<Company> {
   return company;
 }
 
+/**
+ * 会社の taxi / accounts (jsonb) の 1 サービスのステータスを更新する。
+ * value が空文字なら該当キーを削除する。
+ */
+export async function setCompanyService(
+  id: string,
+  field: "taxi" | "accounts",
+  service: string,
+  value: string,
+): Promise<void> {
+  const supabase = getSupabase();
+  if (supabase) {
+    const { data, error } = await supabase
+      .from("companies")
+      .select(field)
+      .eq("id", id)
+      .single();
+    if (error) throw new Error(error.message);
+    const map: Record<string, string> = {
+      ...(((data as Record<string, unknown>)?.[field] as Record<
+        string,
+        string
+      >) ?? {}),
+    };
+    if (value) map[service] = value;
+    else delete map[service];
+    const { error: upErr } = await supabase
+      .from("companies")
+      .update({ [field]: map })
+      .eq("id", id);
+    if (upErr) throw new Error(upErr.message);
+    return;
+  }
+  const company = getMockDb().companies.find((c) => c.id === id);
+  if (!company) return;
+  const map: Record<string, string> = { ...(company[field] ?? {}) };
+  if (value) map[service] = value;
+  else delete map[service];
+  company[field] = map;
+}
+
 // --- 案件 ---
 
 export async function listCases(): Promise<CaseWithCompany[]> {

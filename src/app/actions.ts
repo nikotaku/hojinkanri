@@ -2,12 +2,25 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { createCompany, createCase } from "@/lib/data";
+import { createCompany, createCase, setCompanyService } from "@/lib/data";
 import type {
   CompanyStatus,
   CaseStatus,
   CasePriority,
 } from "@/lib/types";
+
+/** タクシー / 口座 の 1 サービスのステータスを更新する（インライン編集用） */
+export async function setServiceStatusAction(
+  companyId: string,
+  field: "taxi" | "accounts",
+  service: string,
+  value: string,
+) {
+  await setCompanyService(companyId, field, service, value);
+  revalidatePath("/taxi");
+  revalidatePath("/accounts");
+  revalidatePath(`/companies/${companyId}`);
+}
 
 function str(form: FormData, key: string): string | null {
   const v = form.get(key);
