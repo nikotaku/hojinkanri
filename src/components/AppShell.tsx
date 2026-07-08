@@ -9,6 +9,8 @@ const nav = [
   { href: "/", label: "ダッシュボード", icon: "📊" },
   { href: "/companies", label: "法人管理", icon: "🏢" },
   { href: "/cases", label: "案件管理", icon: "📁" },
+  { href: "/taxi", label: "タクシー関連", icon: "🚕" },
+  { href: "/accounts", label: "口座関連", icon: "🏦" },
 ];
 
 /**
