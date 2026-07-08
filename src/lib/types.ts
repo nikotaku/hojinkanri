@@ -21,9 +21,24 @@ export interface Company {
   address: string | null;
   status: CompanyStatus;
   notes: string | null;
+  /** タクシー関連サービスの状況 (サービス名 -> ステータス) */
+  taxi?: Record<string, string> | null;
+  /** 口座関連サービスの状況 (サービス名 -> ステータス) */
+  accounts?: Record<string, string> | null;
   created_at: string;
   updated_at: string;
 }
+
+/** タクシー関連で表示するサービス列 */
+export const TAXI_SERVICES = ["DiDi", "S.RIDE", "GO ビジネス"] as const;
+
+/** 口座関連で表示するサービス列 */
+export const ACCOUNT_SERVICES = [
+  "みずほ銀行",
+  "三井住友銀行",
+  "PayPay銀行",
+  "GMO",
+] as const;
 
 /** 案件 */
 export interface Case {
