@@ -1,35 +1,14 @@
 import Link from "next/link";
 import type { Company } from "@/lib/types";
-
-function statusClass(value: string): string {
-  if (/(使用|完了|開設|通過|登録完了)/.test(value)) {
-    return "bg-green-100 text-green-700";
-  }
-  if (/(落ち|不可|中止|解約)/.test(value)) {
-    return "bg-red-100 text-red-700";
-  }
-  if (/(未着手|未設定|未)/.test(value)) {
-    return "bg-gray-100 text-gray-500";
-  }
-  // 審査中・依頼中・準備中・進行中・申請済み など
-  return "bg-amber-100 text-amber-700";
-}
-
-function StatusCell({ value }: { value?: string }) {
-  if (!value) return <span className="text-gray-300">—</span>;
-  return (
-    <span
-      className={`inline-flex items-center whitespace-nowrap rounded-full px-2.5 py-0.5 text-xs font-medium ${statusClass(
-        value,
-      )}`}
-    >
-      {value}
-    </span>
-  );
-}
+import {
+  TAXI_STATUS_OPTIONS,
+  ACCOUNT_STATUS_OPTIONS,
+} from "@/lib/types";
+import { ServiceStatusSelect } from "@/components/ServiceStatusSelect";
 
 /**
  * 会社 × サービスの状況一覧。モバイルはカード、デスクトップはテーブルで表示。
+ * 各セルは Notion のように、その場でステータスを変更できる。
  * field で company.taxi / company.accounts のどちらを見るか切り替える。
  */
 export function ServiceMatrix({
@@ -41,6 +20,9 @@ export function ServiceMatrix({
   services: readonly string[];
   field: "taxi" | "accounts";
 }) {
+  const options =
+    field === "taxi" ? TAXI_STATUS_OPTIONS : ACCOUNT_STATUS_OPTIONS;
+
   return (
     <>
       {/* モバイル: カード表示 */}
@@ -58,12 +40,18 @@ export function ServiceMatrix({
               >
                 {c.name}
               </Link>
-              <dl className="mt-3 space-y-1.5">
+              <dl className="mt-3 space-y-2">
                 {services.map((s) => (
                   <div key={s} className="flex items-center justify-between gap-3">
                     <dt className="text-xs text-gray-500">{s}</dt>
                     <dd>
-                      <StatusCell value={map[s]} />
+                      <ServiceStatusSelect
+                        companyId={c.id}
+                        field={field}
+                        service={s}
+                        value={map[s]}
+                        options={options}
+                      />
                     </dd>
                   </div>
                 ))}
@@ -106,7 +94,13 @@ export function ServiceMatrix({
                   </td>
                   {services.map((s) => (
                     <td key={s} className="whitespace-nowrap px-6 py-4">
-                      <StatusCell value={map[s]} />
+                      <ServiceStatusSelect
+                        companyId={c.id}
+                        field={field}
+                        service={s}
+                        value={map[s]}
+                        options={options}
+                      />
                     </td>
                   ))}
                 </tr>
