@@ -11,6 +11,7 @@ const nav = [
   { href: "/cases", label: "案件管理", icon: "📁" },
   { href: "/taxi", label: "タクシー関連", icon: "🚕" },
   { href: "/accounts", label: "口座関連", icon: "🏦" },
+  { href: "/backlog", label: "バックログ", icon: "📝" },
 ];
 
 /**

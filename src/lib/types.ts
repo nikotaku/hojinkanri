@@ -61,6 +61,27 @@ export const ACCOUNT_STATUS_OPTIONS = [
   "審査落ち",
 ] as const;
 
+/** 行動のバックログ(活動ログ) */
+export interface BacklogEntry {
+  id: string;
+  entry_date: string;
+  tag: string | null;
+  content: string;
+  created_at: string;
+}
+
+/** バックログのタグ選択肢 */
+export const BACKLOG_TAGS = [
+  "法人設立",
+  "口座",
+  "タクシー",
+  "契約",
+  "書類",
+  "審査",
+  "連絡",
+  "その他",
+] as const;
+
 /** 案件 */
 export interface Case {
   id: string;

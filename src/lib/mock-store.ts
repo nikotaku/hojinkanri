@@ -1,4 +1,4 @@
-import type { Company, Case } from "./types";
+import type { Company, Case, BacklogEntry } from "./types";
 
 // Supabase 未設定時に使うインメモリのサンプルデータ。
 // 開発サーバー起動中はプロセス内に保持され、追加した法人・案件も反映される
@@ -160,10 +160,35 @@ export const seedCases: Case[] = [
   },
 ];
 
+export const seedBacklog: BacklogEntry[] = [
+  {
+    id: "bbbbbbb1-0000-0000-0000-000000000001",
+    entry_date: ymd(-1),
+    tag: "口座",
+    content: "みずほ銀行の法人口座開設書類を提出。",
+    created_at: iso(-1),
+  },
+  {
+    id: "bbbbbbb1-0000-0000-0000-000000000002",
+    entry_date: ymd(-3),
+    tag: "タクシー",
+    content: "GO ビジネスの審査依頼を送付。",
+    created_at: iso(-3),
+  },
+  {
+    id: "bbbbbbb1-0000-0000-0000-000000000003",
+    entry_date: ymd(-7),
+    tag: "法人設立",
+    content: "新規法人の登記書類を準備し、司法書士へ連携。",
+    created_at: iso(-7),
+  },
+];
+
 // プロセス内で保持する可変ストア(モックモード専用)
 interface MockDb {
   companies: Company[];
   cases: Case[];
+  backlog: BacklogEntry[];
 }
 
 const globalForMock = globalThis as unknown as { __mockDb?: MockDb };
@@ -173,6 +198,7 @@ export function getMockDb(): MockDb {
     globalForMock.__mockDb = {
       companies: seedCompanies.map((c) => ({ ...c })),
       cases: seedCases.map((c) => ({ ...c })),
+      backlog: seedBacklog.map((b) => ({ ...b })),
     };
   }
   return globalForMock.__mockDb;
