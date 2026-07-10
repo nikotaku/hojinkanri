@@ -12,7 +12,9 @@ export default async function TaxiPage() {
     <div>
       <PageHeader
         title="タクシー関連"
-        description={`各法人のタクシー配車サービス状況（${TAXI_SERVICES.join(" / ")}）`}
+        description={`各法人のタクシー配車サービス状況と登録番号・メール（${TAXI_SERVICES.join(
+          " / ",
+        )}）`}
       />
 
       {companies.length === 0 ? (
@@ -24,6 +26,7 @@ export default async function TaxiPage() {
           companies={companies}
           services={TAXI_SERVICES}
           field="taxi"
+          showContact
         />
       )}
     </div>
