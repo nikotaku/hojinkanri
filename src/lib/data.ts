@@ -7,6 +7,7 @@ import {
   type CompanyStatus,
   type CaseStatus,
   type CasePriority,
+  type BacklogEntry,
   OPEN_CASE_STATUSES,
 } from "./types";
 
@@ -211,6 +212,67 @@ export async function createCase(input: CaseInput): Promise<Case> {
   };
   db.cases.push(newCase);
   return newCase;
+}
+
+// --- 行動のバックログ ---
+
+export interface BacklogInput {
+  entry_date: string;
+  tag?: string | null;
+  content: string;
+}
+
+export async function listBacklog(): Promise<BacklogEntry[]> {
+  const supabase = getSupabase();
+  if (supabase) {
+    const { data, error } = await supabase
+      .from("backlog")
+      .select("*")
+      .order("entry_date", { ascending: false })
+      .order("created_at", { ascending: false });
+    if (error) throw new Error(error.message);
+    return data as BacklogEntry[];
+  }
+  return [...getMockDb().backlog].sort((a, b) => {
+    const d = b.entry_date.localeCompare(a.entry_date);
+    return d !== 0 ? d : b.created_at.localeCompare(a.created_at);
+  });
+}
+
+export async function createBacklogEntry(
+  input: BacklogInput,
+): Promise<BacklogEntry> {
+  const supabase = getSupabase();
+  if (supabase) {
+    const { data, error } = await supabase
+      .from("backlog")
+      .insert(input)
+      .select("*")
+      .single();
+    if (error) throw new Error(error.message);
+    return data as BacklogEntry;
+  }
+  const db = getMockDb();
+  const entry: BacklogEntry = {
+    id: crypto.randomUUID(),
+    entry_date: input.entry_date,
+    tag: input.tag ?? null,
+    content: input.content,
+    created_at: nowIso(),
+  };
+  db.backlog.push(entry);
+  return entry;
+}
+
+export async function deleteBacklogEntry(id: string): Promise<void> {
+  const supabase = getSupabase();
+  if (supabase) {
+    const { error } = await supabase.from("backlog").delete().eq("id", id);
+    if (error) throw new Error(error.message);
+    return;
+  }
+  const db = getMockDb();
+  db.backlog = db.backlog.filter((e) => e.id !== id);
 }
 
 // --- ダッシュボード集計 ---

@@ -2,12 +2,42 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { createCompany, createCase, setCompanyService } from "@/lib/data";
+import {
+  createCompany,
+  createCase,
+  setCompanyService,
+  createBacklogEntry,
+  deleteBacklogEntry,
+} from "@/lib/data";
 import type {
   CompanyStatus,
   CaseStatus,
   CasePriority,
 } from "@/lib/types";
+
+/** 行動のバックログを1件追加する */
+export async function createBacklogAction(formData: FormData) {
+  const content = str(formData, "content");
+  if (!content) throw new Error("内容は必須です。");
+  const entry_date =
+    str(formData, "entry_date") ?? new Date().toISOString().slice(0, 10);
+
+  await createBacklogEntry({
+    entry_date,
+    tag: str(formData, "tag"),
+    content,
+  });
+
+  revalidatePath("/backlog");
+}
+
+/** 行動のバックログを1件削除する */
+export async function deleteBacklogAction(formData: FormData) {
+  const id = str(formData, "id");
+  if (!id) return;
+  await deleteBacklogEntry(id);
+  revalidatePath("/backlog");
+}
 
 /** タクシー / 口座 の 1 サービスのステータスを更新する（インライン編集用） */
 export async function setServiceStatusAction(
