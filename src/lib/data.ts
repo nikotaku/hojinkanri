@@ -107,9 +107,11 @@ export async function createCompany(input: CompanyInput): Promise<Company> {
  * 会社の taxi / accounts (jsonb) の 1 サービスのステータスを更新する。
  * value が空文字なら該当キーを削除する。
  */
+export type ServiceField = "taxi" | "accounts" | "taxi_phone" | "taxi_email";
+
 export async function setCompanyService(
   id: string,
-  field: "taxi" | "accounts",
+  field: ServiceField,
   service: string,
   value: string,
 ): Promise<void> {

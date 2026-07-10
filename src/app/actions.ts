@@ -39,10 +39,13 @@ export async function deleteBacklogAction(formData: FormData) {
   revalidatePath("/backlog");
 }
 
-/** タクシー / 口座 の 1 サービスのステータスを更新する（インライン編集用） */
+/**
+ * タクシー / 口座 の 1 サービスの項目（ステータス・登録電話番号・登録メール）を
+ * 更新する（インライン編集用）。
+ */
 export async function setServiceStatusAction(
   companyId: string,
-  field: "taxi" | "accounts",
+  field: "taxi" | "accounts" | "taxi_phone" | "taxi_email",
   service: string,
   value: string,
 ) {
