@@ -26,7 +26,7 @@ export default async function TaxiPage() {
           companies={companies}
           services={TAXI_SERVICES}
           field="taxi"
-          showContact
+          perServiceContact
         />
       )}
     </div>
