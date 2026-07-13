@@ -6,6 +6,7 @@ import {
   createCompany,
   createCase,
   setCompanyService,
+  reorderCompanies,
   createBacklogEntry,
   deleteBacklogEntry,
 } from "@/lib/data";
@@ -14,6 +15,15 @@ import type {
   CaseStatus,
   CasePriority,
 } from "@/lib/types";
+
+/** 会社の並び順を保存する（ドラッグ&ドロップ用） */
+export async function reorderCompaniesAction(ids: string[]) {
+  if (!Array.isArray(ids) || ids.length === 0) return;
+  await reorderCompanies(ids);
+  revalidatePath("/taxi");
+  revalidatePath("/accounts");
+  revalidatePath("/companies");
+}
 
 /** 行動のバックログを1件追加する */
 export async function createBacklogAction(formData: FormData) {

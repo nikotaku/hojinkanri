@@ -21,6 +21,8 @@ export interface Company {
   address: string | null;
   status: CompanyStatus;
   notes: string | null;
+  /** 並び順（ドラッグ&ドロップで変更） */
+  sort_order?: number | null;
   /** タクシー関連サービスの状況 (サービス名 -> ステータス) */
   taxi?: Record<string, string> | null;
   /** タクシー関連サービスの登録電話番号 (サービス名 -> 電話番号) */

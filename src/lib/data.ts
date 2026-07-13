@@ -43,19 +43,48 @@ function nowIso(): string {
 
 // --- 法人 ---
 
+function compareCompanies(a: Company, b: Company): number {
+  const ao = a.sort_order ?? null;
+  const bo = b.sort_order ?? null;
+  if (ao != null && bo != null && ao !== bo) return ao - bo;
+  if (ao != null && bo == null) return -1;
+  if (ao == null && bo != null) return 1;
+  return b.created_at.localeCompare(a.created_at);
+}
+
 export async function listCompanies(): Promise<Company[]> {
   const supabase = getSupabase();
   if (supabase) {
     const { data, error } = await supabase
       .from("companies")
       .select("*")
+      .order("sort_order", { ascending: true, nullsFirst: false })
       .order("created_at", { ascending: false });
     if (error) throw new Error(error.message);
     return data as Company[];
   }
-  return [...getMockDb().companies].sort((a, b) =>
-    b.created_at.localeCompare(a.created_at),
-  );
+  return [...getMockDb().companies].sort(compareCompanies);
+}
+
+/** 会社の並び順を id の配列順に保存する（ドラッグ&ドロップ用） */
+export async function reorderCompanies(ids: string[]): Promise<void> {
+  const supabase = getSupabase();
+  if (supabase) {
+    await Promise.all(
+      ids.map((id, index) =>
+        supabase
+          .from("companies")
+          .update({ sort_order: index + 1 })
+          .eq("id", id),
+      ),
+    );
+    return;
+  }
+  const db = getMockDb();
+  ids.forEach((id, index) => {
+    const c = db.companies.find((x) => x.id === id);
+    if (c) c.sort_order = index + 1;
+  });
 }
 
 export async function getCompany(id: string): Promise<Company | null> {
