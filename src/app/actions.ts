@@ -55,7 +55,7 @@ export async function deleteBacklogAction(formData: FormData) {
  */
 export async function setServiceStatusAction(
   companyId: string,
-  field: "taxi" | "accounts" | "taxi_phone" | "taxi_email",
+  field: "taxi" | "accounts" | "taxi_phone" | "taxi_email" | "taxi_name",
   service: string,
   value: string,
 ) {

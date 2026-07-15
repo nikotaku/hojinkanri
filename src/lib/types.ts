@@ -29,6 +29,8 @@ export interface Company {
   taxi_phone?: Record<string, string> | null;
   /** タクシー関連サービスの登録メールアドレス (サービス名 -> メール) */
   taxi_email?: Record<string, string> | null;
+  /** タクシー関連サービスのアプリ登録名 (サービス名 -> 登録名) */
+  taxi_name?: Record<string, string> | null;
   /** 口座関連サービスの状況 (サービス名 -> ステータス) */
   accounts?: Record<string, string> | null;
   created_at: string;
