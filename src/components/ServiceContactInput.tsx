@@ -16,7 +16,7 @@ export function ServiceContactInput({
   type = "text",
 }: {
   companyId: string;
-  field: "taxi_phone" | "taxi_email";
+  field: "taxi_phone" | "taxi_email" | "taxi_name";
   service: string;
   value?: string;
   placeholder: string;

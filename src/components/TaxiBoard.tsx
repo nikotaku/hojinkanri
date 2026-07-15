@@ -61,6 +61,7 @@ export function TaxiBoard({ companies }: { companies: Company[] }) {
         const statusMap = (c.taxi ?? {}) as Record<string, string>;
         const phoneMap = (c.taxi_phone ?? {}) as Record<string, string>;
         const emailMap = (c.taxi_email ?? {}) as Record<string, string>;
+        const nameMap = (c.taxi_name ?? {}) as Record<string, string>;
         return (
           <li
             key={c.id}
@@ -113,7 +114,7 @@ export function TaxiBoard({ companies }: { companies: Company[] }) {
                       field="taxi_phone"
                       service={s}
                       value={phoneMap[s]}
-                      placeholder="登録電話番号"
+                      placeholder="アプリ登録電話番号"
                       type="tel"
                     />
                     <ServiceContactInput
@@ -121,8 +122,15 @@ export function TaxiBoard({ companies }: { companies: Company[] }) {
                       field="taxi_email"
                       service={s}
                       value={emailMap[s]}
-                      placeholder="登録メールアドレス"
+                      placeholder="アプリ登録メールアドレス"
                       type="email"
+                    />
+                    <ServiceContactInput
+                      companyId={c.id}
+                      field="taxi_name"
+                      service={s}
+                      value={nameMap[s]}
+                      placeholder="アプリ登録名"
                     />
                   </div>
                 </details>
