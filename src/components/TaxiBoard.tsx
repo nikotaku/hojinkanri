@@ -62,6 +62,9 @@ export function TaxiBoard({ companies }: { companies: Company[] }) {
         const phoneMap = (c.taxi_phone ?? {}) as Record<string, string>;
         const emailMap = (c.taxi_email ?? {}) as Record<string, string>;
         const nameMap = (c.taxi_name ?? {}) as Record<string, string>;
+        const adminUrlMap = (c.taxi_admin_url ?? {}) as Record<string, string>;
+        const loginIdMap = (c.taxi_login_id ?? {}) as Record<string, string>;
+        const loginPwMap = (c.taxi_login_pw ?? {}) as Record<string, string>;
         return (
           <li
             key={c.id}
@@ -131,6 +134,40 @@ export function TaxiBoard({ companies }: { companies: Company[] }) {
                       service={s}
                       value={nameMap[s]}
                       placeholder="アプリ登録名"
+                    />
+                    <div className="flex items-center gap-1.5">
+                      <ServiceContactInput
+                        companyId={c.id}
+                        field="taxi_admin_url"
+                        service={s}
+                        value={adminUrlMap[s]}
+                        placeholder="管理画面URL"
+                        type="url"
+                      />
+                      {adminUrlMap[s] && (
+                        <a
+                          href={adminUrlMap[s]}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="shrink-0 text-xs font-medium text-brand-600 hover:text-brand-700"
+                        >
+                          開く
+                        </a>
+                      )}
+                    </div>
+                    <ServiceContactInput
+                      companyId={c.id}
+                      field="taxi_login_id"
+                      service={s}
+                      value={loginIdMap[s]}
+                      placeholder="ログインID"
+                    />
+                    <ServiceContactInput
+                      companyId={c.id}
+                      field="taxi_login_pw"
+                      service={s}
+                      value={loginPwMap[s]}
+                      placeholder="ログインPW"
                     />
                   </div>
                 </details>

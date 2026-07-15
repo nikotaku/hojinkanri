@@ -16,11 +16,17 @@ export function ServiceContactInput({
   type = "text",
 }: {
   companyId: string;
-  field: "taxi_phone" | "taxi_email" | "taxi_name";
+  field:
+    | "taxi_phone"
+    | "taxi_email"
+    | "taxi_name"
+    | "taxi_admin_url"
+    | "taxi_login_id"
+    | "taxi_login_pw";
   service: string;
   value?: string;
   placeholder: string;
-  type?: "text" | "tel" | "email";
+  type?: "text" | "tel" | "email" | "url";
 }) {
   const [current, setCurrent] = useState(value ?? "");
   const [pending, startTransition] = useTransition();
@@ -35,7 +41,15 @@ export function ServiceContactInput({
   return (
     <input
       type={type}
-      inputMode={type === "tel" ? "tel" : type === "email" ? "email" : "text"}
+      inputMode={
+        type === "tel"
+          ? "tel"
+          : type === "email"
+            ? "email"
+            : type === "url"
+              ? "url"
+              : "text"
+      }
       aria-label={`${service} の${placeholder}`}
       value={current}
       placeholder={placeholder}

@@ -9,6 +9,7 @@ import {
   reorderCompanies,
   createBacklogEntry,
   deleteBacklogEntry,
+  type ServiceField,
 } from "@/lib/data";
 import type {
   CompanyStatus,
@@ -55,7 +56,7 @@ export async function deleteBacklogAction(formData: FormData) {
  */
 export async function setServiceStatusAction(
   companyId: string,
-  field: "taxi" | "accounts" | "taxi_phone" | "taxi_email" | "taxi_name",
+  field: ServiceField,
   service: string,
   value: string,
 ) {
