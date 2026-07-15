@@ -31,6 +31,12 @@ export interface Company {
   taxi_email?: Record<string, string> | null;
   /** タクシー関連サービスのアプリ登録名 (サービス名 -> 登録名) */
   taxi_name?: Record<string, string> | null;
+  /** タクシー関連サービスの管理画面URL (サービス名 -> URL) */
+  taxi_admin_url?: Record<string, string> | null;
+  /** タクシー関連サービスのログインID (サービス名 -> ID) */
+  taxi_login_id?: Record<string, string> | null;
+  /** タクシー関連サービスのログインPW (サービス名 -> PW) */
+  taxi_login_pw?: Record<string, string> | null;
   /** 口座関連サービスの状況 (サービス名 -> ステータス) */
   accounts?: Record<string, string> | null;
   created_at: string;
