@@ -27,7 +27,7 @@ export interface CompanyInput {
 }
 
 export interface CaseInput {
-  company_id: string;
+  company_id?: string | null;
   title: string;
   description?: string | null;
   status: CaseStatus;
@@ -248,7 +248,7 @@ export async function listCases(): Promise<CaseWithCompany[]> {
     return (data as (Case & { companies: { name: string } | null })[]).map(
       ({ companies, ...rest }) => ({
         ...rest,
-        company_name: companies?.name ?? "(不明)",
+        company_name: companies?.name ?? "—",
       }),
     );
   }
@@ -256,7 +256,10 @@ export async function listCases(): Promise<CaseWithCompany[]> {
   const byId = new Map(db.companies.map((c) => [c.id, c.name]));
   return [...db.cases]
     .sort((a, b) => b.created_at.localeCompare(a.created_at))
-    .map((c) => ({ ...c, company_name: byId.get(c.company_id) ?? "(不明)" }));
+    .map((c) => ({
+      ...c,
+      company_name: (c.company_id && byId.get(c.company_id)) || "—",
+    }));
 }
 
 export async function getCasesByCompany(companyId: string): Promise<Case[]> {
@@ -290,7 +293,7 @@ export async function createCase(input: CaseInput): Promise<Case> {
   const ts = nowIso();
   const newCase: Case = {
     id: crypto.randomUUID(),
-    company_id: input.company_id,
+    company_id: input.company_id ?? null,
     title: input.title,
     description: input.description ?? null,
     status: input.status,

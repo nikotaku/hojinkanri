@@ -9,6 +9,47 @@ import { generateMail, generateTel } from "@/lib/meishi";
 const CARD_W = 1075;
 const CARD_H = 650;
 
+// ハガキサイズ 100mm x 148mm (300dpi) — コンビニのハガキ印刷用
+const HAGAKI_W = 1181;
+const HAGAKI_H = 1748;
+
+/** 名刺キャンバスをハガキ中央に配置し、四隅にトンボを付けた印刷用画像を作る */
+function buildHagakiDataUrl(cardCanvas: HTMLCanvasElement): string {
+  const canvas = document.createElement("canvas");
+  canvas.width = HAGAKI_W;
+  canvas.height = HAGAKI_H;
+  const ctx = canvas.getContext("2d");
+  if (!ctx) return "";
+
+  ctx.fillStyle = "#ffffff";
+  ctx.fillRect(0, 0, HAGAKI_W, HAGAKI_H);
+
+  const x = (HAGAKI_W - CARD_W) / 2;
+  const y = (HAGAKI_H - CARD_H) / 2;
+  ctx.drawImage(cardCanvas, x, y);
+
+  // 切り取り用トンボ
+  ctx.strokeStyle = "#9ca3af";
+  ctx.lineWidth = 2;
+  const m = 24; // カードからの距離
+  const len = 40;
+  const corners: [number, number, number, number][] = [
+    [x - m, y - m, 1, 1],
+    [x + CARD_W + m, y - m, -1, 1],
+    [x - m, y + CARD_H + m, 1, -1],
+    [x + CARD_W + m, y + CARD_H + m, -1, -1],
+  ];
+  for (const [cx, cy, dx, dy] of corners) {
+    ctx.beginPath();
+    ctx.moveTo(cx, cy);
+    ctx.lineTo(cx + len * dx, cy);
+    ctx.moveTo(cx, cy);
+    ctx.lineTo(cx, cy + len * dy);
+    ctx.stroke();
+  }
+  return canvas.toDataURL("image/png");
+}
+
 interface MeishiData {
   companyName: string;
   personName: string;
@@ -105,6 +146,7 @@ export function MeishiMaker({ companies }: { companies: Company[] }) {
   const [mail, setMail] = useState("");
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [dataUrl, setDataUrl] = useState<string>("");
+  const [hagakiUrl, setHagakiUrl] = useState<string>("");
 
   const company = useMemo(
     () => companies.find((c) => c.id === companyId) ?? null,
@@ -130,6 +172,7 @@ export function MeishiMaker({ companies }: { companies: Company[] }) {
       email: mail,
     });
     setDataUrl(canvas.toDataURL("image/png"));
+    setHagakiUrl(buildHagakiDataUrl(canvas));
   }, [company, personName, personTitle, tel, mail]);
 
   const fileName = `meishi-${company?.name ?? "company"}-${
@@ -199,7 +242,7 @@ export function MeishiMaker({ companies }: { companies: Company[] }) {
           height={CARD_H}
           className="w-full max-w-xl rounded-md border border-gray-200 shadow"
         />
-        <div className="mt-4">
+        <div className="mt-4 flex flex-wrap items-center gap-3">
           <a
             href={dataUrl || undefined}
             download={fileName}
@@ -212,12 +255,62 @@ export function MeishiMaker({ companies }: { companies: Company[] }) {
           >
             画像をダウンロード (PNG)
           </a>
+          <a
+            href={hagakiUrl || undefined}
+            download={`hagaki-${fileName}`}
+            aria-disabled={!personName}
+            className={`inline-flex items-center rounded-lg border px-5 py-2 text-sm font-medium shadow-sm transition ${
+              personName
+                ? "border-brand-600 bg-white text-brand-700 hover:bg-brand-50"
+                : "pointer-events-none border-gray-200 bg-gray-100 text-gray-400"
+            }`}
+          >
+            コンビニ印刷用（ハガキ）PNG
+          </a>
           {!personName && (
-            <span className="ml-3 text-xs text-gray-400">
+            <span className="text-xs text-gray-400">
               担当者名を入力するとダウンロードできます
             </span>
           )}
         </div>
+      </div>
+
+      {/* コンビニ印刷の手順 */}
+      <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm sm:p-6">
+        <h2 className="mb-2 text-sm font-semibold text-gray-700">
+          コンビニでハガキ印刷する手順
+        </h2>
+        <ol className="list-decimal space-y-1.5 pl-5 text-sm text-gray-600">
+          <li>上の「コンビニ印刷用（ハガキ）PNG」を保存する</li>
+          <li>
+            <span className="font-medium">セブンイレブン</span>:{" "}
+            <a
+              href="https://www.printing.ne.jp/support/lite/index.html"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-brand-600 hover:underline"
+            >
+              かんたんnetprint
+            </a>
+            （アプリ）に画像を登録すると<span className="font-medium">プリント予約番号</span>が発行されます
+          </li>
+          <li>
+            <span className="font-medium">ファミマ・ローソン</span>:{" "}
+            <a
+              href="https://networkprint.ne.jp/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-brand-600 hover:underline"
+            >
+              ネットワークプリント
+            </a>
+            に画像を登録すると<span className="font-medium">ユーザー番号</span>が発行されます
+          </li>
+          <li>店頭のマルチコピー機で番号を入力し、「はがきプリント」を選んで印刷</li>
+        </ol>
+        <p className="mt-2 text-xs text-gray-400">
+          ※ 各サービスの規約により、番号の自動発行（API連携）は提供されていないため、登録は公式アプリ/サイトから行ってください。
+        </p>
       </div>
     </div>
   );

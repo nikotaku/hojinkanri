@@ -139,7 +139,7 @@ export const BACKLOG_TAGS = [
 /** 案件 */
 export interface Case {
   id: string;
-  company_id: string;
+  company_id: string | null;
   title: string;
   description: string | null;
   status: CaseStatus;
