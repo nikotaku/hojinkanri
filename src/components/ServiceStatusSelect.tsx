@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { setServiceStatusAction } from "@/app/actions";
+import type { ServiceField } from "@/lib/data";
 
 function statusClass(value: string): string {
   if (!value) return "bg-gray-50 text-gray-400 border-gray-200";
@@ -29,7 +30,7 @@ export function ServiceStatusSelect({
   options,
 }: {
   companyId: string;
-  field: "taxi" | "accounts";
+  field: ServiceField;
   service: string;
   value?: string;
   options: readonly string[];

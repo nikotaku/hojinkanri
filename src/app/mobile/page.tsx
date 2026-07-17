@@ -1,18 +1,18 @@
 import { listCompanies } from "@/lib/data";
-import { TAXI_SERVICES, TAXI_STATUS_OPTIONS } from "@/lib/types";
+import { MOBILE_SERVICES, MOBILE_STATUS_OPTIONS } from "@/lib/types";
 import { PageHeader } from "@/components/PageHeader";
 import { ServiceBoard } from "@/components/ServiceBoard";
 
 export const dynamic = "force-dynamic";
 
-export default async function TaxiPage() {
+export default async function MobilePage() {
   const companies = await listCompanies();
 
   return (
     <div>
       <PageHeader
-        title="タクシー関連"
-        description={`各法人のタクシー配車サービス（${TAXI_SERVICES.join(
+        title="法人モバイル回線"
+        description={`各法人のモバイル回線（${MOBILE_SERVICES.join(
           " / ",
         )}）｜⠿ をドラッグで並び替え・各社をタップで開閉`}
       />
@@ -24,9 +24,9 @@ export default async function TaxiPage() {
       ) : (
         <ServiceBoard
           companies={companies}
-          services={TAXI_SERVICES}
-          statusOptions={TAXI_STATUS_OPTIONS}
-          prefix="taxi"
+          services={MOBILE_SERVICES}
+          statusOptions={MOBILE_STATUS_OPTIONS}
+          prefix="mobile"
         />
       )}
     </div>

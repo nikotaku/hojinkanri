@@ -10,8 +10,10 @@ const nav = [
   { href: "/companies", label: "法人管理", icon: "🏢" },
   { href: "/cases", label: "案件管理", icon: "📁" },
   { href: "/taxi", label: "タクシー関連", icon: "🚕" },
+  { href: "/mobile", label: "法人モバイル回線", icon: "📱" },
   { href: "/accounts", label: "口座関連", icon: "🏦" },
   { href: "/backlog", label: "バックログ", icon: "📝" },
+  { href: "/meishi", label: "名刺作成", icon: "💳" },
 ];
 
 /**

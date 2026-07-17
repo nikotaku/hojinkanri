@@ -144,7 +144,14 @@ export type ServiceField =
   | "taxi_name"
   | "taxi_admin_url"
   | "taxi_login_id"
-  | "taxi_login_pw";
+  | "taxi_login_pw"
+  | "mobile"
+  | "mobile_phone"
+  | "mobile_email"
+  | "mobile_name"
+  | "mobile_admin_url"
+  | "mobile_login_id"
+  | "mobile_login_pw";
 
 export async function setCompanyService(
   id: string,
