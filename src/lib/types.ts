@@ -115,6 +115,17 @@ export const ACCOUNT_STATUS_OPTIONS = [
   "審査落ち",
 ] as const;
 
+/** 連絡先 */
+export interface Contact {
+  id: string;
+  name: string;
+  affiliation: string | null;
+  phone: string | null;
+  email: string | null;
+  notes: string | null;
+  created_at: string;
+}
+
 /** 行動のバックログ(活動ログ) */
 export interface BacklogEntry {
   id: string;
