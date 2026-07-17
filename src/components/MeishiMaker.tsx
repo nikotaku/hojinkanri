@@ -1,9 +1,10 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, useTransition } from "react";
 import type { Company } from "@/lib/types";
 import { Field, TextInput, Select } from "@/components/Form";
 import { generateMail, generateTel } from "@/lib/meishi";
+import { saveMeishiFromMakerAction } from "@/app/actions";
 
 // 名刺サイズ 91mm x 55mm を 300dpi 相当で描画
 const CARD_W = 1075;
@@ -147,6 +148,8 @@ export function MeishiMaker({ companies }: { companies: Company[] }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [dataUrl, setDataUrl] = useState<string>("");
   const [hagakiUrl, setHagakiUrl] = useState<string>("");
+  const [saved, setSaved] = useState(false);
+  const [saving, startSaving] = useTransition();
 
   const company = useMemo(
     () => companies.find((c) => c.id === companyId) ?? null,
@@ -173,6 +176,7 @@ export function MeishiMaker({ companies }: { companies: Company[] }) {
     });
     setDataUrl(canvas.toDataURL("image/png"));
     setHagakiUrl(buildHagakiDataUrl(canvas));
+    setSaved(false);
   }, [company, personName, personTitle, tel, mail]);
 
   const fileName = `meishi-${company?.name ?? "company"}-${
@@ -267,6 +271,34 @@ export function MeishiMaker({ companies }: { companies: Company[] }) {
           >
             コンビニ印刷用（ハガキ）PNG
           </a>
+          <button
+            type="button"
+            disabled={!personName || saving || saved}
+            onClick={() => {
+              if (!company || !dataUrl) return;
+              startSaving(async () => {
+                await saveMeishiFromMakerAction(
+                  company.id,
+                  [personTitle, personName].filter(Boolean).join(" "),
+                  dataUrl,
+                );
+                setSaved(true);
+              });
+            }}
+            className={`inline-flex items-center rounded-lg border px-5 py-2 text-sm font-medium shadow-sm transition ${
+              saved
+                ? "border-green-300 bg-green-50 text-green-700"
+                : personName
+                  ? "border-gray-300 bg-white text-gray-700 hover:bg-gray-50"
+                  : "border-gray-200 bg-gray-100 text-gray-400"
+            } disabled:cursor-default`}
+          >
+            {saved
+              ? "✓ 保存しました"
+              : saving
+                ? "保存中…"
+                : "この名刺を保存（名刺画像管理へ）"}
+          </button>
           {!personName && (
             <span className="text-xs text-gray-400">
               担当者名を入力するとダウンロードできます

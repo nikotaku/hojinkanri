@@ -126,6 +126,20 @@ export interface Contact {
   created_at: string;
 }
 
+/** 名刺画像（会社に紐づく） */
+export interface MeishiImage {
+  id: string;
+  company_id: string;
+  label: string | null;
+  image_url: string;
+  created_at: string;
+}
+
+/** 会社名を結合した名刺画像(一覧表示用) */
+export interface MeishiImageWithCompany extends MeishiImage {
+  company_name: string;
+}
+
 /** 行動のバックログ(活動ログ) */
 export interface BacklogEntry {
   id: string;
