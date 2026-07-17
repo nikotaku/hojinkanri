@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { Company } from "@/lib/types";
 import { Field, TextInput, Select } from "@/components/Form";
+import { generateMail, generateTel } from "@/lib/meishi";
 
 // 名刺サイズ 91mm x 55mm を 300dpi 相当で描画
 const CARD_W = 1075;
@@ -79,21 +80,20 @@ function drawMeishi(canvas: HTMLCanvasElement, d: MeishiData) {
   // 連絡先（下部）
   ctx.font = "26px 'Hiragino Sans', 'Noto Sans JP', 'Yu Gothic', sans-serif";
   ctx.fillStyle = "#374151";
-  let y = CARD_H - 190;
   const lineH = 40;
 
+  const lines: string[] = [];
   if (d.address) {
-    const lines = wrapText(ctx, d.address, CARD_W - 160);
-    for (const line of lines.slice(0, 2)) {
-      ctx.fillText(line, 70, y);
-      y += lineH;
-    }
+    lines.push(...wrapText(ctx, d.address, CARD_W - 160).slice(0, 2));
   }
-  const contact: string[] = [];
-  if (d.phone) contact.push(`TEL: ${d.phone}`);
-  if (d.email) contact.push(`Email: ${d.email}`);
-  if (contact.length) {
-    ctx.fillText(contact.join("　"), 70, y);
+  if (d.phone) lines.push(`TEL：${d.phone}`);
+  if (d.email) lines.push(`MAIL：${d.email}`);
+
+  // 下端から詰めて描画
+  let y = CARD_H - 60 - lineH * lines.length;
+  for (const line of lines) {
+    ctx.fillText(line, 70, y);
+    y += lineH;
   }
 }
 
@@ -101,6 +101,8 @@ export function MeishiMaker({ companies }: { companies: Company[] }) {
   const [companyId, setCompanyId] = useState(companies[0]?.id ?? "");
   const [personName, setPersonName] = useState("");
   const [personTitle, setPersonTitle] = useState("");
+  const [tel, setTel] = useState("");
+  const [mail, setMail] = useState("");
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [dataUrl, setDataUrl] = useState<string>("");
 
@@ -108,6 +110,13 @@ export function MeishiMaker({ companies }: { companies: Company[] }) {
     () => companies.find((c) => c.id === companyId) ?? null,
     [companies, companyId],
   );
+
+  // 会社を切り替えたら TEL / MAIL を自動生成し直す（手で編集可能）
+  useEffect(() => {
+    if (!company) return;
+    setTel(generateTel(company.id));
+    setMail(generateMail(company.name));
+  }, [company]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -117,11 +126,11 @@ export function MeishiMaker({ companies }: { companies: Company[] }) {
       personName,
       personTitle,
       address: company.address ?? "",
-      phone: company.phone ?? "",
-      email: company.email ?? "",
+      phone: tel,
+      email: mail,
     });
     setDataUrl(canvas.toDataURL("image/png"));
-  }, [company, personName, personTitle]);
+  }, [company, personName, personTitle, tel, mail]);
 
   const fileName = `meishi-${company?.name ?? "company"}-${
     personName || "name"
@@ -157,9 +166,27 @@ export function MeishiMaker({ companies }: { companies: Company[] }) {
               placeholder="営業部長"
             />
           </Field>
+          <Field label="TEL（自動生成・編集可）">
+            <TextInput
+              type="tel"
+              value={tel}
+              onChange={(e) => setTel(e.target.value)}
+              placeholder="050-0000-0000"
+            />
+          </Field>
+          <Field label="MAIL（自動生成・編集可）">
+            <TextInput
+              type="email"
+              value={mail}
+              onChange={(e) => setMail(e.target.value)}
+              placeholder="info@example.com"
+            />
+          </Field>
         </div>
         <p className="text-xs text-gray-500">
-          住所・電話・メールは選択した法人の登録情報から自動で反映されます。
+          住所は選択した法人の登録情報から反映されます。TEL は
+          050番号を、MAIL は会社名から info@〜.com
+          を自動生成します（どちらも編集できます）。
         </p>
       </div>
 
