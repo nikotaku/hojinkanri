@@ -2,23 +2,9 @@ import { listContacts } from "@/lib/data";
 import { createContactAction, deleteContactAction } from "@/app/actions";
 import { PageHeader } from "@/components/PageHeader";
 import { Field, TextInput, TextArea, SubmitButton } from "@/components/Form";
+import { DeleteButton } from "@/components/DeleteButton";
 
 export const dynamic = "force-dynamic";
-
-function DeleteButton({ id }: { id: string }) {
-  return (
-    <form action={deleteContactAction}>
-      <input type="hidden" name="id" value={id} />
-      <button
-        type="submit"
-        className="rounded-md px-2 py-1 text-xs font-medium text-gray-400 transition hover:bg-red-50 hover:text-red-600"
-        aria-label="削除"
-      >
-        削除
-      </button>
-    </form>
-  );
-}
 
 export default async function ContactsPage() {
   const contacts = await listContacts();
@@ -75,7 +61,7 @@ export default async function ContactsPage() {
                       <p className="text-xs text-gray-500">{c.affiliation}</p>
                     )}
                   </div>
-                  <DeleteButton id={c.id} />
+                  <DeleteButton id={c.id} action={deleteContactAction} />
                 </div>
                 <div className="mt-2 space-y-1 text-sm">
                   {c.phone && (
@@ -168,7 +154,7 @@ export default async function ContactsPage() {
                       <span className="whitespace-pre-wrap">{c.notes ?? "—"}</span>
                     </td>
                     <td className="whitespace-nowrap px-6 py-4 text-right">
-                      <DeleteButton id={c.id} />
+                      <DeleteButton id={c.id} action={deleteContactAction} />
                     </td>
                   </tr>
                 ))}

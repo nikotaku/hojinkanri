@@ -4,6 +4,7 @@ import { createBacklogAction, deleteBacklogAction } from "@/app/actions";
 import { formatDate } from "@/lib/format";
 import { PageHeader } from "@/components/PageHeader";
 import { Field, TextInput, TextArea, Select, SubmitButton } from "@/components/Form";
+import { DeleteButton } from "@/components/DeleteButton";
 
 export const dynamic = "force-dynamic";
 
@@ -28,21 +29,6 @@ function TagBadge({ tag }: { tag: string | null }) {
     >
       {tag}
     </span>
-  );
-}
-
-function DeleteButton({ id }: { id: string }) {
-  return (
-    <form action={deleteBacklogAction}>
-      <input type="hidden" name="id" value={id} />
-      <button
-        type="submit"
-        className="rounded-md px-2 py-1 text-xs font-medium text-gray-400 transition hover:bg-red-50 hover:text-red-600"
-        aria-label="削除"
-      >
-        削除
-      </button>
-    </form>
   );
 }
 
@@ -103,7 +89,7 @@ export default async function BacklogPage() {
                     </span>
                     <TagBadge tag={e.tag} />
                   </div>
-                  <DeleteButton id={e.id} />
+                  <DeleteButton id={e.id} action={deleteBacklogAction} />
                 </div>
                 <p className="mt-2 whitespace-pre-wrap text-sm text-gray-900">
                   {e.content}
@@ -142,7 +128,7 @@ export default async function BacklogPage() {
                       <span className="whitespace-pre-wrap">{e.content}</span>
                     </td>
                     <td className="whitespace-nowrap px-6 py-4 text-right">
-                      <DeleteButton id={e.id} />
+                      <DeleteButton id={e.id} action={deleteBacklogAction} />
                     </td>
                   </tr>
                 ))}
