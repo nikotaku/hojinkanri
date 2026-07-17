@@ -85,20 +85,63 @@ export function kanaToRomaji(input: string): string {
   return out;
 }
 
-/** 会社名からメールのドメイン用スラッグを作る */
+// 漢字を含む語の読み辞書。かな変換の前に置換する（長い語を先に評価）
+const KANJI_READINGS: [string, string][] = [
+  ["聡電舍", "sodensha"],
+  ["喜王仙", "kiosen"],
+  ["西日本", "nishinihon"],
+  ["東日本", "higashinihon"],
+  ["三福", "sanpuku"],
+  ["商貿", "shobo"],
+  ["長田", "osada"],
+  ["大観", "taikan"],
+  ["自立支援", "jiritsushien"],
+  ["不動産", "fudosan"],
+  ["工業", "kogyo"],
+  ["商事", "shoji"],
+  ["電気", "denki"],
+  ["日本", "nihon"],
+];
+
+// 日本語風の擬似スラッグ生成用の音節
+const SYLLABLES = [
+  "ka", "ki", "ku", "ke", "ko", "sa", "shi", "su", "se", "so",
+  "ta", "chi", "tsu", "te", "to", "na", "ni", "no", "ha", "hi",
+  "fu", "ho", "ma", "mi", "mu", "me", "mo", "ya", "yu", "yo",
+  "ra", "ri", "ru", "re", "ro", "wa", "n",
+];
+
+/** 変換不能な社名向けに、社名から決まる日本語風スラッグを作る */
+function pseudoSlug(seed: string): string {
+  let h = 7;
+  for (let i = 0; i < seed.length; i++) {
+    h = (h * 131 + seed.charCodeAt(i)) >>> 0;
+  }
+  let out = "";
+  const count = 3 + (h % 2); // 3〜4音節
+  for (let i = 0; i < count; i++) {
+    out += SYLLABLES[h % SYLLABLES.length];
+    h = (h * 2654435761 + 1) >>> 0;
+  }
+  return out;
+}
+
+/** 会社名からメールのドメイン用スラッグを作る（必ず何かしら返す） */
 export function companySlug(name: string): string {
-  const stripped = name
+  let stripped = name
     .replace(/株式会社|合同会社|有限会社|一般社団法人|一般財団法人|公益社団法人/g, "")
-    .replace(/[\s・．.、,＆&\-－ー–]/g, (m) => (m === "ー" ? "ー" : ""))
+    .replace(/[\s・．.、,＆&\-－–]/g, "")
     .trim();
+  for (const [kanji, reading] of KANJI_READINGS) {
+    stripped = stripped.split(kanji).join(reading);
+  }
   const slug = kanaToRomaji(stripped).replace(/[^a-z0-9]/g, "");
-  return slug.length >= 2 ? slug : "";
+  return slug.length >= 2 ? slug : pseudoSlug(name);
 }
 
 /** 会社名から info@ メールアドレスを自動生成する */
 export function generateMail(name: string): string {
-  const slug = companySlug(name);
-  return slug ? `info@${slug}.com` : "info@";
+  return `info@${companySlug(name)}.com`;
 }
 
 /** 会社IDから決まる 050 番号を自動生成する（同じ会社なら常に同じ番号） */

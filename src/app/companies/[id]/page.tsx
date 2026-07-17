@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getCompany, getCasesByCompany } from "@/lib/data";
-import { COMPANY_STATUS_LABELS } from "@/lib/types";
 import { formatCurrency, formatDate } from "@/lib/format";
 import { PageHeader } from "@/components/PageHeader";
 import {
@@ -9,17 +8,10 @@ import {
   CaseStatusBadge,
   PriorityBadge,
 } from "@/components/StatusBadge";
+import { CompanyHpInput } from "@/components/CompanyHpInput";
+import { ToukiUpload } from "@/components/ToukiUpload";
 
 export const dynamic = "force-dynamic";
-
-function DetailRow({ label, value }: { label: string; value: string | null }) {
-  return (
-    <div className="flex border-b border-gray-100 py-2.5 last:border-0">
-      <dt className="w-32 shrink-0 text-sm text-gray-500">{label}</dt>
-      <dd className="text-sm text-gray-900">{value ?? "—"}</dd>
-    </div>
-  );
-}
 
 export default async function CompanyDetailPage({
   params,
@@ -49,24 +41,17 @@ export default async function CompanyDetailPage({
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
         {/* 基本情報 */}
         <section className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm lg:col-span-1">
-          <h2 className="mb-3 text-base font-semibold text-gray-900">基本情報</h2>
-          <dl>
-            <DetailRow label="業種" value={company.industry} />
-            <DetailRow label="担当者" value={company.contact_person} />
-            <DetailRow label="電話番号" value={company.phone} />
-            <DetailRow label="メール" value={company.email} />
-            <DetailRow label="住所" value={company.address} />
-            <DetailRow
-              label="ステータス"
-              value={COMPANY_STATUS_LABELS[company.status]}
-            />
-            <DetailRow label="登録日" value={formatDate(company.created_at)} />
-          </dl>
-          {company.notes && (
-            <div className="mt-4 rounded-lg bg-gray-50 p-3 text-sm text-gray-600">
-              {company.notes}
+          <h2 className="mb-4 text-base font-semibold text-gray-900">基本情報</h2>
+          <div className="space-y-5">
+            <div>
+              <p className="mb-1.5 text-sm text-gray-500">会社HP</p>
+              <CompanyHpInput companyId={company.id} value={company.hp} />
             </div>
-          )}
+            <div>
+              <p className="mb-1.5 text-sm text-gray-500">登記簿謄本（画像）</p>
+              <ToukiUpload companyId={company.id} url={company.touki_url} />
+            </div>
+          </div>
         </section>
 
         {/* 案件一覧 */}
