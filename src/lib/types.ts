@@ -37,6 +37,20 @@ export interface Company {
   taxi_login_id?: Record<string, string> | null;
   /** タクシー関連サービスのログインPW (サービス名 -> PW) */
   taxi_login_pw?: Record<string, string> | null;
+  /** 法人モバイル回線の状況 (サービス名 -> ステータス) */
+  mobile?: Record<string, string> | null;
+  /** 法人モバイル回線の登録電話番号 (サービス名 -> 電話番号) */
+  mobile_phone?: Record<string, string> | null;
+  /** 法人モバイル回線の登録メールアドレス (サービス名 -> メール) */
+  mobile_email?: Record<string, string> | null;
+  /** 法人モバイル回線の登録名 (サービス名 -> 登録名) */
+  mobile_name?: Record<string, string> | null;
+  /** 法人モバイル回線の管理画面URL (サービス名 -> URL) */
+  mobile_admin_url?: Record<string, string> | null;
+  /** 法人モバイル回線のログインID (サービス名 -> ID) */
+  mobile_login_id?: Record<string, string> | null;
+  /** 法人モバイル回線のログインPW (サービス名 -> PW) */
+  mobile_login_pw?: Record<string, string> | null;
   /** 口座関連サービスの状況 (サービス名 -> ステータス) */
   accounts?: Record<string, string> | null;
   created_at: string;
@@ -52,6 +66,26 @@ export const ACCOUNT_SERVICES = [
   "三井住友銀行",
   "PayPay銀行",
   "GMO",
+] as const;
+
+/** 法人モバイル回線で表示するサービス列 */
+export const MOBILE_SERVICES = ["ドコモ", "UQ"] as const;
+
+/** 法人モバイル回線ステータスの選択肢 */
+export const MOBILE_STATUS_OPTIONS = [
+  "未着手",
+  "未設定",
+  "申し込み中",
+  "審査中",
+  "3台契約",
+  "4台契約",
+  "5台契約",
+  "使用中",
+  "設定不可",
+  "印鑑証明待ち",
+  "審査落ち",
+  "割賦審査不可",
+  "代表社変更のため再度審査",
 ] as const;
 
 /** タクシー関連ステータスの選択肢 */

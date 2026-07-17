@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { setServiceStatusAction } from "@/app/actions";
+import type { ServiceField } from "@/lib/data";
 
 /**
  * サービスごとの登録電話番号 / 登録メールを入力するボックス。
@@ -16,13 +17,7 @@ export function ServiceContactInput({
   type = "text",
 }: {
   companyId: string;
-  field:
-    | "taxi_phone"
-    | "taxi_email"
-    | "taxi_name"
-    | "taxi_admin_url"
-    | "taxi_login_id"
-    | "taxi_login_pw";
+  field: ServiceField;
   service: string;
   value?: string;
   placeholder: string;

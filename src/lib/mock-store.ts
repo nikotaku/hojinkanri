@@ -29,6 +29,7 @@ export const seedCompanies: Company[] = [
     taxi: { DiDi: "使用中", "S.RIDE": "未着手", "GO ビジネス": "限度額まで使用" },
     taxi_phone: { DiDi: "090-1111-2222", "GO ビジネス": "090-1111-2222" },
     taxi_email: { DiDi: "didi@sunrise.example.com" },
+    mobile: { ドコモ: "申し込み中", UQ: "使用中" },
     accounts: { みずほ銀行: "開設済み", 三井住友銀行: "審査中" },
     created_at: iso(-90),
     updated_at: iso(-5),

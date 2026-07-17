@@ -4,13 +4,36 @@ import { useEffect, useRef } from "react";
 import Link from "next/link";
 import Sortable from "sortablejs";
 import type { Company } from "@/lib/types";
-import { TAXI_SERVICES, TAXI_STATUS_OPTIONS } from "@/lib/types";
 import { ServiceStatusSelect } from "@/components/ServiceStatusSelect";
 import { ServiceContactInput } from "@/components/ServiceContactInput";
 import { reorderCompaniesAction } from "@/app/actions";
 
+// サービス群ごとの保存先フィールド定義
+const FIELD_SETS = {
+  taxi: {
+    status: "taxi",
+    phone: "taxi_phone",
+    email: "taxi_email",
+    name: "taxi_name",
+    adminUrl: "taxi_admin_url",
+    loginId: "taxi_login_id",
+    loginPw: "taxi_login_pw",
+  },
+  mobile: {
+    status: "mobile",
+    phone: "mobile_phone",
+    email: "mobile_email",
+    name: "mobile_name",
+    adminUrl: "mobile_admin_url",
+    loginId: "mobile_login_id",
+    loginPw: "mobile_login_pw",
+  },
+} as const;
+
+type Prefix = keyof typeof FIELD_SETS;
+
 function statusClass(value: string): string {
-  if (/(使用|完了|開設|通過|登録完了)/.test(value)) {
+  if (/(使用|完了|開設|通過|登録完了|契約)/.test(value)) {
     return "bg-green-100 text-green-700";
   }
   if (/(落ち|不可|中止|解約)/.test(value)) return "bg-red-100 text-red-700";
@@ -19,11 +42,10 @@ function statusClass(value: string): string {
 }
 
 function StatusPill({ value }: { value?: string }) {
-  if (!value)
-    return <span className="text-xs text-gray-300">—</span>;
+  if (!value) return <span className="text-xs text-gray-300">—</span>;
   return (
     <span
-      className={`inline-flex items-center whitespace-nowrap rounded-full px-2 py-0.5 text-[11px] font-medium ${statusClass(
+      className={`inline-flex max-w-[12rem] items-center truncate whitespace-nowrap rounded-full px-2 py-0.5 text-[11px] font-medium ${statusClass(
         value,
       )}`}
     >
@@ -32,8 +54,25 @@ function StatusPill({ value }: { value?: string }) {
   );
 }
 
-export function TaxiBoard({ companies }: { companies: Company[] }) {
+/**
+ * 会社ごとにサービス群（タクシー / モバイル回線）を折りたたみで表示するボード。
+ * - 各サービスはトグルで開閉（要約に現在ステータス）
+ * - 開くと ステータス / アプリ登録電話番号 / メール / 登録名 / 管理画面URL / ログインID / PW
+ * - ⠿ ハンドルでドラッグ&ドロップ並び替え（順序は保存）
+ */
+export function ServiceBoard({
+  companies,
+  services,
+  statusOptions,
+  prefix,
+}: {
+  companies: Company[];
+  services: readonly string[];
+  statusOptions: readonly string[];
+  prefix: Prefix;
+}) {
   const listRef = useRef<HTMLUListElement>(null);
+  const fields = FIELD_SETS[prefix];
 
   useEffect(() => {
     const el = listRef.current;
@@ -41,7 +80,6 @@ export function TaxiBoard({ companies }: { companies: Company[] }) {
     const sortable = Sortable.create(el, {
       animation: 150,
       handle: ".drag-handle",
-      // タッチ端末でも動くようフォールバックを有効化
       forceFallback: true,
       fallbackTolerance: 4,
       ghostClass: "opacity-40",
@@ -58,13 +96,13 @@ export function TaxiBoard({ companies }: { companies: Company[] }) {
   return (
     <ul ref={listRef} className="space-y-2">
       {companies.map((c) => {
-        const statusMap = (c.taxi ?? {}) as Record<string, string>;
-        const phoneMap = (c.taxi_phone ?? {}) as Record<string, string>;
-        const emailMap = (c.taxi_email ?? {}) as Record<string, string>;
-        const nameMap = (c.taxi_name ?? {}) as Record<string, string>;
-        const adminUrlMap = (c.taxi_admin_url ?? {}) as Record<string, string>;
-        const loginIdMap = (c.taxi_login_id ?? {}) as Record<string, string>;
-        const loginPwMap = (c.taxi_login_pw ?? {}) as Record<string, string>;
+        const statusMap = (c[fields.status] ?? {}) as Record<string, string>;
+        const phoneMap = (c[fields.phone] ?? {}) as Record<string, string>;
+        const emailMap = (c[fields.email] ?? {}) as Record<string, string>;
+        const nameMap = (c[fields.name] ?? {}) as Record<string, string>;
+        const adminUrlMap = (c[fields.adminUrl] ?? {}) as Record<string, string>;
+        const loginIdMap = (c[fields.loginId] ?? {}) as Record<string, string>;
+        const loginPwMap = (c[fields.loginPw] ?? {}) as Record<string, string>;
         return (
           <li
             key={c.id}
@@ -88,7 +126,7 @@ export function TaxiBoard({ companies }: { companies: Company[] }) {
             </div>
 
             <div className="mt-1.5 space-y-1">
-              {TAXI_SERVICES.map((s) => (
+              {services.map((s) => (
                 <details
                   key={s}
                   className="group rounded-md border border-gray-100 bg-gray-50/60 [&_summary::-webkit-details-marker]:hidden"
@@ -107,14 +145,14 @@ export function TaxiBoard({ companies }: { companies: Company[] }) {
                   <div className="space-y-1.5 px-2.5 pb-2.5 pt-1">
                     <ServiceStatusSelect
                       companyId={c.id}
-                      field="taxi"
+                      field={fields.status}
                       service={s}
                       value={statusMap[s]}
-                      options={TAXI_STATUS_OPTIONS}
+                      options={statusOptions}
                     />
                     <ServiceContactInput
                       companyId={c.id}
-                      field="taxi_phone"
+                      field={fields.phone}
                       service={s}
                       value={phoneMap[s]}
                       placeholder="アプリ登録電話番号"
@@ -122,7 +160,7 @@ export function TaxiBoard({ companies }: { companies: Company[] }) {
                     />
                     <ServiceContactInput
                       companyId={c.id}
-                      field="taxi_email"
+                      field={fields.email}
                       service={s}
                       value={emailMap[s]}
                       placeholder="アプリ登録メールアドレス"
@@ -130,7 +168,7 @@ export function TaxiBoard({ companies }: { companies: Company[] }) {
                     />
                     <ServiceContactInput
                       companyId={c.id}
-                      field="taxi_name"
+                      field={fields.name}
                       service={s}
                       value={nameMap[s]}
                       placeholder="アプリ登録名"
@@ -138,7 +176,7 @@ export function TaxiBoard({ companies }: { companies: Company[] }) {
                     <div className="flex items-center gap-1.5">
                       <ServiceContactInput
                         companyId={c.id}
-                        field="taxi_admin_url"
+                        field={fields.adminUrl}
                         service={s}
                         value={adminUrlMap[s]}
                         placeholder="管理画面URL"
@@ -157,14 +195,14 @@ export function TaxiBoard({ companies }: { companies: Company[] }) {
                     </div>
                     <ServiceContactInput
                       companyId={c.id}
-                      field="taxi_login_id"
+                      field={fields.loginId}
                       service={s}
                       value={loginIdMap[s]}
                       placeholder="ログインID"
                     />
                     <ServiceContactInput
                       companyId={c.id}
-                      field="taxi_login_pw"
+                      field={fields.loginPw}
                       service={s}
                       value={loginPwMap[s]}
                       placeholder="ログインPW"
