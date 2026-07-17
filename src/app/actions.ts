@@ -13,6 +13,9 @@ import {
   deleteBacklogEntry,
   createContact,
   deleteContact,
+  saveMeishiImageFile,
+  saveMeishiImageDataUrl,
+  deleteMeishiImage,
   type ServiceField,
 } from "@/lib/data";
 import type {
@@ -20,6 +23,37 @@ import type {
   CaseStatus,
   CasePriority,
 } from "@/lib/types";
+
+/** 名刺画像をアップロードして会社に紐づける */
+export async function uploadMeishiImageAction(formData: FormData) {
+  const companyId = str(formData, "company_id");
+  const file = formData.get("file");
+  if (!companyId) throw new Error("法人の選択は必須です。");
+  if (!(file instanceof File) || file.size === 0) {
+    throw new Error("画像ファイルを選択してください。");
+  }
+  await saveMeishiImageFile(companyId, str(formData, "label"), file);
+  revalidatePath("/meishi-images");
+}
+
+/** 名刺作成で生成した名刺画像を保存する */
+export async function saveMeishiFromMakerAction(
+  companyId: string,
+  label: string,
+  dataUrl: string,
+) {
+  if (!companyId || !dataUrl) return;
+  await saveMeishiImageDataUrl(companyId, label.trim() || null, dataUrl);
+  revalidatePath("/meishi-images");
+}
+
+/** 名刺画像を削除する */
+export async function deleteMeishiImageAction(formData: FormData) {
+  const id = str(formData, "id");
+  if (!id) return;
+  await deleteMeishiImage(id);
+  revalidatePath("/meishi-images");
+}
 
 /** 連絡先を1件追加する */
 export async function createContactAction(formData: FormData) {

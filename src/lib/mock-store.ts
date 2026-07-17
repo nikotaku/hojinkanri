@@ -1,4 +1,10 @@
-import type { Company, Case, BacklogEntry, Contact } from "./types";
+import type {
+  Company,
+  Case,
+  BacklogEntry,
+  Contact,
+  MeishiImage,
+} from "./types";
 
 // Supabase 未設定時に使うインメモリのサンプルデータ。
 // 開発サーバー起動中はプロセス内に保持され、追加した法人・案件も反映される
@@ -214,6 +220,7 @@ interface MockDb {
   cases: Case[];
   backlog: BacklogEntry[];
   contacts: Contact[];
+  meishiImages: MeishiImage[];
 }
 
 const globalForMock = globalThis as unknown as { __mockDb?: MockDb };
@@ -225,6 +232,7 @@ export function getMockDb(): MockDb {
       cases: seedCases.map((c) => ({ ...c })),
       backlog: seedBacklog.map((b) => ({ ...b })),
       contacts: seedContacts.map((c) => ({ ...c })),
+      meishiImages: [],
     };
   }
   return globalForMock.__mockDb;
