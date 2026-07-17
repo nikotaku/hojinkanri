@@ -8,6 +8,7 @@ import {
   type CaseStatus,
   type CasePriority,
   type BacklogEntry,
+  type Contact,
   OPEN_CASE_STATUSES,
 } from "./types";
 
@@ -306,6 +307,67 @@ export async function createCase(input: CaseInput): Promise<Case> {
   };
   db.cases.push(newCase);
   return newCase;
+}
+
+// --- 連絡先 ---
+
+export interface ContactInput {
+  name: string;
+  affiliation?: string | null;
+  phone?: string | null;
+  email?: string | null;
+  notes?: string | null;
+}
+
+export async function listContacts(): Promise<Contact[]> {
+  const supabase = getSupabase();
+  if (supabase) {
+    const { data, error } = await supabase
+      .from("contacts")
+      .select("*")
+      .order("created_at", { ascending: false });
+    if (error) throw new Error(error.message);
+    return data as Contact[];
+  }
+  return [...getMockDb().contacts].sort((a, b) =>
+    b.created_at.localeCompare(a.created_at),
+  );
+}
+
+export async function createContact(input: ContactInput): Promise<Contact> {
+  const supabase = getSupabase();
+  if (supabase) {
+    const { data, error } = await supabase
+      .from("contacts")
+      .insert(input)
+      .select("*")
+      .single();
+    if (error) throw new Error(error.message);
+    return data as Contact;
+  }
+  const db = getMockDb();
+  const contact: Contact = {
+    id: crypto.randomUUID(),
+    name: input.name,
+    affiliation: input.affiliation ?? null,
+    phone: input.phone ?? null,
+    email: input.email ?? null,
+    notes: input.notes ?? null,
+    created_at: nowIso(),
+  };
+  db.contacts.push(contact);
+  return contact;
+}
+
+export async function deleteContact(id: string): Promise<void> {
+  const supabase = getSupabase();
+  if (supabase) {
+    const { error } = await supabase.from("contacts").delete().eq("id", id);
+    if (error) throw new Error(error.message);
+    return;
+  }
+  const db = getMockDb();
+  db.contacts = db.contacts.filter((c) => c.id !== id);
 }
 
 // --- 行動のバックログ ---

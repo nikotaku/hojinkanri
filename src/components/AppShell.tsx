@@ -14,6 +14,7 @@ const nav = [
   { href: "/accounts", label: "口座関連", icon: "🏦" },
   { href: "/backlog", label: "バックログ", icon: "📝" },
   { href: "/meishi", label: "名刺作成", icon: "💳" },
+  { href: "/contacts", label: "連絡先一覧", icon: "📇" },
 ];
 
 /**

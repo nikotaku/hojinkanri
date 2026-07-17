@@ -11,6 +11,8 @@ import {
   reorderCompanies,
   createBacklogEntry,
   deleteBacklogEntry,
+  createContact,
+  deleteContact,
   type ServiceField,
 } from "@/lib/data";
 import type {
@@ -18,6 +20,28 @@ import type {
   CaseStatus,
   CasePriority,
 } from "@/lib/types";
+
+/** 連絡先を1件追加する */
+export async function createContactAction(formData: FormData) {
+  const name = str(formData, "name");
+  if (!name) throw new Error("名前は必須です。");
+  await createContact({
+    name,
+    affiliation: str(formData, "affiliation"),
+    phone: str(formData, "phone"),
+    email: str(formData, "email"),
+    notes: str(formData, "notes"),
+  });
+  revalidatePath("/contacts");
+}
+
+/** 連絡先を1件削除する */
+export async function deleteContactAction(formData: FormData) {
+  const id = str(formData, "id");
+  if (!id) return;
+  await deleteContact(id);
+  revalidatePath("/contacts");
+}
 
 /** 会社HPのURLを更新する（インライン編集用） */
 export async function setCompanyHpAction(companyId: string, hp: string) {
