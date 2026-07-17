@@ -7,23 +7,9 @@ import {
 import { formatDate } from "@/lib/format";
 import { PageHeader } from "@/components/PageHeader";
 import { Field, TextInput, Select, SubmitButton } from "@/components/Form";
+import { DeleteButton } from "@/components/DeleteButton";
 
 export const dynamic = "force-dynamic";
-
-function DeleteButton({ id }: { id: string }) {
-  return (
-    <form action={deleteMeishiImageAction}>
-      <input type="hidden" name="id" value={id} />
-      <button
-        type="submit"
-        className="rounded-md px-2 py-1 text-xs font-medium text-gray-400 transition hover:bg-red-50 hover:text-red-600"
-        aria-label="削除"
-      >
-        削除
-      </button>
-    </form>
-  );
-}
 
 export default async function MeishiImagesPage() {
   const [companies, images] = await Promise.all([
@@ -129,7 +115,10 @@ export default async function MeishiImagesPage() {
                           {formatDate(img.created_at)}
                         </p>
                       </div>
-                      <DeleteButton id={img.id} />
+                      <DeleteButton
+                        id={img.id}
+                        action={deleteMeishiImageAction}
+                      />
                     </div>
                   </li>
                 ))}

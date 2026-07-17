@@ -14,6 +14,36 @@ const CARD_H = 650;
 const HAGAKI_W = 1181;
 const HAGAKI_H = 1748;
 
+/**
+ * 画像を保存する。iOS Safari はデータURLの download リンクが効かないことがあるため、
+ * 共有シート（「画像を保存」で写真に保存できる）を優先し、使えない環境では
+ * Blob URL でのダウンロードにフォールバックする。
+ */
+async function saveImage(dataUrl: string, fileName: string) {
+  const blob = await (await fetch(dataUrl)).blob();
+  const file = new File([blob], fileName, { type: "image/png" });
+  if (
+    typeof navigator !== "undefined" &&
+    navigator.canShare?.({ files: [file] })
+  ) {
+    try {
+      await navigator.share({ files: [file] });
+      return;
+    } catch {
+      // キャンセル時などは何もしない
+      return;
+    }
+  }
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = fileName;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 10_000);
+}
+
 /** 名刺キャンバスをハガキ中央に配置し、四隅にトンボを付けた印刷用画像を作る */
 function buildHagakiDataUrl(cardCanvas: HTMLCanvasElement): string {
   const canvas = document.createElement("canvas");
@@ -247,30 +277,30 @@ export function MeishiMaker({ companies }: { companies: Company[] }) {
           className="w-full max-w-xl rounded-md border border-gray-200 shadow"
         />
         <div className="mt-4 flex flex-wrap items-center gap-3">
-          <a
-            href={dataUrl || undefined}
-            download={fileName}
-            aria-disabled={!personName}
+          <button
+            type="button"
+            disabled={!personName}
+            onClick={() => saveImage(dataUrl, fileName)}
             className={`inline-flex items-center rounded-lg px-5 py-2 text-sm font-medium text-white shadow-sm transition ${
               personName
                 ? "bg-brand-600 hover:bg-brand-700"
                 : "pointer-events-none bg-gray-300"
             }`}
           >
-            画像をダウンロード (PNG)
-          </a>
-          <a
-            href={hagakiUrl || undefined}
-            download={`hagaki-${fileName}`}
-            aria-disabled={!personName}
+            画像を保存 (PNG)
+          </button>
+          <button
+            type="button"
+            disabled={!personName}
+            onClick={() => saveImage(hagakiUrl, `hagaki-${fileName}`)}
             className={`inline-flex items-center rounded-lg border px-5 py-2 text-sm font-medium shadow-sm transition ${
               personName
                 ? "border-brand-600 bg-white text-brand-700 hover:bg-brand-50"
                 : "pointer-events-none border-gray-200 bg-gray-100 text-gray-400"
             }`}
           >
-            コンビニ印刷用（ハガキ）PNG
-          </a>
+            コンビニ印刷用（ハガキ）を保存
+          </button>
           <button
             type="button"
             disabled={!personName || saving || saved}
