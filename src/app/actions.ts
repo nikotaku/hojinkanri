@@ -6,6 +6,8 @@ import {
   createCompany,
   createCase,
   setCompanyService,
+  setCompanyHp,
+  saveToukiImage,
   reorderCompanies,
   createBacklogEntry,
   deleteBacklogEntry,
@@ -16,6 +18,22 @@ import type {
   CaseStatus,
   CasePriority,
 } from "@/lib/types";
+
+/** 会社HPのURLを更新する（インライン編集用） */
+export async function setCompanyHpAction(companyId: string, hp: string) {
+  await setCompanyHp(companyId, hp);
+  revalidatePath(`/companies/${companyId}`);
+  revalidatePath("/companies");
+}
+
+/** 登記簿謄本の画像をアップロードする */
+export async function uploadToukiAction(formData: FormData) {
+  const companyId = str(formData, "company_id");
+  const file = formData.get("file");
+  if (!companyId || !(file instanceof File) || file.size === 0) return;
+  await saveToukiImage(companyId, file);
+  revalidatePath(`/companies/${companyId}`);
+}
 
 /** 会社の並び順を保存する（ドラッグ&ドロップ用） */
 export async function reorderCompaniesAction(ids: string[]) {

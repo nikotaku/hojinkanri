@@ -21,6 +21,10 @@ export interface Company {
   address: string | null;
   status: CompanyStatus;
   notes: string | null;
+  /** 会社HPのURL */
+  hp?: string | null;
+  /** 登記簿謄本(画像)のURL */
+  touki_url?: string | null;
   /** 並び順（ドラッグ&ドロップで変更） */
   sort_order?: number | null;
   /** タクシー関連サービスの状況 (サービス名 -> ステータス) */

@@ -66,6 +66,51 @@ export async function listCompanies(): Promise<Company[]> {
   return [...getMockDb().companies].sort(compareCompanies);
 }
 
+/** 会社HPのURLを更新する */
+export async function setCompanyHp(id: string, hp: string): Promise<void> {
+  const supabase = getSupabase();
+  const value = hp.trim() || null;
+  if (supabase) {
+    const { error } = await supabase
+      .from("companies")
+      .update({ hp: value })
+      .eq("id", id);
+    if (error) throw new Error(error.message);
+    return;
+  }
+  const c = getMockDb().companies.find((x) => x.id === id);
+  if (c) c.hp = value;
+}
+
+/** 登記簿謄本の画像を保存し、公開URLを会社に紐づける */
+export async function saveToukiImage(
+  companyId: string,
+  file: File,
+): Promise<void> {
+  const supabase = getSupabase();
+  if (supabase) {
+    const ext = (file.name.split(".").pop() || "png").toLowerCase();
+    const path = `${companyId}/touki-${Date.now()}.${ext}`;
+    const buf = await file.arrayBuffer();
+    const { error } = await supabase.storage
+      .from("touki")
+      .upload(path, buf, { upsert: true, contentType: file.type });
+    if (error) throw new Error(error.message);
+    const { data } = supabase.storage.from("touki").getPublicUrl(path);
+    const { error: upErr } = await supabase
+      .from("companies")
+      .update({ touki_url: data.publicUrl })
+      .eq("id", companyId);
+    if (upErr) throw new Error(upErr.message);
+    return;
+  }
+  // モック: データURLとして保持（プロセス内のみ）
+  const buf = Buffer.from(await file.arrayBuffer());
+  const url = `data:${file.type};base64,${buf.toString("base64")}`;
+  const c = getMockDb().companies.find((x) => x.id === companyId);
+  if (c) c.touki_url = url;
+}
+
 /** 会社の並び順を id の配列順に保存する（ドラッグ&ドロップ用） */
 export async function reorderCompanies(ids: string[]): Promise<void> {
   const supabase = getSupabase();
