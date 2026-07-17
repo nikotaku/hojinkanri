@@ -34,12 +34,16 @@ export default async function CasesPage() {
                   <p className="min-w-0 font-medium text-gray-900">{c.title}</p>
                   <CaseStatusBadge status={c.status} />
                 </div>
-                <Link
-                  href={`/companies/${c.company_id}`}
-                  className="mt-1 block text-sm text-gray-500 hover:text-brand-600"
-                >
-                  {c.company_name}
-                </Link>
+                {c.company_id ? (
+                  <Link
+                    href={`/companies/${c.company_id}`}
+                    className="mt-1 block text-sm text-gray-500 hover:text-brand-600"
+                  >
+                    {c.company_name}
+                  </Link>
+                ) : (
+                  <p className="mt-1 text-sm text-gray-400">{c.company_name}</p>
+                )}
                 <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1.5 text-xs text-gray-500">
                   <PriorityBadge priority={c.priority} />
                   <span>担当: {c.assignee ?? "—"}</span>
@@ -85,12 +89,16 @@ export default async function CasesPage() {
                       {c.title}
                     </td>
                     <td className="whitespace-nowrap px-6 py-4 text-sm">
-                      <Link
-                        href={`/companies/${c.company_id}`}
-                        className="text-gray-600 hover:text-brand-600"
-                      >
-                        {c.company_name}
-                      </Link>
+                      {c.company_id ? (
+                        <Link
+                          href={`/companies/${c.company_id}`}
+                          className="text-gray-600 hover:text-brand-600"
+                        >
+                          {c.company_name}
+                        </Link>
+                      ) : (
+                        <span className="text-gray-400">{c.company_name}</span>
+                      )}
                     </td>
                     <td className="px-6 py-4">
                       <CaseStatusBadge status={c.status} />

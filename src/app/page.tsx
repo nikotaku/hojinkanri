@@ -101,12 +101,18 @@ export default async function DashboardPage() {
               {stats.upcomingCases.map((c) => (
                 <li key={c.id} className="flex items-center justify-between py-3">
                   <div className="min-w-0">
-                    <Link
-                      href={`/companies/${c.company_id}`}
-                      className="block truncate text-sm font-medium text-gray-900 hover:text-brand-600"
-                    >
-                      {c.title}
-                    </Link>
+                    {c.company_id ? (
+                      <Link
+                        href={`/companies/${c.company_id}`}
+                        className="block truncate text-sm font-medium text-gray-900 hover:text-brand-600"
+                      >
+                        {c.title}
+                      </Link>
+                    ) : (
+                      <p className="truncate text-sm font-medium text-gray-900">
+                        {c.title}
+                      </p>
+                    )}
                     <p className="truncate text-xs text-gray-500">
                       {c.company_name}
                     </p>

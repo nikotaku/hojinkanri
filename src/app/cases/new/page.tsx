@@ -22,32 +22,17 @@ export default async function NewCasePage({
     <div>
       <PageHeader title="案件を登録" description="新しい案件を追加します" />
 
-      {companies.length === 0 ? (
-        <div className="max-w-2xl rounded-xl border border-dashed border-gray-300 bg-white p-8 text-center text-gray-500">
-          先に法人を登録してください。
-          <div className="mt-3">
-            <Link
-              href="/companies/new"
-              className="text-sm font-medium text-brand-600 hover:text-brand-700"
-            >
-              法人を登録する →
-            </Link>
-          </div>
-        </div>
-      ) : (
-        <form
-          action={createCaseAction}
-          className="max-w-2xl space-y-5 rounded-xl border border-gray-200 bg-white p-6 shadow-sm"
-        >
+      <form
+        action={createCaseAction}
+        className="max-w-2xl space-y-5 rounded-xl border border-gray-200 bg-white p-6 shadow-sm"
+      >
           <Field label="案件名" required>
             <TextInput name="title" required placeholder="基幹システム保守契約 更新" />
           </Field>
 
-          <Field label="法人" required>
-            <Select name="company_id" required defaultValue={defaultCompany}>
-              <option value="" disabled>
-                選択してください
-              </option>
+          <Field label="法人（任意）">
+            <Select name="company_id" defaultValue={defaultCompany}>
+              <option value="">（法人なし）</option>
               {companies.map((c) => (
                 <option key={c.id} value={c.id}>
                   {c.name}
@@ -99,8 +84,7 @@ export default async function NewCasePage({
               キャンセル
             </Link>
           </div>
-        </form>
-      )}
+      </form>
     </div>
   );
 }

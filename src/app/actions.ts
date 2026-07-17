@@ -116,7 +116,6 @@ export async function createCaseAction(formData: FormData) {
   const title = str(formData, "title");
   const companyId = str(formData, "company_id");
   if (!title) throw new Error("案件名は必須です。");
-  if (!companyId) throw new Error("法人の選択は必須です。");
 
   const amountRaw = str(formData, "amount");
   const amount = amountRaw ? Number(amountRaw.replace(/[,，]/g, "")) : null;
