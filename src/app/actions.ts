@@ -16,6 +16,12 @@ import {
   saveMeishiImageFile,
   saveMeishiImageDataUrl,
   deleteMeishiImage,
+  createCrowPartner,
+  deleteCrowPartner,
+  createCrowContract,
+  deleteCrowContract,
+  createCrowStore,
+  deleteCrowStore,
   type ServiceField,
 } from "@/lib/data";
 import type {
@@ -23,6 +29,75 @@ import type {
   CaseStatus,
   CasePriority,
 } from "@/lib/types";
+
+// --- crow 案件管理 ---
+
+/** crow: 抱き合わせ営業依頼先を追加 */
+export async function createCrowPartnerAction(formData: FormData) {
+  const companyName = str(formData, "company_name");
+  if (!companyName) throw new Error("会社名は必須です。");
+  await createCrowPartner({
+    company_name: companyName,
+    contact_person: str(formData, "contact_person"),
+    phone: str(formData, "phone"),
+    email: str(formData, "email"),
+    conditions: str(formData, "conditions"),
+    status: str(formData, "status") ?? "未打診",
+    notes: str(formData, "notes"),
+  });
+  revalidatePath("/crow");
+}
+
+export async function deleteCrowPartnerAction(formData: FormData) {
+  const id = str(formData, "id");
+  if (id) await deleteCrowPartner(id);
+  revalidatePath("/crow");
+}
+
+/** crow: サービスの契約を追加 */
+export async function createCrowContractAction(formData: FormData) {
+  const customerName = str(formData, "customer_name");
+  if (!customerName) throw new Error("顧客名は必須です。");
+  const feeRaw = str(formData, "monthly_fee");
+  const fee = feeRaw ? Number(feeRaw.replace(/[,，]/g, "")) : null;
+  await createCrowContract({
+    customer_name: customerName,
+    plan: str(formData, "plan"),
+    status: str(formData, "status") ?? "商談中",
+    monthly_fee: fee != null && !Number.isNaN(fee) ? fee : null,
+    start_date: str(formData, "start_date"),
+    notes: str(formData, "notes"),
+  });
+  revalidatePath("/crow");
+}
+
+export async function deleteCrowContractAction(formData: FormData) {
+  const id = str(formData, "id");
+  if (id) await deleteCrowContract(id);
+  revalidatePath("/crow");
+}
+
+/** crow: 契約店舗を追加 */
+export async function createCrowStoreAction(formData: FormData) {
+  const storeName = str(formData, "store_name");
+  if (!storeName) throw new Error("店舗名は必須です。");
+  await createCrowStore({
+    store_name: storeName,
+    company_name: str(formData, "company_name"),
+    address: str(formData, "address"),
+    phone: str(formData, "phone"),
+    start_date: str(formData, "start_date"),
+    status: str(formData, "status") ?? "営業中",
+    notes: str(formData, "notes"),
+  });
+  revalidatePath("/crow");
+}
+
+export async function deleteCrowStoreAction(formData: FormData) {
+  const id = str(formData, "id");
+  if (id) await deleteCrowStore(id);
+  revalidatePath("/crow");
+}
 
 /** 名刺画像をアップロードして会社に紐づける */
 export async function uploadMeishiImageAction(formData: FormData) {

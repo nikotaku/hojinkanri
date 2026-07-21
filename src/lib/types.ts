@@ -140,6 +140,68 @@ export interface MeishiImageWithCompany extends MeishiImage {
   company_name: string;
 }
 
+// --- crow 案件管理 ---
+
+/** crow: 抱き合わせ営業依頼先 */
+export interface CrowPartner {
+  id: string;
+  company_name: string;
+  contact_person: string | null;
+  phone: string | null;
+  email: string | null;
+  conditions: string | null;
+  status: string;
+  notes: string | null;
+  created_at: string;
+}
+
+export const CROW_PARTNER_STATUSES = [
+  "未打診",
+  "打診中",
+  "成約",
+  "見送り",
+] as const;
+
+/** crow: サービスの契約状況 */
+export interface CrowContract {
+  id: string;
+  customer_name: string;
+  plan: string | null;
+  status: string;
+  monthly_fee: number | null;
+  start_date: string | null;
+  notes: string | null;
+  created_at: string;
+}
+
+export const CROW_CONTRACT_STATUSES = [
+  "商談中",
+  "トライアル",
+  "契約中",
+  "休止",
+  "解約",
+] as const;
+
+/** crow: 契約店舗 */
+export interface CrowStore {
+  id: string;
+  store_name: string;
+  company_name: string | null;
+  address: string | null;
+  phone: string | null;
+  start_date: string | null;
+  status: string;
+  notes: string | null;
+  created_at: string;
+}
+
+export const CROW_STORE_STATUSES = [
+  "営業中",
+  "準備中",
+  "休止",
+  "解約",
+] as const;
+
 /** 行動のバックログ(活動ログ) */
 export interface BacklogEntry {
   id: string;

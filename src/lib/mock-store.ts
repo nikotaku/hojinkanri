@@ -4,6 +4,9 @@ import type {
   BacklogEntry,
   Contact,
   MeishiImage,
+  CrowPartner,
+  CrowContract,
+  CrowStore,
 } from "./types";
 
 // Supabase 未設定時に使うインメモリのサンプルデータ。
@@ -221,6 +224,11 @@ interface MockDb {
   backlog: BacklogEntry[];
   contacts: Contact[];
   meishiImages: MeishiImage[];
+  crow: {
+    partners: CrowPartner[];
+    contracts: CrowContract[];
+    stores: CrowStore[];
+  };
 }
 
 const globalForMock = globalThis as unknown as { __mockDb?: MockDb };
@@ -233,6 +241,46 @@ export function getMockDb(): MockDb {
       backlog: seedBacklog.map((b) => ({ ...b })),
       contacts: seedContacts.map((c) => ({ ...c })),
       meishiImages: [],
+      crow: {
+        partners: [
+          {
+            id: "ddddddd1-0000-0000-0000-000000000001",
+            company_name: "株式会社サンライズ商事",
+            contact_person: "田中 一郎",
+            phone: "03-1234-5678",
+            email: "tanaka@sunrise.example.com",
+            conditions: "紹介1件につき成約時に売上の10%を還元",
+            status: "打診中",
+            notes: "来週アポ予定。",
+            created_at: iso(-3),
+          },
+        ],
+        contracts: [
+          {
+            id: "ddddddd2-0000-0000-0000-000000000001",
+            customer_name: "みらいテック株式会社",
+            plan: "スタンダード",
+            status: "トライアル",
+            monthly_fee: 50000,
+            start_date: ymd(-14),
+            notes: "トライアル1ヶ月。",
+            created_at: iso(-14),
+          },
+        ],
+        stores: [
+          {
+            id: "ddddddd3-0000-0000-0000-000000000001",
+            store_name: "サンライズ 丸の内店",
+            company_name: "株式会社サンライズ商事",
+            address: "東京都千代田区丸の内1-1-1",
+            phone: "03-1234-5678",
+            start_date: ymd(-30),
+            status: "営業中",
+            notes: null,
+            created_at: iso(-30),
+          },
+        ],
+      },
     };
   }
   return globalForMock.__mockDb;

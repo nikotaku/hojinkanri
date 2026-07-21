@@ -15,6 +15,7 @@ const nav = [
   { href: "/backlog", label: "バックログ", icon: "📝" },
   { href: "/meishi", label: "名刺作成", icon: "💳" },
   { href: "/meishi-images", label: "名刺画像管理", icon: "🖼️" },
+  { href: "/crow", label: "crow案件管理", icon: "🐦" },
   { href: "/contacts", label: "連絡先一覧", icon: "📇" },
 ];
 
