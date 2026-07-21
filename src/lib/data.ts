@@ -9,6 +9,9 @@ import {
   type CasePriority,
   type BacklogEntry,
   type Contact,
+  type CrowPartner,
+  type CrowContract,
+  type CrowStore,
   type MeishiImage,
   type MeishiImageWithCompany,
   OPEN_CASE_STATUSES,
@@ -310,6 +313,89 @@ export async function createCase(input: CaseInput): Promise<Case> {
   db.cases.push(newCase);
   return newCase;
 }
+
+// --- crow 案件管理 ---
+
+// 3テーブル(営業依頼先/契約状況/契約店舗)共通の CRUD ヘルパー
+type CrowTable = "crow_partners" | "crow_contracts" | "crow_stores";
+
+async function crowList<T>(table: CrowTable, mockKey: keyof MockCrow): Promise<T[]> {
+  const supabase = getSupabase();
+  if (supabase) {
+    const { data, error } = await supabase
+      .from(table)
+      .select("*")
+      .order("created_at", { ascending: false });
+    if (error) throw new Error(error.message);
+    return data as T[];
+  }
+  const rows = getMockDb().crow[mockKey] as unknown as { created_at: string }[];
+  return [...rows].sort((a, b) =>
+    b.created_at.localeCompare(a.created_at),
+  ) as T[];
+}
+
+async function crowInsert(
+  table: CrowTable,
+  mockKey: keyof MockCrow,
+  row: Record<string, unknown>,
+): Promise<void> {
+  const supabase = getSupabase();
+  if (supabase) {
+    const { error } = await supabase.from(table).insert(row);
+    if (error) throw new Error(error.message);
+    return;
+  }
+  (getMockDb().crow[mockKey] as unknown as Record<string, unknown>[]).push({
+    id: crypto.randomUUID(),
+    created_at: nowIso(),
+    ...row,
+  });
+}
+
+async function crowDelete(
+  table: CrowTable,
+  mockKey: keyof MockCrow,
+  id: string,
+): Promise<void> {
+  const supabase = getSupabase();
+  if (supabase) {
+    const { error } = await supabase.from(table).delete().eq("id", id);
+    if (error) throw new Error(error.message);
+    return;
+  }
+  const db = getMockDb();
+  db.crow[mockKey] = (
+    db.crow[mockKey] as unknown as { id: string }[]
+  ).filter((r) => r.id !== id) as never;
+}
+
+export interface MockCrow {
+  partners: CrowPartner[];
+  contracts: CrowContract[];
+  stores: CrowStore[];
+}
+
+export const listCrowPartners = () =>
+  crowList<CrowPartner>("crow_partners", "partners");
+export const createCrowPartner = (row: Record<string, unknown>) =>
+  crowInsert("crow_partners", "partners", row);
+export const deleteCrowPartner = (id: string) =>
+  crowDelete("crow_partners", "partners", id);
+
+export const listCrowContracts = () =>
+  crowList<CrowContract>("crow_contracts", "contracts");
+export const createCrowContract = (row: Record<string, unknown>) =>
+  crowInsert("crow_contracts", "contracts", row);
+export const deleteCrowContract = (id: string) =>
+  crowDelete("crow_contracts", "contracts", id);
+
+export const listCrowStores = () =>
+  crowList<CrowStore>("crow_stores", "stores");
+export const createCrowStore = (row: Record<string, unknown>) =>
+  crowInsert("crow_stores", "stores", row);
+export const deleteCrowStore = (id: string) =>
+  crowDelete("crow_stores", "stores", id);
 
 // --- 名刺画像管理 ---
 
