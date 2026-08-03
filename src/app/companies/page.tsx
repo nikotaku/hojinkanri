@@ -1,8 +1,7 @@
 import Link from "next/link";
 import { listCompanies } from "@/lib/data";
-import { formatDate } from "@/lib/format";
+import { formatCurrency, formatDate } from "@/lib/format";
 import { PageHeader } from "@/components/PageHeader";
-import { CompanyStatusBadge } from "@/components/StatusBadge";
 import { DeleteButton } from "@/components/DeleteButton";
 import { deleteCompanyAction } from "@/app/actions";
 
@@ -24,117 +23,77 @@ export default async function CompaniesPage() {
           まだ法人が登録されていません。
         </div>
       ) : (
-        <>
-          {/* モバイル: カード表示 */}
-          <ul className="space-y-3 sm:hidden">
-            {companies.map((c) => (
-              <li
-                key={c.id}
-                className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm"
-              >
+        <ul className="space-y-3">
+          {companies.map((c) => (
+            <li key={c.id}>
+              <details className="group overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
+                <summary className="flex cursor-pointer list-none items-center justify-between gap-4 px-4 py-4 font-medium text-gray-900 transition hover:bg-gray-50 sm:px-6 [&::-webkit-details-marker]:hidden">
+                  <span className="min-w-0 truncate">{c.name}</span>
+                  <svg
+                    width="18"
+                    height="18"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    aria-hidden="true"
+                    className="shrink-0 text-gray-400 transition-transform group-open:rotate-180"
+                  >
+                    <path d="m6 9 6 6 6-6" />
+                  </svg>
+                </summary>
+
                 <Link
                   href={`/companies/${c.id}`}
-                  className="block p-4 active:bg-gray-50"
+                  className="block border-t border-gray-100 bg-gray-50/60 px-4 py-4 transition hover:bg-brand-50 sm:px-6"
+                  aria-label={`${c.name}の詳細ページを開く`}
                 >
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="min-w-0">
-                      <p className="font-medium text-gray-900">{c.name}</p>
-                      {c.name_kana && (
-                        <p className="text-xs text-gray-400">{c.name_kana}</p>
-                      )}
-                    </div>
-                    <CompanyStatusBadge status={c.status} />
-                  </div>
-                  <dl className="mt-3 grid grid-cols-2 gap-x-3 gap-y-1.5 text-xs">
+                  <dl className="grid grid-cols-1 gap-x-8 gap-y-4 text-sm sm:grid-cols-2 lg:grid-cols-3">
                     <div>
-                      <dt className="text-gray-400">業種</dt>
-                      <dd className="text-gray-700">{c.industry ?? "—"}</dd>
+                      <dt className="text-gray-400">登記住所</dt>
+                      <dd className="mt-1 text-gray-700">{c.address ?? "—"}</dd>
                     </div>
                     <div>
-                      <dt className="text-gray-400">担当者</dt>
-                      <dd className="text-gray-700">{c.contact_person ?? "—"}</dd>
+                      <dt className="text-gray-400">会社URL</dt>
+                      <dd className="mt-1 break-all text-gray-700">{c.hp ?? "—"}</dd>
                     </div>
                     <div>
-                      <dt className="text-gray-400">登録日</dt>
-                      <dd className="text-gray-700">{formatDate(c.created_at)}</dd>
+                      <dt className="text-gray-400">代表者名</dt>
+                      <dd className="mt-1 text-gray-700">
+                        {c.representative_name ?? "—"}
+                      </dd>
+                    </div>
+                    <div>
+                      <dt className="text-gray-400">設立年月日</dt>
+                      <dd className="mt-1 text-gray-700">
+                        {formatDate(c.established_on)}
+                      </dd>
+                    </div>
+                    <div>
+                      <dt className="text-gray-400">資本金</dt>
+                      <dd className="mt-1 text-gray-700">
+                        {formatCurrency(c.capital)}
+                      </dd>
                     </div>
                   </dl>
+                  <p className="mt-4 text-right text-xs font-medium text-brand-600">
+                    詳細ページを開く →
+                  </p>
                 </Link>
-                <div className="flex justify-end border-t border-gray-100 px-4 py-2">
+
+                <div className="flex justify-end border-t border-gray-100 px-4 py-2 sm:px-6">
                   <DeleteButton
                     id={c.id}
                     action={deleteCompanyAction}
                     confirmMessage={`「${c.name}」を削除します。紐づく案件・名刺画像も削除され、元に戻せません。よろしいですか？`}
                   />
                 </div>
-              </li>
-            ))}
-          </ul>
-
-          {/* デスクトップ: テーブル表示 */}
-          <div className="hidden overflow-x-auto rounded-xl border border-gray-200 bg-white shadow-sm sm:block">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="whitespace-nowrap px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">
-                    会社名
-                  </th>
-                  <th className="whitespace-nowrap px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">
-                    業種
-                  </th>
-                  <th className="whitespace-nowrap px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">
-                    担当者
-                  </th>
-                  <th className="whitespace-nowrap px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">
-                    ステータス
-                  </th>
-                  <th className="whitespace-nowrap px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">
-                    登録日
-                  </th>
-                  <th className="whitespace-nowrap px-6 py-3 text-right text-xs font-semibold uppercase tracking-wider text-gray-500">
-                    操作
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-100">
-                {companies.map((c) => (
-                  <tr key={c.id} className="hover:bg-gray-50">
-                    <td className="px-6 py-4">
-                      <Link
-                        href={`/companies/${c.id}`}
-                        className="font-medium text-gray-900 hover:text-brand-600"
-                      >
-                        {c.name}
-                      </Link>
-                      {c.name_kana && (
-                        <p className="text-xs text-gray-400">{c.name_kana}</p>
-                      )}
-                    </td>
-                    <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-600">
-                      {c.industry ?? "—"}
-                    </td>
-                    <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-600">
-                      {c.contact_person ?? "—"}
-                    </td>
-                    <td className="px-6 py-4">
-                      <CompanyStatusBadge status={c.status} />
-                    </td>
-                    <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">
-                      {formatDate(c.created_at)}
-                    </td>
-                    <td className="whitespace-nowrap px-6 py-4 text-right">
-                      <DeleteButton
-                        id={c.id}
-                        action={deleteCompanyAction}
-                        confirmMessage={`「${c.name}」を削除します。紐づく案件・名刺画像も削除され、元に戻せません。よろしいですか？`}
-                      />
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </>
+              </details>
+            </li>
+          ))}
+        </ul>
       )}
     </div>
   );

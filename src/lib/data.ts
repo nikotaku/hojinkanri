@@ -28,6 +28,10 @@ export interface CompanyInput {
   email?: string | null;
   phone?: string | null;
   address?: string | null;
+  representative_name?: string | null;
+  established_on?: string | null;
+  capital?: number | null;
+  hp?: string | null;
   status: CompanyStatus;
   notes?: string | null;
 }
@@ -174,6 +178,10 @@ export async function createCompany(input: CompanyInput): Promise<Company> {
     email: input.email ?? null,
     phone: input.phone ?? null,
     address: input.address ?? null,
+    representative_name: input.representative_name ?? null,
+    established_on: input.established_on ?? null,
+    capital: input.capital ?? null,
+    hp: input.hp ?? null,
     status: input.status,
     notes: input.notes ?? null,
     created_at: ts,

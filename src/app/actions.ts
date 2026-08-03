@@ -228,6 +228,10 @@ function str(form: FormData, key: string): string | null {
 export async function createCompanyAction(formData: FormData) {
   const name = str(formData, "name");
   if (!name) throw new Error("会社名は必須です。");
+  const capitalRaw = str(formData, "capital");
+  const capital = capitalRaw
+    ? Number(capitalRaw.replace(/[,，]/g, ""))
+    : null;
 
   const company = await createCompany({
     name,
@@ -237,6 +241,10 @@ export async function createCompanyAction(formData: FormData) {
     email: str(formData, "email"),
     phone: str(formData, "phone"),
     address: str(formData, "address"),
+    representative_name: str(formData, "representative_name"),
+    established_on: str(formData, "established_on"),
+    capital: capital != null && Number.isFinite(capital) ? capital : null,
+    hp: str(formData, "hp"),
     status: (str(formData, "status") as CompanyStatus) ?? "prospect",
     notes: str(formData, "notes"),
   });
