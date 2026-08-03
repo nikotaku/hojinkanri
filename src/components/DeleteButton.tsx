@@ -9,9 +9,11 @@ import { useTransition } from "react";
 export function DeleteButton({
   id,
   action,
+  confirmMessage,
 }: {
   id: string;
   action: (formData: FormData) => Promise<void>;
+  confirmMessage?: string;
 }) {
   const [pending, startTransition] = useTransition();
 
@@ -20,6 +22,8 @@ export function DeleteButton({
       type="button"
       disabled={pending}
       onClick={() => {
+        if (confirmMessage && !window.confirm(confirmMessage)) return;
+
         const fd = new FormData();
         fd.set("id", id);
         startTransition(async () => {
