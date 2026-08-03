@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import {
   createCompany,
+  deleteCompany,
   createCase,
   setCompanyService,
   setCompanyHp,
@@ -243,6 +244,23 @@ export async function createCompanyAction(formData: FormData) {
   revalidatePath("/companies");
   revalidatePath("/");
   redirect(`/companies/${company.id}`);
+}
+
+/** 法人と紐づく案件・名刺画像を削除する */
+export async function deleteCompanyAction(formData: FormData) {
+  const id = str(formData, "id");
+  if (!id) throw new Error("削除対象の法人が指定されていません。");
+
+  await deleteCompany(id);
+
+  revalidatePath("/");
+  revalidatePath("/companies");
+  revalidatePath("/cases");
+  revalidatePath("/taxi");
+  revalidatePath("/mobile");
+  revalidatePath("/accounts");
+  revalidatePath("/meishi");
+  revalidatePath("/meishi-images");
 }
 
 export async function createCaseAction(formData: FormData) {

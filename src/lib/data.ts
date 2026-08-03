@@ -183,6 +183,93 @@ export async function createCompany(input: CompanyInput): Promise<Company> {
   return company;
 }
 
+function getStoragePathFromPublicUrl(
+  url: string | null | undefined,
+  bucket: string,
+): string | null {
+  if (!url) return null;
+  const marker = `/object/public/${bucket}/`;
+  const index = url.indexOf(marker);
+  return index >= 0
+    ? decodeURIComponent(url.slice(index + marker.length))
+    : null;
+}
+
+async function removeStorageFiles(
+  bucket: string,
+  paths: Array<string | null>,
+): Promise<void> {
+  const supabase = getSupabase();
+  const targets = paths.filter((path): path is string => Boolean(path));
+  if (!supabase || targets.length === 0) return;
+
+  const { error } = await supabase.storage.from(bucket).remove(targets);
+  if (error) {
+    // 法人データの削除は完了済みなので、画面上の削除を失敗扱いにしない。
+    // ストレージ上の孤立ファイルはログから追跡できるようにする。
+    console.error(`Failed to remove ${bucket} files:`, error.message);
+  }
+}
+
+/**
+ * 法人を削除する。
+ * Supabase では関連する案件・名刺画像レコードは外部キーで連動削除される。
+ * レコード削除後、Storage 上の登記簿・名刺画像も削除する。
+ */
+export async function deleteCompany(id: string): Promise<void> {
+  const supabase = getSupabase();
+  if (supabase) {
+    const [{ data: company, error: companyError }, { data: images, error: imagesError }] =
+      await Promise.all([
+        supabase
+          .from("companies")
+          .select("touki_url")
+          .eq("id", id)
+          .maybeSingle(),
+        supabase
+          .from("meishi_images")
+          .select("image_url")
+          .eq("company_id", id),
+      ]);
+
+    if (companyError) throw new Error(companyError.message);
+    if (imagesError) throw new Error(imagesError.message);
+    if (!company) throw new Error("削除対象の法人が見つかりません。");
+
+    const { data: deleted, error: deleteError } = await supabase
+      .from("companies")
+      .delete()
+      .eq("id", id)
+      .select("id")
+      .maybeSingle();
+    if (deleteError) throw new Error(deleteError.message);
+    if (!deleted) throw new Error("法人を削除できませんでした。");
+
+    await Promise.all([
+      removeStorageFiles("touki", [
+        getStoragePathFromPublicUrl(
+          (company as { touki_url?: string | null }).touki_url,
+          "touki",
+        ),
+      ]),
+      removeStorageFiles(
+        "meishi",
+        ((images as Array<{ image_url?: string }> | null) ?? []).map((image) =>
+          getStoragePathFromPublicUrl(image.image_url, "meishi"),
+        ),
+      ),
+    ]);
+    return;
+  }
+
+  const db = getMockDb();
+  const exists = db.companies.some((company) => company.id === id);
+  if (!exists) throw new Error("削除対象の法人が見つかりません。");
+  db.companies = db.companies.filter((company) => company.id !== id);
+  db.cases = db.cases.filter((item) => item.company_id !== id);
+  db.meishiImages = db.meishiImages.filter((image) => image.company_id !== id);
+}
+
 /**
  * 会社の taxi / accounts (jsonb) の 1 サービスのステータスを更新する。
  * value が空文字なら該当キーを削除する。
