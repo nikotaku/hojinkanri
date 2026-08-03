@@ -44,6 +44,25 @@ export default function NewCompanyPage() {
           <Field label="住所">
             <TextInput name="address" placeholder="東京都千代田区..." />
           </Field>
+          <Field label="会社URL">
+            <TextInput type="url" name="hp" placeholder="https://example.com" />
+          </Field>
+          <Field label="代表者名">
+            <TextInput name="representative_name" placeholder="田中 一郎" />
+          </Field>
+          <Field label="設立年月日">
+            <TextInput type="date" name="established_on" />
+          </Field>
+          <Field label="資本金（円）">
+            <TextInput
+              type="number"
+              name="capital"
+              min="0"
+              step="1"
+              inputMode="numeric"
+              placeholder="1000000"
+            />
+          </Field>
         </div>
 
         <Field label="メモ">
