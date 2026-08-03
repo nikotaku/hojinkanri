@@ -19,6 +19,12 @@ export interface Company {
   email: string | null;
   phone: string | null;
   address: string | null;
+  /** 代表者名 */
+  representative_name?: string | null;
+  /** 設立年月日 */
+  established_on?: string | null;
+  /** 資本金（円） */
+  capital?: number | null;
   status: CompanyStatus;
   notes: string | null;
   /** 会社HPのURL */
