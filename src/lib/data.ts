@@ -14,6 +14,8 @@ import {
   type CrowStore,
   type MeishiImage,
   type MeishiImageWithCompany,
+  type MobileContractDetail,
+  MOBILE_SERVICES,
   OPEN_CASE_STATUSES,
 } from "./types";
 
@@ -74,6 +76,33 @@ export async function listCompanies(): Promise<Company[]> {
     return data as Company[];
   }
   return [...getMockDb().companies].sort(compareCompanies);
+}
+
+/** モバイル回線ページ用に、各法人の契約端末もまとめて取得する */
+export async function listCompaniesWithMobileContracts(): Promise<Company[]> {
+  const supabase = getSupabase();
+  if (supabase) {
+    const { data, error } = await supabase
+      .from("companies")
+      .select("*, mobile_contract_details(*)")
+      .order("sort_order", { ascending: true, nullsFirst: false })
+      .order("created_at", { ascending: false });
+    if (error) throw new Error(error.message);
+    return (data as Company[]).map((company) => ({
+      ...company,
+      mobile_contract_details: [
+        ...(company.mobile_contract_details ?? []),
+      ].sort((a, b) => a.created_at.localeCompare(b.created_at)),
+    }));
+  }
+
+  const db = getMockDb();
+  return [...db.companies].sort(compareCompanies).map((company) => ({
+    ...company,
+    mobile_contract_details: db.mobileContracts
+      .filter((detail) => detail.company_id === company.id)
+      .sort((a, b) => a.created_at.localeCompare(b.created_at)),
+  }));
 }
 
 /** 会社HPのURLを更新する */
@@ -334,6 +363,120 @@ export async function setCompanyService(
   if (value) map[service] = value;
   else delete map[service];
   company[field] = map;
+}
+
+// --- 法人モバイル回線の契約端末 ---
+
+export type MobileContractField =
+  | "device_model"
+  | "contract_person"
+  | "contracted_on";
+
+function assertMobileService(
+  service: string,
+): asserts service is MobileContractDetail["service"] {
+  if (!MOBILE_SERVICES.includes(service as MobileContractDetail["service"])) {
+    throw new Error("対象の回線を確認できませんでした。");
+  }
+}
+
+/** 契約端末の入力行を1件追加する */
+export async function createMobileContractDetail(
+  companyId: string,
+  service: string,
+): Promise<MobileContractDetail> {
+  assertMobileService(service);
+  const supabase = getSupabase();
+  if (supabase) {
+    const { data, error } = await supabase
+      .from("mobile_contract_details")
+      .insert({ company_id: companyId, service })
+      .select("*")
+      .single();
+    if (error) throw new Error(error.message);
+    return data as MobileContractDetail;
+  }
+
+  const ts = nowIso();
+  const detail: MobileContractDetail = {
+    id: crypto.randomUUID(),
+    company_id: companyId,
+    service,
+    device_model: null,
+    contract_person: null,
+    contracted_on: null,
+    created_at: ts,
+    updated_at: ts,
+  };
+  getMockDb().mobileContracts.push(detail);
+  return detail;
+}
+
+/** 契約端末の機種・担当者・契約日のいずれかを更新する */
+export async function updateMobileContractDetail(
+  companyId: string,
+  id: string,
+  field: MobileContractField,
+  value: string,
+): Promise<void> {
+  const trimmed = value.trim();
+  if (
+    field === "contracted_on" &&
+    trimmed &&
+    !/^\d{4}-\d{2}-\d{2}$/.test(trimmed)
+  ) {
+    throw new Error("契約日を正しい形式で入力してください。");
+  }
+  const safeValue = trimmed ? trimmed.slice(0, 120) : null;
+  const supabase = getSupabase();
+  if (supabase) {
+    const { data, error } = await supabase
+      .from("mobile_contract_details")
+      .update({ [field]: safeValue })
+      .eq("id", id)
+      .eq("company_id", companyId)
+      .select("id")
+      .maybeSingle();
+    if (error) throw new Error(error.message);
+    if (!data) throw new Error("契約端末が見つかりませんでした。");
+    return;
+  }
+
+  const detail = getMockDb().mobileContracts.find(
+    (item) => item.id === id && item.company_id === companyId,
+  );
+  if (!detail) throw new Error("契約端末が見つかりませんでした。");
+  detail[field] = safeValue;
+  detail.updated_at = nowIso();
+}
+
+/** 契約端末の入力行を1件削除する */
+export async function deleteMobileContractDetail(
+  companyId: string,
+  id: string,
+): Promise<void> {
+  const supabase = getSupabase();
+  if (supabase) {
+    const { data, error } = await supabase
+      .from("mobile_contract_details")
+      .delete()
+      .eq("id", id)
+      .eq("company_id", companyId)
+      .select("id")
+      .maybeSingle();
+    if (error) throw new Error(error.message);
+    if (!data) throw new Error("契約端末が見つかりませんでした。");
+    return;
+  }
+
+  const db = getMockDb();
+  const before = db.mobileContracts.length;
+  db.mobileContracts = db.mobileContracts.filter(
+    (item) => !(item.id === id && item.company_id === companyId),
+  );
+  if (db.mobileContracts.length === before) {
+    throw new Error("契約端末が見つかりませんでした。");
+  }
 }
 
 // --- 案件 ---

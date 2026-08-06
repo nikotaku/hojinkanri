@@ -6,6 +6,7 @@ import Sortable from "sortablejs";
 import type { Company } from "@/lib/types";
 import { ServiceStatusSelect } from "@/components/ServiceStatusSelect";
 import { ServiceContactInput } from "@/components/ServiceContactInput";
+import { MobileContractDetails } from "@/components/MobileContractDetails";
 import { reorderCompaniesAction } from "@/app/actions";
 
 // サービス群ごとの保存先フィールド定義
@@ -57,6 +58,7 @@ function StatusPill({ value }: { value?: string }) {
 /**
  * 会社ごとにサービス群（タクシー / モバイル回線）を折りたたみで表示するボード。
  * - 各サービスはトグルで開閉（要約に現在ステータス）
+ * - モバイル回線では契約端末ごとに機種・担当者・契約日を記録
  * - 開くと ステータス / アプリ登録電話番号 / メール / 登録名 / 管理画面URL / ログインID / PW
  * - ⠿ ハンドルでドラッグ&ドロップ並び替え（順序は保存）
  */
@@ -150,6 +152,15 @@ export function ServiceBoard({
                       value={statusMap[s]}
                       options={statusOptions}
                     />
+                    {prefix === "mobile" && (
+                      <MobileContractDetails
+                        companyId={c.id}
+                        service={s}
+                        details={(c.mobile_contract_details ?? []).filter(
+                          (detail) => detail.service === s,
+                        )}
+                      />
+                    )}
                     <ServiceContactInput
                       companyId={c.id}
                       field={fields.phone}
