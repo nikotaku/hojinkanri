@@ -7,6 +7,7 @@ import type {
   CrowPartner,
   CrowContract,
   CrowStore,
+  MobileContractDetail,
 } from "./types";
 
 // Supabase 未設定時に使うインメモリのサンプルデータ。
@@ -217,12 +218,26 @@ export const seedContacts: Contact[] = [
   },
 ];
 
+export const seedMobileContracts: MobileContractDetail[] = [
+  {
+    id: "eeeeeee1-0000-0000-0000-000000000001",
+    company_id: "11111111-1111-1111-1111-111111111111",
+    service: "UQ",
+    device_model: "iPhone 16",
+    contract_person: "佐藤",
+    contracted_on: "2026-05-15",
+    created_at: iso(-17),
+    updated_at: iso(-17),
+  },
+];
+
 // プロセス内で保持する可変ストア(モックモード専用)
 interface MockDb {
   companies: Company[];
   cases: Case[];
   backlog: BacklogEntry[];
   contacts: Contact[];
+  mobileContracts: MobileContractDetail[];
   meishiImages: MeishiImage[];
   crow: {
     partners: CrowPartner[];
@@ -240,6 +255,7 @@ export function getMockDb(): MockDb {
       cases: seedCases.map((c) => ({ ...c })),
       backlog: seedBacklog.map((b) => ({ ...b })),
       contacts: seedContacts.map((c) => ({ ...c })),
+      mobileContracts: seedMobileContracts.map((detail) => ({ ...detail })),
       meishiImages: [],
       crow: {
         partners: [

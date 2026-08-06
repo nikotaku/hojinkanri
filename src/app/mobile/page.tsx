@@ -1,4 +1,4 @@
-import { listCompanies } from "@/lib/data";
+import { listCompaniesWithMobileContracts } from "@/lib/data";
 import { MOBILE_SERVICES, MOBILE_STATUS_OPTIONS } from "@/lib/types";
 import { PageHeader } from "@/components/PageHeader";
 import { ServiceBoard } from "@/components/ServiceBoard";
@@ -6,7 +6,7 @@ import { ServiceBoard } from "@/components/ServiceBoard";
 export const dynamic = "force-dynamic";
 
 export default async function MobilePage() {
-  const companies = await listCompanies();
+  const companies = await listCompaniesWithMobileContracts();
 
   return (
     <div>

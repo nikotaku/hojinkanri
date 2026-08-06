@@ -23,12 +23,17 @@ import {
   deleteCrowContract,
   createCrowStore,
   deleteCrowStore,
+  createMobileContractDetail,
+  updateMobileContractDetail,
+  deleteMobileContractDetail,
   type ServiceField,
+  type MobileContractField,
 } from "@/lib/data";
 import type {
   CompanyStatus,
   CaseStatus,
   CasePriority,
+  MobileContractDetail,
 } from "@/lib/types";
 
 // --- crow 案件管理 ---
@@ -216,6 +221,36 @@ export async function setServiceStatusAction(
   revalidatePath("/taxi");
   revalidatePath("/accounts");
   revalidatePath(`/companies/${companyId}`);
+}
+
+/** モバイル回線に契約端末の入力行を追加する */
+export async function createMobileContractDetailAction(
+  companyId: string,
+  service: string,
+): Promise<MobileContractDetail> {
+  const detail = await createMobileContractDetail(companyId, service);
+  revalidatePath("/mobile");
+  return detail;
+}
+
+/** 契約端末の機種・担当者・契約日を更新する */
+export async function updateMobileContractDetailAction(
+  companyId: string,
+  id: string,
+  field: MobileContractField,
+  value: string,
+) {
+  await updateMobileContractDetail(companyId, id, field, value);
+  revalidatePath("/mobile");
+}
+
+/** モバイル回線の契約端末を削除する */
+export async function deleteMobileContractDetailAction(
+  companyId: string,
+  id: string,
+) {
+  await deleteMobileContractDetail(companyId, id);
+  revalidatePath("/mobile");
 }
 
 function str(form: FormData, key: string): string | null {

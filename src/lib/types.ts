@@ -9,6 +9,18 @@ export type CaseStatus = "new" | "in_progress" | "on_hold" | "done" | "lost";
 /** 案件の優先度 */
 export type CasePriority = "low" | "medium" | "high";
 
+/** 法人モバイル回線で契約した端末 */
+export interface MobileContractDetail {
+  id: string;
+  company_id: string;
+  service: "ドコモ" | "UQ";
+  device_model: string | null;
+  contract_person: string | null;
+  contracted_on: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
 /** 法人(顧客) */
 export interface Company {
   id: string;
@@ -61,6 +73,8 @@ export interface Company {
   mobile_login_id?: Record<string, string> | null;
   /** 法人モバイル回線のログインPW (サービス名 -> PW) */
   mobile_login_pw?: Record<string, string> | null;
+  /** 法人モバイル回線で契約した端末（モバイル回線ページで取得） */
+  mobile_contract_details?: MobileContractDetail[];
   /** 口座関連サービスの状況 (サービス名 -> ステータス) */
   accounts?: Record<string, string> | null;
   created_at: string;
