@@ -17,6 +17,7 @@ function ContractInput({
   placeholder,
   value,
   type = "text",
+  wide = false,
   onError,
 }: {
   companyId: string;
@@ -24,11 +25,12 @@ function ContractInput({
   field: MobileContractField;
   label: string;
   placeholder?: string;
-  value: string | null;
-  type?: "text" | "date";
+  value: string | number | null;
+  type?: "text" | "date" | "number";
+  wide?: boolean;
   onError: (message: string | null) => void;
 }) {
-  const initial = value ?? "";
+  const initial = value == null ? "" : String(value);
   const [current, setCurrent] = useState(initial);
   const [saved, setSaved] = useState(initial);
   const [pending, startTransition] = useTransition();
@@ -54,12 +56,15 @@ function ContractInput({
   };
 
   return (
-    <label className="block min-w-0">
+    <label className={`block min-w-0 ${wide ? "lg:col-span-2" : ""}`}>
       <span className="mb-1 block text-[10px] font-medium text-gray-500">
         {label}
       </span>
       <input
         type={type}
+        min={type === "number" ? 0 : undefined}
+        step={type === "number" ? 1 : undefined}
+        inputMode={type === "number" ? "numeric" : undefined}
         value={current}
         placeholder={placeholder}
         disabled={pending}
@@ -159,7 +164,7 @@ export function MobileContractDetails({
                   削除
                 </button>
               </div>
-              <div className="grid grid-cols-1 gap-1.5 sm:grid-cols-3">
+              <div className="grid grid-cols-1 gap-1.5 sm:grid-cols-2 lg:grid-cols-6">
                 <ContractInput
                   companyId={companyId}
                   detailId={detail.id}
@@ -167,6 +172,26 @@ export function MobileContractDetails({
                   label="契約機種名"
                   placeholder="例：iPhone 16 Pro"
                   value={detail.device_model}
+                  wide
+                  onError={setError}
+                />
+                <ContractInput
+                  companyId={companyId}
+                  detailId={detail.id}
+                  field="sale_price"
+                  label="売却価格（円）"
+                  placeholder="例：98000"
+                  value={detail.sale_price}
+                  type="number"
+                  onError={setError}
+                />
+                <ContractInput
+                  companyId={companyId}
+                  detailId={detail.id}
+                  field="sale_destination"
+                  label="売却先"
+                  placeholder="例：買取店名"
+                  value={detail.sale_destination}
                   onError={setError}
                 />
                 <ContractInput
