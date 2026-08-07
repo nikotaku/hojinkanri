@@ -15,6 +15,8 @@ export interface MobileContractDetail {
   company_id: string;
   service: "ドコモ" | "UQ";
   device_model: string | null;
+  sale_price: number | null;
+  sale_destination: string | null;
   contract_person: string | null;
   contracted_on: string | null;
   created_at: string;

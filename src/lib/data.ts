@@ -369,6 +369,8 @@ export async function setCompanyService(
 
 export type MobileContractField =
   | "device_model"
+  | "sale_price"
+  | "sale_destination"
   | "contract_person"
   | "contracted_on";
 
@@ -403,6 +405,8 @@ export async function createMobileContractDetail(
     company_id: companyId,
     service,
     device_model: null,
+    sale_price: null,
+    sale_destination: null,
     contract_person: null,
     contracted_on: null,
     created_at: ts,
@@ -412,7 +416,7 @@ export async function createMobileContractDetail(
   return detail;
 }
 
-/** 契約端末の機種・担当者・契約日のいずれかを更新する */
+/** 契約端末の機種・売却情報・担当者・契約日のいずれかを更新する */
 export async function updateMobileContractDetail(
   companyId: string,
   id: string,
@@ -427,7 +431,22 @@ export async function updateMobileContractDetail(
   ) {
     throw new Error("契約日を正しい形式で入力してください。");
   }
-  const safeValue = trimmed ? trimmed.slice(0, 120) : null;
+  let safeValue: string | number | null;
+  if (field === "sale_price") {
+    if (!trimmed) {
+      safeValue = null;
+    } else if (!/^\d+$/.test(trimmed)) {
+      throw new Error("売却価格は0円以上の整数で入力してください。");
+    } else {
+      const price = Number(trimmed);
+      if (!Number.isSafeInteger(price)) {
+        throw new Error("売却価格が大きすぎます。");
+      }
+      safeValue = price;
+    }
+  } else {
+    safeValue = trimmed ? trimmed.slice(0, 120) : null;
+  }
   const supabase = getSupabase();
   if (supabase) {
     const { data, error } = await supabase
@@ -446,7 +465,11 @@ export async function updateMobileContractDetail(
     (item) => item.id === id && item.company_id === companyId,
   );
   if (!detail) throw new Error("契約端末が見つかりませんでした。");
-  detail[field] = safeValue;
+  if (field === "sale_price") {
+    detail.sale_price = safeValue as number | null;
+  } else {
+    detail[field] = safeValue as string | null;
+  }
   detail.updated_at = nowIso();
 }
 

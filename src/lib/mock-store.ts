@@ -224,6 +224,8 @@ export const seedMobileContracts: MobileContractDetail[] = [
     company_id: "11111111-1111-1111-1111-111111111111",
     service: "UQ",
     device_model: "iPhone 16",
+    sale_price: 98000,
+    sale_destination: "買取店サンプル",
     contract_person: "佐藤",
     contracted_on: "2026-05-15",
     created_at: iso(-17),

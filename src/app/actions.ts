@@ -233,7 +233,7 @@ export async function createMobileContractDetailAction(
   return detail;
 }
 
-/** 契約端末の機種・担当者・契約日を更新する */
+/** 契約端末の機種・売却情報・担当者・契約日を更新する */
 export async function updateMobileContractDetailAction(
   companyId: string,
   id: string,
