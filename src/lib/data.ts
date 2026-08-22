@@ -4,6 +4,7 @@ import {
   type Company,
   type Case,
   type CaseWithCompany,
+  type CaseTask,
   type CompanyStatus,
   type CaseStatus,
   type CasePriority,
@@ -303,7 +304,13 @@ export async function deleteCompany(id: string): Promise<void> {
   const exists = db.companies.some((company) => company.id === id);
   if (!exists) throw new Error("削除対象の法人が見つかりません。");
   db.companies = db.companies.filter((company) => company.id !== id);
+  const removedCaseIds = new Set(
+    db.cases.filter((item) => item.company_id === id).map((item) => item.id),
+  );
   db.cases = db.cases.filter((item) => item.company_id !== id);
+  db.caseTasks = db.caseTasks.filter(
+    (task) => !removedCaseIds.has(task.case_id),
+  );
   db.meishiImages = db.meishiImages.filter((image) => image.company_id !== id);
 }
 
@@ -509,13 +516,19 @@ export async function listCases(): Promise<CaseWithCompany[]> {
   if (supabase) {
     const { data, error } = await supabase
       .from("cases")
-      .select("*, companies(name)")
+      .select("*, companies(name), case_tasks(*)")
       .order("created_at", { ascending: false });
     if (error) throw new Error(error.message);
-    return (data as (Case & { companies: { name: string } | null })[]).map(
-      ({ companies, ...rest }) => ({
+    return (data as (Case & {
+      companies: { name: string } | null;
+      case_tasks: CaseTask[];
+    })[]).map(
+      ({ companies, case_tasks, ...rest }) => ({
         ...rest,
         company_name: companies?.name ?? "—",
+        case_tasks: [...(case_tasks ?? [])].sort(
+          (a, b) => a.sort_order - b.sort_order,
+        ),
       }),
     );
   }
@@ -526,6 +539,9 @@ export async function listCases(): Promise<CaseWithCompany[]> {
     .map((c) => ({
       ...c,
       company_name: (c.company_id && byId.get(c.company_id)) || "—",
+      case_tasks: db.caseTasks
+        .filter((task) => task.case_id === c.id)
+        .sort((a, b) => a.sort_order - b.sort_order),
     }));
 }
 
@@ -573,6 +589,79 @@ export async function createCase(input: CaseInput): Promise<Case> {
   };
   db.cases.push(newCase);
   return newCase;
+}
+
+/** 案件に小タスクをまとめて追加する */
+export async function createCaseTasks(
+  caseId: string,
+  titles: string[],
+): Promise<void> {
+  const cleaned = titles.map((title) => title.trim()).filter(Boolean);
+  if (cleaned.length === 0) return;
+
+  const supabase = getSupabase();
+  if (supabase) {
+    const { data: existing, error: countError } = await supabase
+      .from("case_tasks")
+      .select("sort_order")
+      .eq("case_id", caseId)
+      .order("sort_order", { ascending: false })
+      .limit(1);
+    if (countError) throw new Error(countError.message);
+    const start = (existing?.[0]?.sort_order ?? -1) + 1;
+    const { error } = await supabase.from("case_tasks").insert(
+      cleaned.map((title, index) => ({
+        case_id: caseId,
+        title,
+        sort_order: start + index,
+      })),
+    );
+    if (error) throw new Error(error.message);
+    return;
+  }
+
+  const db = getMockDb();
+  const currentOrders = db.caseTasks
+    .filter((task) => task.case_id === caseId)
+    .map((task) => task.sort_order);
+  const start = (currentOrders.length ? Math.max(...currentOrders) : -1) + 1;
+  const ts = nowIso();
+  cleaned.forEach((title, index) => {
+    db.caseTasks.push({
+      id: crypto.randomUUID(),
+      case_id: caseId,
+      title,
+      is_completed: false,
+      sort_order: start + index,
+      created_at: ts,
+      updated_at: ts,
+    });
+  });
+}
+
+/** 小タスクの完了状態を更新する */
+export async function setCaseTaskCompleted(
+  caseId: string,
+  taskId: string,
+  isCompleted: boolean,
+): Promise<void> {
+  const supabase = getSupabase();
+  if (supabase) {
+    const { error } = await supabase
+      .from("case_tasks")
+      .update({ is_completed: isCompleted })
+      .eq("id", taskId)
+      .eq("case_id", caseId);
+    if (error) throw new Error(error.message);
+    return;
+  }
+
+  const task = getMockDb().caseTasks.find(
+    (item) => item.id === taskId && item.case_id === caseId,
+  );
+  if (!task) throw new Error("小タスクが見つかりませんでした。");
+  task.is_completed = isCompleted;
+  task.updated_at = nowIso();
 }
 
 // --- crow 案件管理 ---

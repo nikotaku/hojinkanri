@@ -8,6 +8,7 @@ import type {
   CrowContract,
   CrowStore,
   MobileContractDetail,
+  CaseTask,
 } from "./types";
 
 // Supabase 未設定時に使うインメモリのサンプルデータ。
@@ -237,6 +238,7 @@ export const seedMobileContracts: MobileContractDetail[] = [
 interface MockDb {
   companies: Company[];
   cases: Case[];
+  caseTasks: CaseTask[];
   backlog: BacklogEntry[];
   contacts: Contact[];
   mobileContracts: MobileContractDetail[];
@@ -255,6 +257,7 @@ export function getMockDb(): MockDb {
     globalForMock.__mockDb = {
       companies: seedCompanies.map((c) => ({ ...c })),
       cases: seedCases.map((c) => ({ ...c })),
+      caseTasks: [],
       backlog: seedBacklog.map((b) => ({ ...b })),
       contacts: seedContacts.map((c) => ({ ...c })),
       mobileContracts: seedMobileContracts.map((detail) => ({ ...detail })),

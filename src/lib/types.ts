@@ -260,9 +260,21 @@ export interface Case {
   updated_at: string;
 }
 
+/** 案件に紐づく小タスク */
+export interface CaseTask {
+  id: string;
+  case_id: string;
+  title: string;
+  is_completed: boolean;
+  sort_order: number;
+  created_at: string;
+  updated_at: string;
+}
+
 /** 法人名を結合した案件(一覧表示用) */
 export interface CaseWithCompany extends Case {
   company_name: string;
+  case_tasks: CaseTask[];
 }
 
 // --- 表示用ラベル ---

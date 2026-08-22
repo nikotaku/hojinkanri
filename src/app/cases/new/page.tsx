@@ -75,6 +75,17 @@ export default async function NewCasePage({
             <TextArea name="description" rows={3} placeholder="案件の内容や状況" />
           </Field>
 
+          <Field label="小タスク">
+            <TextArea
+              name="subtasks"
+              rows={5}
+              placeholder={"必要書類を確認\n申請フォームを入力\n担当者へ完了連絡"}
+            />
+            <span className="mt-1 block text-xs text-gray-500">
+              1行につき1つの小タスクとして登録されます。
+            </span>
+          </Field>
+
           <div className="flex items-center gap-3 pt-2">
             <SubmitButton>登録する</SubmitButton>
             <Link

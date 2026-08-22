@@ -3,6 +3,7 @@ import { listCases } from "@/lib/data";
 import { formatCurrency, formatDate } from "@/lib/format";
 import { PageHeader } from "@/components/PageHeader";
 import { CaseStatusBadge, PriorityBadge } from "@/components/StatusBadge";
+import { CaseTasks } from "@/components/CaseTasks";
 
 export const dynamic = "force-dynamic";
 
@@ -50,6 +51,7 @@ export default async function CasesPage() {
                   <span>金額: {formatCurrency(c.amount)}</span>
                   <span>期限: {formatDate(c.due_date)}</span>
                 </div>
+                <CaseTasks caseId={c.id} tasks={c.case_tasks} />
               </li>
             ))}
           </ul>
@@ -84,9 +86,10 @@ export default async function CasesPage() {
               </thead>
               <tbody className="divide-y divide-gray-100">
                 {cases.map((c) => (
-                  <tr key={c.id} className="hover:bg-gray-50">
-                    <td className="px-6 py-4 font-medium text-gray-900">
+                  <tr key={c.id} className="align-top hover:bg-gray-50">
+                    <td className="min-w-72 px-6 py-4 font-medium text-gray-900">
                       {c.title}
+                      <CaseTasks caseId={c.id} tasks={c.case_tasks} />
                     </td>
                     <td className="whitespace-nowrap px-6 py-4 text-sm">
                       {c.company_id ? (
