@@ -92,7 +92,12 @@ export default async function CompanyDetailPage({
               {cases.map((c) => (
                 <li key={c.id} className="py-3">
                   <div className="flex items-center justify-between gap-3">
-                    <p className="font-medium text-gray-900">{c.title}</p>
+                    <Link
+                      href={`/cases/${c.id}`}
+                      className="font-medium text-gray-900 hover:text-brand-600"
+                    >
+                      {c.title}
+                    </Link>
                     <CaseStatusBadge status={c.status} />
                   </div>
                   <div className="mt-1 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-gray-500">

@@ -102,7 +102,7 @@ export default async function DashboardPage() {
                 <li key={c.id} className="flex items-center justify-between py-3">
                   <div className="min-w-0">
                     <Link
-                      href={`/companies/${c.company_id}`}
+                      href={`/cases/${c.id}`}
                       className="block truncate text-sm font-medium text-gray-900 hover:text-brand-600"
                     >
                       {c.title}

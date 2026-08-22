@@ -1,4 +1,4 @@
-import type { Company, Case } from "./types";
+import type { Case, CaseBacklog, CaseTask, Company } from "./types";
 
 // Supabase 未設定時に使うインメモリのサンプルデータ。
 // 開発サーバー起動中はプロセス内に保持され、追加した法人・案件も反映される
@@ -154,10 +154,52 @@ export const seedCases: Case[] = [
   },
 ];
 
+export const seedCaseTasks: CaseTask[] = [
+  {
+    id: "bbbbbbb1-0000-0000-0000-000000000001",
+    case_id: "aaaaaaa1-0000-0000-0000-000000000001",
+    title: "先方の要望と契約条件を確認する",
+    is_completed: true,
+    due_date: ymd(5),
+    created_at: iso(-12),
+    updated_at: iso(-8),
+  },
+  {
+    id: "bbbbbbb1-0000-0000-0000-000000000002",
+    case_id: "aaaaaaa1-0000-0000-0000-000000000001",
+    title: "見積書のドラフトを作成する",
+    is_completed: false,
+    due_date: ymd(12),
+    created_at: iso(-7),
+    updated_at: iso(-7),
+  },
+  {
+    id: "bbbbbbb1-0000-0000-0000-000000000003",
+    case_id: "aaaaaaa1-0000-0000-0000-000000000002",
+    title: "現行業務のヒアリング日程を調整する",
+    is_completed: false,
+    due_date: ymd(7),
+    created_at: iso(-3),
+    updated_at: iso(-3),
+  },
+];
+
+export const seedCaseBacklogs: CaseBacklog[] = [
+  {
+    id: "ccccccc1-0000-0000-0000-000000000001",
+    case_id: "aaaaaaa1-0000-0000-0000-000000000001",
+    title: "更新対象のライセンス数を再確認する",
+    content: "経理部門の増員予定があるため、現契約数から増える可能性あり。",
+    created_at: iso(-4),
+  },
+];
+
 // プロセス内で保持する可変ストア(モックモード専用)
 interface MockDb {
   companies: Company[];
   cases: Case[];
+  caseTasks: CaseTask[];
+  caseBacklogs: CaseBacklog[];
 }
 
 const globalForMock = globalThis as unknown as { __mockDb?: MockDb };
@@ -167,6 +209,8 @@ export function getMockDb(): MockDb {
     globalForMock.__mockDb = {
       companies: seedCompanies.map((c) => ({ ...c })),
       cases: seedCases.map((c) => ({ ...c })),
+      caseTasks: seedCaseTasks.map((task) => ({ ...task })),
+      caseBacklogs: seedCaseBacklogs.map((backlog) => ({ ...backlog })),
     };
   }
   return globalForMock.__mockDb;

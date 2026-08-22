@@ -2,18 +2,28 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { createCompany, createCase } from "@/lib/data";
+import {
+  createCase,
+  createCaseBacklog,
+  createCaseTask,
+  createCompany,
+  setCaseTaskCompleted,
+} from "@/lib/data";
 import type {
-  CompanyStatus,
-  CaseStatus,
   CasePriority,
+  CaseStatus,
+  CompanyStatus,
 } from "@/lib/types";
 
 function str(form: FormData, key: string): string | null {
-  const v = form.get(key);
-  if (typeof v !== "string") return null;
-  const trimmed = v.trim();
+  const value = form.get(key);
+  if (typeof value !== "string") return null;
+  const trimmed = value.trim();
   return trimmed === "" ? null : trimmed;
+}
+
+function casePath(caseId: string): string {
+  return `/cases/${caseId}`;
 }
 
 export async function createCompanyAction(formData: FormData) {
@@ -46,7 +56,7 @@ export async function createCaseAction(formData: FormData) {
   const amountRaw = str(formData, "amount");
   const amount = amountRaw ? Number(amountRaw.replace(/[,，]/g, "")) : null;
 
-  await createCase({
+  const caseItem = await createCase({
     company_id: companyId,
     title,
     description: str(formData, "description"),
@@ -59,5 +69,49 @@ export async function createCaseAction(formData: FormData) {
 
   revalidatePath("/cases");
   revalidatePath("/");
-  redirect("/cases");
+  revalidatePath(`/companies/${companyId}`);
+  redirect(casePath(caseItem.id));
+}
+
+export async function createCaseTaskAction(formData: FormData) {
+  const caseId = str(formData, "case_id");
+  const title = str(formData, "title");
+  if (!caseId) throw new Error("案件を特定できませんでした。");
+  if (!title) throw new Error("小タスク名は必須です。");
+
+  await createCaseTask({
+    case_id: caseId,
+    title,
+    due_date: str(formData, "due_date"),
+  });
+
+  revalidatePath(casePath(caseId));
+  revalidatePath("/cases");
+}
+
+export async function toggleCaseTaskAction(formData: FormData) {
+  const caseId = str(formData, "case_id");
+  const taskId = str(formData, "task_id");
+  const isCompleted = str(formData, "is_completed") === "true";
+  if (!caseId || !taskId) throw new Error("小タスクを特定できませんでした。");
+
+  await setCaseTaskCompleted(taskId, isCompleted);
+
+  revalidatePath(casePath(caseId));
+  revalidatePath("/cases");
+}
+
+export async function createCaseBacklogAction(formData: FormData) {
+  const caseId = str(formData, "case_id");
+  const title = str(formData, "title");
+  if (!caseId) throw new Error("案件を特定できませんでした。");
+  if (!title) throw new Error("バックログの件名は必須です。");
+
+  await createCaseBacklog({
+    case_id: caseId,
+    title,
+    content: str(formData, "content"),
+  });
+
+  revalidatePath(casePath(caseId));
 }

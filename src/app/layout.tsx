@@ -20,7 +20,7 @@ export default function RootLayout({
           <Sidebar />
           <div className="flex min-w-0 flex-1 flex-col">
             <DemoBanner />
-            <main className="flex-1 p-8">
+            <main className="flex-1 px-4 pb-6 pt-20 sm:px-6 sm:pb-8 md:p-8">
               <div className="mx-auto max-w-6xl">{children}</div>
             </main>
           </div>

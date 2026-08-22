@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { listCases } from "@/lib/data";
+import { getTaskProgressByCase, listCases } from "@/lib/data";
 import { formatCurrency, formatDate } from "@/lib/format";
 import { PageHeader } from "@/components/PageHeader";
 import { CaseStatusBadge, PriorityBadge } from "@/components/StatusBadge";
@@ -7,7 +7,10 @@ import { CaseStatusBadge, PriorityBadge } from "@/components/StatusBadge";
 export const dynamic = "force-dynamic";
 
 export default async function CasesPage() {
-  const cases = await listCases();
+  const [cases, taskProgressByCase] = await Promise.all([
+    listCases(),
+    getTaskProgressByCase(),
+  ]);
 
   return (
     <div>
@@ -22,66 +25,69 @@ export default async function CasesPage() {
           まだ案件が登録されていません。
         </div>
       ) : (
-        <div className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">
-                  案件名
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">
-                  法人
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">
-                  ステータス
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">
-                  優先度
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">
-                  担当
-                </th>
-                <th className="px-6 py-3 text-right text-xs font-semibold uppercase tracking-wider text-gray-500">
-                  金額
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">
-                  期限
-                </th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-100">
-              {cases.map((c) => (
-                <tr key={c.id} className="hover:bg-gray-50">
-                  <td className="px-6 py-4 font-medium text-gray-900">
-                    {c.title}
-                  </td>
-                  <td className="px-6 py-4 text-sm">
-                    <Link
-                      href={`/companies/${c.company_id}`}
-                      className="text-gray-600 hover:text-brand-600"
-                    >
-                      {c.company_name}
-                    </Link>
-                  </td>
-                  <td className="px-6 py-4">
-                    <CaseStatusBadge status={c.status} />
-                  </td>
-                  <td className="px-6 py-4">
-                    <PriorityBadge priority={c.priority} />
-                  </td>
-                  <td className="px-6 py-4 text-sm text-gray-600">
-                    {c.assignee ?? "—"}
-                  </td>
-                  <td className="px-6 py-4 text-right text-sm text-gray-900">
-                    {formatCurrency(c.amount)}
-                  </td>
-                  <td className="px-6 py-4 text-sm text-gray-500">
-                    {formatDate(c.due_date)}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+          {cases.map((caseItem) => {
+            const taskProgress = taskProgressByCase.get(caseItem.id) ?? {
+              task_count: 0,
+              completed_task_count: 0,
+            };
+
+            return (
+              <Link
+                key={caseItem.id}
+                href={`/cases/${caseItem.id}`}
+                aria-label={`案件「${caseItem.title}」の詳細を開く`}
+                className="group block rounded-2xl border border-gray-200 bg-white p-5 shadow-sm transition duration-150 hover:-translate-y-0.5 hover:border-brand-200 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-2 sm:p-6"
+              >
+                <div className="flex items-start justify-between gap-4">
+                  <div className="min-w-0">
+                    <p className="text-sm font-medium text-gray-500">{caseItem.company_name}</p>
+                    <h2 className="mt-1 text-lg font-bold text-gray-900 transition group-hover:text-brand-700">
+                      {caseItem.title}
+                    </h2>
+                  </div>
+                  <CaseStatusBadge status={caseItem.status} />
+                </div>
+
+                {caseItem.description && (
+                  <p className="mt-3 min-h-10 text-sm leading-5 text-gray-500">
+                    {caseItem.description}
+                  </p>
+                )}
+
+                <div className="mt-5 flex flex-wrap items-center gap-x-4 gap-y-2 border-y border-gray-100 py-4 text-sm text-gray-600">
+                  <PriorityBadge priority={caseItem.priority} />
+                  <span>担当: {caseItem.assignee ?? "未設定"}</span>
+                  <span>金額: {formatCurrency(caseItem.amount)}</span>
+                  <span>期限: {formatDate(caseItem.due_date)}</span>
+                </div>
+
+                <div className="mt-4 flex items-center justify-between gap-3">
+                  <div>
+                    <p className="text-sm font-semibold text-gray-800">
+                      小タスク {taskProgress.completed_task_count}/{taskProgress.task_count}
+                    </p>
+                    <div className="mt-2 h-1.5 w-36 overflow-hidden rounded-full bg-gray-100">
+                      <div
+                        className="h-full rounded-full bg-brand-500"
+                        style={{
+                          width: `${
+                            taskProgress.task_count === 0
+                              ? 0
+                              : (taskProgress.completed_task_count / taskProgress.task_count) * 100
+                          }%`,
+                        }}
+                      />
+                    </div>
+                  </div>
+                  <span className="inline-flex items-center gap-1 text-sm font-semibold text-brand-600">
+                    詳細を開く
+                    <span aria-hidden className="text-lg leading-none transition group-hover:translate-x-0.5">›</span>
+                  </span>
+                </div>
+              </Link>
+            );
+          })}
         </div>
       )}
     </div>

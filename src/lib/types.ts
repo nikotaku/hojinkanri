@@ -45,6 +45,32 @@ export interface CaseWithCompany extends Case {
   company_name: string;
 }
 
+/** 一覧に表示する小タスクの進捗集計 */
+export interface CaseTaskProgress {
+  completed_task_count: number;
+  task_count: number;
+}
+
+/** 案件に紐づく小タスク */
+export interface CaseTask {
+  id: string;
+  case_id: string;
+  title: string;
+  is_completed: boolean;
+  due_date: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+/** 案件詳細に残すバックログメモ */
+export interface CaseBacklog {
+  id: string;
+  case_id: string;
+  title: string;
+  content: string | null;
+  created_at: string;
+}
+
 // --- 表示用ラベル ---
 
 export const COMPANY_STATUS_LABELS: Record<CompanyStatus, string> = {
