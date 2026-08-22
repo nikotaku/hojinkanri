@@ -6,6 +6,8 @@ import {
   createCompany,
   deleteCompany,
   createCase,
+  createCaseTasks,
+  setCaseTaskCompleted,
   setCompanyService,
   setCompanyHp,
   saveToukiImage,
@@ -314,7 +316,7 @@ export async function createCaseAction(formData: FormData) {
   const amountRaw = str(formData, "amount");
   const amount = amountRaw ? Number(amountRaw.replace(/[,，]/g, "")) : null;
 
-  await createCase({
+  const newCase = await createCase({
     company_id: companyId,
     title,
     description: str(formData, "description"),
@@ -325,7 +327,35 @@ export async function createCaseAction(formData: FormData) {
     due_date: str(formData, "due_date"),
   });
 
+  const subtasks = (str(formData, "subtasks") ?? "")
+    .split(/\r?\n/)
+    .map((task) => task.trim())
+    .filter(Boolean);
+  await createCaseTasks(newCase.id, subtasks);
+
   revalidatePath("/cases");
   revalidatePath("/");
   redirect("/cases");
+}
+
+/** 既存案件に小タスクを追加する */
+export async function createCaseTaskAction(formData: FormData) {
+  const caseId = str(formData, "case_id");
+  const title = str(formData, "title");
+  if (!caseId || !title) return;
+  await createCaseTasks(caseId, [title]);
+  revalidatePath("/cases");
+}
+
+/** 小タスクの完了・未完了を切り替える */
+export async function toggleCaseTaskAction(formData: FormData) {
+  const caseId = str(formData, "case_id");
+  const taskId = str(formData, "task_id");
+  if (!caseId || !taskId) return;
+  await setCaseTaskCompleted(
+    caseId,
+    taskId,
+    str(formData, "is_completed") === "true",
+  );
+  revalidatePath("/cases");
 }
