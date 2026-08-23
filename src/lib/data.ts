@@ -333,7 +333,14 @@ export type ServiceField =
   | "mobile_name"
   | "mobile_admin_url"
   | "mobile_login_id"
-  | "mobile_login_pw";
+  | "mobile_login_pw"
+  | "billing"
+  | "billing_phone"
+  | "billing_email"
+  | "billing_name"
+  | "billing_admin_url"
+  | "billing_login_id"
+  | "billing_login_pw";
 
 export async function setCompanyService(
   id: string,

@@ -6,7 +6,7 @@ import type { ServiceField } from "@/lib/data";
 
 function statusClass(value: string): string {
   if (!value) return "bg-gray-50 text-gray-400 border-gray-200";
-  if (/(使用|完了|開設|通過|登録完了)/.test(value)) {
+  if (/(使用|利用|完了|開設|通過|登録完了)/.test(value)) {
     return "bg-green-50 text-green-700 border-green-200";
   }
   if (/(落ち|不可|中止|解約)/.test(value)) {

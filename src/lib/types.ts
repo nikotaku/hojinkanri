@@ -77,6 +77,20 @@ export interface Company {
   mobile_login_pw?: Record<string, string> | null;
   /** 法人モバイル回線で契約した端末（モバイル回線ページで取得） */
   mobile_contract_details?: MobileContractDetail[];
+  /** 掛け払いサービスの申請・利用状況 (サービス名 -> ステータス) */
+  billing?: Record<string, string> | null;
+  /** 掛け払いサービスの登録電話番号 (サービス名 -> 電話番号) */
+  billing_phone?: Record<string, string> | null;
+  /** 掛け払いサービスの登録メールアドレス (サービス名 -> メール) */
+  billing_email?: Record<string, string> | null;
+  /** 掛け払いサービスの登録名 (サービス名 -> 登録名) */
+  billing_name?: Record<string, string> | null;
+  /** 掛け払いサービスの管理画面URL (サービス名 -> URL) */
+  billing_admin_url?: Record<string, string> | null;
+  /** 掛け払いサービスのログインID (サービス名 -> ID) */
+  billing_login_id?: Record<string, string> | null;
+  /** 掛け払いサービスのログインPW (サービス名 -> PW) */
+  billing_login_pw?: Record<string, string> | null;
   /** 口座関連サービスの状況 (サービス名 -> ステータス) */
   accounts?: Record<string, string> | null;
   created_at: string;
@@ -96,6 +110,22 @@ export const ACCOUNT_SERVICES = [
 
 /** 法人モバイル回線で表示するサービス列 */
 export const MOBILE_SERVICES = ["ドコモ", "UQ"] as const;
+
+/** 掛け払いで表示するサービス列 */
+export const BILLING_SERVICES = ["NPかけ払い", "Paid"] as const;
+
+/** 掛け払いの申請・利用ステータス */
+export const BILLING_STATUS_OPTIONS = [
+  "未着手",
+  "書類準備中",
+  "申請済み",
+  "審査中",
+  "追加書類待ち",
+  "審査通過",
+  "利用開始",
+  "保留",
+  "審査落ち",
+] as const;
 
 /** 法人モバイル回線ステータスの選択肢 */
 export const MOBILE_STATUS_OPTIONS = [
