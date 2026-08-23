@@ -181,6 +181,8 @@ export async function reorderCompaniesAction(ids: string[]) {
   if (!Array.isArray(ids) || ids.length === 0) return;
   await reorderCompanies(ids);
   revalidatePath("/taxi");
+  revalidatePath("/mobile");
+  revalidatePath("/billing");
   revalidatePath("/accounts");
   revalidatePath("/companies");
 }
@@ -210,7 +212,7 @@ export async function deleteBacklogAction(formData: FormData) {
 }
 
 /**
- * タクシー / 口座 の 1 サービスの項目（ステータス・登録電話番号・登録メール）を
+ * タクシー / モバイル回線 / 掛け払い / 口座の各項目を
  * 更新する（インライン編集用）。
  */
 export async function setServiceStatusAction(
@@ -221,6 +223,8 @@ export async function setServiceStatusAction(
 ) {
   await setCompanyService(companyId, field, service, value);
   revalidatePath("/taxi");
+  revalidatePath("/mobile");
+  revalidatePath("/billing");
   revalidatePath("/accounts");
   revalidatePath(`/companies/${companyId}`);
 }
@@ -303,6 +307,7 @@ export async function deleteCompanyAction(formData: FormData) {
   revalidatePath("/cases");
   revalidatePath("/taxi");
   revalidatePath("/mobile");
+  revalidatePath("/billing");
   revalidatePath("/accounts");
   revalidatePath("/meishi");
   revalidatePath("/meishi-images");

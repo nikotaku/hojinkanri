@@ -29,12 +29,21 @@ const FIELD_SETS = {
     loginId: "mobile_login_id",
     loginPw: "mobile_login_pw",
   },
+  billing: {
+    status: "billing",
+    phone: "billing_phone",
+    email: "billing_email",
+    name: "billing_name",
+    adminUrl: "billing_admin_url",
+    loginId: "billing_login_id",
+    loginPw: "billing_login_pw",
+  },
 } as const;
 
 type Prefix = keyof typeof FIELD_SETS;
 
 function statusClass(value: string): string {
-  if (/(使用|完了|開設|通過|登録完了|契約)/.test(value)) {
+  if (/(使用|利用|完了|開設|通過|登録完了|契約)/.test(value)) {
     return "bg-green-100 text-green-700";
   }
   if (/(落ち|不可|中止|解約)/.test(value)) return "bg-red-100 text-red-700";
@@ -56,7 +65,7 @@ function StatusPill({ value }: { value?: string }) {
 }
 
 /**
- * 会社ごとにサービス群（タクシー / モバイル回線）を折りたたみで表示するボード。
+ * 会社ごとにサービス群（タクシー / モバイル回線 / 掛け払い）を折りたたみで表示するボード。
  * - 各サービスはトグルで開閉（要約に現在ステータス）
  * - モバイル回線では契約端末ごとに機種・担当者・契約日を記録
  * - 開くと ステータス / アプリ登録電話番号 / メール / 登録名 / 管理画面URL / ログインID / PW
@@ -166,7 +175,11 @@ export function ServiceBoard({
                       field={fields.phone}
                       service={s}
                       value={phoneMap[s]}
-                      placeholder="アプリ登録電話番号"
+                      placeholder={
+                        prefix === "billing"
+                          ? "登録電話番号"
+                          : "アプリ登録電話番号"
+                      }
                       type="tel"
                     />
                     <ServiceContactInput
@@ -174,7 +187,11 @@ export function ServiceBoard({
                       field={fields.email}
                       service={s}
                       value={emailMap[s]}
-                      placeholder="アプリ登録メールアドレス"
+                      placeholder={
+                        prefix === "billing"
+                          ? "登録メールアドレス"
+                          : "アプリ登録メールアドレス"
+                      }
                       type="email"
                     />
                     <ServiceContactInput
@@ -182,7 +199,9 @@ export function ServiceBoard({
                       field={fields.name}
                       service={s}
                       value={nameMap[s]}
-                      placeholder="アプリ登録名"
+                      placeholder={
+                        prefix === "billing" ? "登録名" : "アプリ登録名"
+                      }
                     />
                     <div className="flex items-center gap-1.5">
                       <ServiceContactInput
