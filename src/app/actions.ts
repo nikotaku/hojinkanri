@@ -28,6 +28,9 @@ import {
   createMobileContractDetail,
   updateMobileContractDetail,
   deleteMobileContractDetail,
+  createBillingUsageDetail,
+  updateBillingUsageDetail,
+  deleteBillingUsageDetail,
   type ServiceField,
   type MobileContractField,
 } from "@/lib/data";
@@ -36,6 +39,7 @@ import type {
   CaseStatus,
   CasePriority,
   MobileContractDetail,
+  BillingUsageDetail,
 } from "@/lib/types";
 
 // --- crow 案件管理 ---
@@ -257,6 +261,40 @@ export async function deleteMobileContractDetailAction(
 ) {
   await deleteMobileContractDetail(companyId, id);
   revalidatePath("/mobile");
+}
+
+/** 掛け払いサービスの利用先・用途を追加する */
+export async function createBillingUsageDetailAction(
+  companyId: string,
+  service: string,
+  usageName: string,
+): Promise<BillingUsageDetail> {
+  const detail = await createBillingUsageDetail(
+    companyId,
+    service,
+    usageName,
+  );
+  revalidatePath("/billing");
+  return detail;
+}
+
+/** 掛け払いサービスの利用先・用途を更新する */
+export async function updateBillingUsageDetailAction(
+  companyId: string,
+  id: string,
+  usageName: string,
+) {
+  await updateBillingUsageDetail(companyId, id, usageName);
+  revalidatePath("/billing");
+}
+
+/** 掛け払いサービスの利用先・用途を削除する */
+export async function deleteBillingUsageDetailAction(
+  companyId: string,
+  id: string,
+) {
+  await deleteBillingUsageDetail(companyId, id);
+  revalidatePath("/billing");
 }
 
 function str(form: FormData, key: string): string | null {

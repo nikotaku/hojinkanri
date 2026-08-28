@@ -23,6 +23,16 @@ export interface MobileContractDetail {
   updated_at: string;
 }
 
+/** 掛け払いサービスを利用している支払先・用途 */
+export interface BillingUsageDetail {
+  id: string;
+  company_id: string;
+  service: "NPかけ払い" | "Paid";
+  usage_name: string;
+  created_at: string;
+  updated_at: string;
+}
+
 /** 法人(顧客) */
 export interface Company {
   id: string;
@@ -91,6 +101,10 @@ export interface Company {
   billing_login_id?: Record<string, string> | null;
   /** 掛け払いサービスのログインPW (サービス名 -> PW) */
   billing_login_pw?: Record<string, string> | null;
+  /** 掛け払いサービスを利用できない理由 (サービス名 -> 理由) */
+  billing_unavailable_reason?: Record<string, string> | null;
+  /** 掛け払いサービスの利用先・用途（掛け払いページで取得） */
+  billing_usage_details?: BillingUsageDetail[];
   /** 口座関連サービスの状況 (サービス名 -> ステータス) */
   accounts?: Record<string, string> | null;
   created_at: string;
@@ -125,6 +139,7 @@ export const BILLING_STATUS_OPTIONS = [
   "利用開始",
   "保留",
   "審査落ち",
+  "利用不可",
 ] as const;
 
 /** 法人モバイル回線ステータスの選択肢 */

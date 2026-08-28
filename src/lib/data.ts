@@ -16,7 +16,9 @@ import {
   type MeishiImage,
   type MeishiImageWithCompany,
   type MobileContractDetail,
+  type BillingUsageDetail,
   MOBILE_SERVICES,
+  BILLING_SERVICES,
   OPEN_CASE_STATUSES,
 } from "./types";
 
@@ -101,6 +103,33 @@ export async function listCompaniesWithMobileContracts(): Promise<Company[]> {
   return [...db.companies].sort(compareCompanies).map((company) => ({
     ...company,
     mobile_contract_details: db.mobileContracts
+      .filter((detail) => detail.company_id === company.id)
+      .sort((a, b) => a.created_at.localeCompare(b.created_at)),
+  }));
+}
+
+/** 掛け払いページ用に、各法人の利用先・用途もまとめて取得する */
+export async function listCompaniesWithBillingUsage(): Promise<Company[]> {
+  const supabase = getSupabase();
+  if (supabase) {
+    const { data, error } = await supabase
+      .from("companies")
+      .select("*, billing_usage_details(*)")
+      .order("sort_order", { ascending: true, nullsFirst: false })
+      .order("created_at", { ascending: false });
+    if (error) throw new Error(error.message);
+    return (data as Company[]).map((company) => ({
+      ...company,
+      billing_usage_details: [
+        ...(company.billing_usage_details ?? []),
+      ].sort((a, b) => a.created_at.localeCompare(b.created_at)),
+    }));
+  }
+
+  const db = getMockDb();
+  return [...db.companies].sort(compareCompanies).map((company) => ({
+    ...company,
+    billing_usage_details: db.billingUsageDetails
       .filter((detail) => detail.company_id === company.id)
       .sort((a, b) => a.created_at.localeCompare(b.created_at)),
   }));
@@ -340,7 +369,8 @@ export type ServiceField =
   | "billing_name"
   | "billing_admin_url"
   | "billing_login_id"
-  | "billing_login_pw";
+  | "billing_login_pw"
+  | "billing_unavailable_reason";
 
 export async function setCompanyService(
   id: string,
@@ -377,6 +407,115 @@ export async function setCompanyService(
   if (value) map[service] = value;
   else delete map[service];
   company[field] = map;
+}
+
+// --- 掛け払いサービスの利用先・用途 ---
+
+function assertBillingService(
+  service: string,
+): asserts service is BillingUsageDetail["service"] {
+  if (!BILLING_SERVICES.includes(service as BillingUsageDetail["service"])) {
+    throw new Error("対象の掛け払いサービスを確認できませんでした。");
+  }
+}
+
+function normalizeBillingUsageName(value: string): string {
+  const name = value.trim();
+  if (!name) throw new Error("利用先・用途を入力してください。");
+  if (name.length > 200) {
+    throw new Error("利用先・用途は200文字以内で入力してください。");
+  }
+  return name;
+}
+
+/** 利用先・用途を1件追加する */
+export async function createBillingUsageDetail(
+  companyId: string,
+  service: string,
+  usageName: string,
+): Promise<BillingUsageDetail> {
+  assertBillingService(service);
+  const name = normalizeBillingUsageName(usageName);
+  const supabase = getSupabase();
+  if (supabase) {
+    const { data, error } = await supabase
+      .from("billing_usage_details")
+      .insert({ company_id: companyId, service, usage_name: name })
+      .select("*")
+      .single();
+    if (error) throw new Error(error.message);
+    return data as BillingUsageDetail;
+  }
+
+  const ts = nowIso();
+  const detail: BillingUsageDetail = {
+    id: crypto.randomUUID(),
+    company_id: companyId,
+    service,
+    usage_name: name,
+    created_at: ts,
+    updated_at: ts,
+  };
+  getMockDb().billingUsageDetails.push(detail);
+  return detail;
+}
+
+/** 利用先・用途を更新する */
+export async function updateBillingUsageDetail(
+  companyId: string,
+  id: string,
+  usageName: string,
+): Promise<void> {
+  const name = normalizeBillingUsageName(usageName);
+  const supabase = getSupabase();
+  if (supabase) {
+    const { data, error } = await supabase
+      .from("billing_usage_details")
+      .update({ usage_name: name })
+      .eq("id", id)
+      .eq("company_id", companyId)
+      .select("id")
+      .maybeSingle();
+    if (error) throw new Error(error.message);
+    if (!data) throw new Error("利用先・用途が見つかりませんでした。");
+    return;
+  }
+
+  const detail = getMockDb().billingUsageDetails.find(
+    (item) => item.id === id && item.company_id === companyId,
+  );
+  if (!detail) throw new Error("利用先・用途が見つかりませんでした。");
+  detail.usage_name = name;
+  detail.updated_at = nowIso();
+}
+
+/** 利用先・用途を1件削除する */
+export async function deleteBillingUsageDetail(
+  companyId: string,
+  id: string,
+): Promise<void> {
+  const supabase = getSupabase();
+  if (supabase) {
+    const { data, error } = await supabase
+      .from("billing_usage_details")
+      .delete()
+      .eq("id", id)
+      .eq("company_id", companyId)
+      .select("id")
+      .maybeSingle();
+    if (error) throw new Error(error.message);
+    if (!data) throw new Error("利用先・用途が見つかりませんでした。");
+    return;
+  }
+
+  const db = getMockDb();
+  const before = db.billingUsageDetails.length;
+  db.billingUsageDetails = db.billingUsageDetails.filter(
+    (item) => !(item.id === id && item.company_id === companyId),
+  );
+  if (db.billingUsageDetails.length === before) {
+    throw new Error("利用先・用途が見つかりませんでした。");
+  }
 }
 
 // --- 法人モバイル回線の契約端末 ---

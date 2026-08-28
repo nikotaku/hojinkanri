@@ -8,6 +8,7 @@ import type {
   CrowContract,
   CrowStore,
   MobileContractDetail,
+  BillingUsageDetail,
   CaseTask,
 } from "./types";
 
@@ -242,6 +243,7 @@ interface MockDb {
   backlog: BacklogEntry[];
   contacts: Contact[];
   mobileContracts: MobileContractDetail[];
+  billingUsageDetails: BillingUsageDetail[];
   meishiImages: MeishiImage[];
   crow: {
     partners: CrowPartner[];
@@ -261,6 +263,7 @@ export function getMockDb(): MockDb {
       backlog: seedBacklog.map((b) => ({ ...b })),
       contacts: seedContacts.map((c) => ({ ...c })),
       mobileContracts: seedMobileContracts.map((detail) => ({ ...detail })),
+      billingUsageDetails: [],
       meishiImages: [],
       crow: {
         partners: [
