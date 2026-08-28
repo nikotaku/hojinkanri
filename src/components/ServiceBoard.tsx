@@ -7,6 +7,8 @@ import type { Company } from "@/lib/types";
 import { ServiceStatusSelect } from "@/components/ServiceStatusSelect";
 import { ServiceContactInput } from "@/components/ServiceContactInput";
 import { MobileContractDetails } from "@/components/MobileContractDetails";
+import { BillingStatusFields } from "@/components/BillingStatusFields";
+import { BillingUsageDetails } from "@/components/BillingUsageDetails";
 import { reorderCompaniesAction } from "@/app/actions";
 
 // サービス群ごとの保存先フィールド定義
@@ -114,6 +116,10 @@ export function ServiceBoard({
         const adminUrlMap = (c[fields.adminUrl] ?? {}) as Record<string, string>;
         const loginIdMap = (c[fields.loginId] ?? {}) as Record<string, string>;
         const loginPwMap = (c[fields.loginPw] ?? {}) as Record<string, string>;
+        const unavailableReasonMap =
+          prefix === "billing"
+            ? ((c.billing_unavailable_reason ?? {}) as Record<string, string>)
+            : {};
         return (
           <li
             key={c.id}
@@ -154,13 +160,32 @@ export function ServiceBoard({
                     <StatusPill value={statusMap[s]} />
                   </summary>
                   <div className="space-y-1.5 px-2.5 pb-2.5 pt-1">
-                    <ServiceStatusSelect
-                      companyId={c.id}
-                      field={fields.status}
-                      service={s}
-                      value={statusMap[s]}
-                      options={statusOptions}
-                    />
+                    {prefix === "billing" ? (
+                      <BillingStatusFields
+                        companyId={c.id}
+                        service={s}
+                        status={statusMap[s]}
+                        unavailableReason={unavailableReasonMap[s]}
+                        options={statusOptions}
+                      />
+                    ) : (
+                      <ServiceStatusSelect
+                        companyId={c.id}
+                        field={fields.status}
+                        service={s}
+                        value={statusMap[s]}
+                        options={statusOptions}
+                      />
+                    )}
+                    {prefix === "billing" && s === "NPかけ払い" && (
+                      <BillingUsageDetails
+                        companyId={c.id}
+                        service="NPかけ払い"
+                        details={(c.billing_usage_details ?? []).filter(
+                          (detail) => detail.service === "NPかけ払い",
+                        )}
+                      />
+                    )}
                     {prefix === "mobile" && (
                       <MobileContractDetails
                         companyId={c.id}

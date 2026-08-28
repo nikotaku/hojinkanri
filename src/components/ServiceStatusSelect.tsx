@@ -28,12 +28,14 @@ export function ServiceStatusSelect({
   service,
   value,
   options,
+  onValueChange,
 }: {
   companyId: string;
   field: ServiceField;
   service: string;
   value?: string;
   options: readonly string[];
+  onValueChange?: (value: string) => void;
 }) {
   const [current, setCurrent] = useState(value ?? "");
   const [pending, startTransition] = useTransition();
@@ -50,6 +52,7 @@ export function ServiceStatusSelect({
       onChange={(e) => {
         const v = e.target.value;
         setCurrent(v);
+        onValueChange?.(v);
         startTransition(() =>
           setServiceStatusAction(companyId, field, service, v),
         );
