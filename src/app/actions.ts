@@ -28,8 +28,10 @@ import {
   createMobileContractDetail,
   updateMobileContractDetail,
   deleteMobileContractDetail,
-  createBillingUsageDetail,
-  updateBillingUsageDetail,
+  createNpBillingUsageDetail,
+  updateNpBillingUsageDetail,
+  createPaidServiceDetail,
+  updatePaidServiceCredentials,
   deleteBillingUsageDetail,
   type ServiceField,
   type MobileContractField,
@@ -266,14 +268,9 @@ export async function deleteMobileContractDetailAction(
 /** 掛け払いサービスの利用先・用途を追加する */
 export async function createBillingUsageDetailAction(
   companyId: string,
-  service: string,
   usageName: string,
 ): Promise<BillingUsageDetail> {
-  const detail = await createBillingUsageDetail(
-    companyId,
-    service,
-    usageName,
-  );
+  const detail = await createNpBillingUsageDetail(companyId, usageName);
   revalidatePath("/billing");
   return detail;
 }
@@ -284,7 +281,35 @@ export async function updateBillingUsageDetailAction(
   id: string,
   usageName: string,
 ) {
-  await updateBillingUsageDetail(companyId, id, usageName);
+  await updateNpBillingUsageDetail(companyId, id, usageName);
+  revalidatePath("/billing");
+}
+
+/** Paidの利用サービスとサービス側ログイン情報をまとめて追加する */
+export async function createPaidServiceDetailAction(
+  companyId: string,
+  usageName: string,
+  loginId: string,
+  loginPw: string,
+): Promise<BillingUsageDetail> {
+  const detail = await createPaidServiceDetail(
+    companyId,
+    usageName,
+    loginId,
+    loginPw,
+  );
+  revalidatePath("/billing");
+  return detail;
+}
+
+/** Paid利用サービス側のログインID・PWをまとめて更新する */
+export async function updatePaidServiceCredentialsAction(
+  companyId: string,
+  id: string,
+  loginId: string,
+  loginPw: string,
+) {
+  await updatePaidServiceCredentials(companyId, id, loginId, loginPw);
   revalidatePath("/billing");
 }
 
@@ -292,8 +317,9 @@ export async function updateBillingUsageDetailAction(
 export async function deleteBillingUsageDetailAction(
   companyId: string,
   id: string,
+  service: string,
 ) {
-  await deleteBillingUsageDetail(companyId, id);
+  await deleteBillingUsageDetail(companyId, id, service);
   revalidatePath("/billing");
 }
 

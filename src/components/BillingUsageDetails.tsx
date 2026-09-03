@@ -20,7 +20,7 @@ export function BillingUsageDetails({
   details,
 }: {
   companyId: string;
-  service: BillingUsageDetail["service"];
+  service: "NPかけ払い";
   details: BillingUsageDetail[];
 }) {
   const [rows, setRows] = useState<EditableUsage[]>(() =>
@@ -44,6 +44,8 @@ export function BillingUsageDetails({
         company_id: companyId,
         service,
         usage_name: "",
+        login_id: null,
+        login_pw: null,
         created_at: now,
         updated_at: now,
         persisted: false,
@@ -88,7 +90,6 @@ export function BillingUsageDetails({
       } else {
         const created = await createBillingUsageDetailAction(
           companyId,
-          service,
           name,
         );
         setRows((current) =>
@@ -128,7 +129,7 @@ export function BillingUsageDetails({
     setBusyId(row.id);
     setError(null);
     try {
-      await deleteBillingUsageDetailAction(companyId, row.id);
+      await deleteBillingUsageDetailAction(companyId, row.id, service);
     } catch {
       setRows(previous);
       setError("削除できませんでした。もう一度お試しください。");

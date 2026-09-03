@@ -29,6 +29,8 @@ export interface BillingUsageDetail {
   company_id: string;
   service: "NPかけ払い" | "Paid";
   usage_name: string;
+  login_id: string | null;
+  login_pw: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -127,6 +129,35 @@ export const MOBILE_SERVICES = ["ドコモ", "UQ"] as const;
 
 /** 掛け払いで表示するサービス列 */
 export const BILLING_SERVICES = ["NPかけ払い", "Paid"] as const;
+
+/**
+ * Paidでの支払いに対応していることを公式情報で確認できたサービス。
+ * Paidの全加盟先は公開されていないため、候補外は「その他」から登録する。
+ * 確認日: 2026-09-03
+ */
+export const PAID_SERVICE_OPTIONS = [
+  "スーパーデリバリー",
+  "ニトリネット（法人会員）",
+  "タンスのゲン本店（法人）",
+  "コールマン公式オンラインショップ",
+  "電材堂",
+  "ジャングルストア",
+  "ヨックモック公式オンラインショップ",
+  "ビバムサシオンライン",
+  "印刷通販グラフィック",
+  "スチール棚.com",
+  "パーツコム",
+  "NEXCO西日本オンラインショップ",
+  "オートバックスドットコム（法人会員）",
+  "トラノテ",
+  "Chatwork",
+  "ココナラ（法人機能）",
+  "写真AC（法人プラン）",
+  "ニュースPR by LINEヤフー",
+  "ハート電報",
+  "お花の窓口",
+  "ナースリー（特別割引法人）",
+] as const;
 
 /** 掛け払いの申請・利用ステータス */
 export const BILLING_STATUS_OPTIONS = [
