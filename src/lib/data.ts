@@ -428,19 +428,38 @@ function normalizeBillingUsageName(value: string): string {
   return name;
 }
 
-/** 利用先・用途を1件追加する */
-export async function createBillingUsageDetail(
+function normalizeBillingCredential(
+  value: string,
+  label: "ログインID" | "ログインPW",
+): string | null {
+  if (typeof value !== "string") {
+    throw new Error(`${label}の入力内容を確認できませんでした。`);
+  }
+  const normalized = label === "ログインID" ? value.trim() : value;
+  if (normalized.length > 500) {
+    throw new Error(`${label}は500文字以内で入力してください。`);
+  }
+  return normalized === "" ? null : normalized;
+}
+
+/** NPかけ払いの利用先・用途を1件追加する */
+export async function createNpBillingUsageDetail(
   companyId: string,
-  service: string,
   usageName: string,
 ): Promise<BillingUsageDetail> {
-  assertBillingService(service);
+  if (typeof companyId !== "string" || typeof usageName !== "string") {
+    throw new Error("利用先・用途の入力内容を確認できませんでした。");
+  }
   const name = normalizeBillingUsageName(usageName);
   const supabase = getSupabase();
   if (supabase) {
     const { data, error } = await supabase
       .from("billing_usage_details")
-      .insert({ company_id: companyId, service, usage_name: name })
+      .insert({
+        company_id: companyId,
+        service: "NPかけ払い",
+        usage_name: name,
+      })
       .select("*")
       .single();
     if (error) throw new Error(error.message);
@@ -451,8 +470,10 @@ export async function createBillingUsageDetail(
   const detail: BillingUsageDetail = {
     id: crypto.randomUUID(),
     company_id: companyId,
-    service,
+    service: "NPかけ払い",
     usage_name: name,
+    login_id: null,
+    login_pw: null,
     created_at: ts,
     updated_at: ts,
   };
@@ -460,12 +481,19 @@ export async function createBillingUsageDetail(
   return detail;
 }
 
-/** 利用先・用途を更新する */
-export async function updateBillingUsageDetail(
+/** NPかけ払いの利用先・用途を更新する */
+export async function updateNpBillingUsageDetail(
   companyId: string,
   id: string,
   usageName: string,
 ): Promise<void> {
+  if (
+    typeof companyId !== "string" ||
+    typeof id !== "string" ||
+    typeof usageName !== "string"
+  ) {
+    throw new Error("利用先・用途の入力内容を確認できませんでした。");
+  }
   const name = normalizeBillingUsageName(usageName);
   const supabase = getSupabase();
   if (supabase) {
@@ -474,6 +502,7 @@ export async function updateBillingUsageDetail(
       .update({ usage_name: name })
       .eq("id", id)
       .eq("company_id", companyId)
+      .eq("service", "NPかけ払い")
       .select("id")
       .maybeSingle();
     if (error) throw new Error(error.message);
@@ -482,10 +511,97 @@ export async function updateBillingUsageDetail(
   }
 
   const detail = getMockDb().billingUsageDetails.find(
-    (item) => item.id === id && item.company_id === companyId,
+    (item) =>
+      item.id === id &&
+      item.company_id === companyId &&
+      item.service === "NPかけ払い",
   );
   if (!detail) throw new Error("利用先・用途が見つかりませんでした。");
   detail.usage_name = name;
+  detail.updated_at = nowIso();
+}
+
+/** Paidの利用サービスとサービス側ログイン情報をまとめて追加する */
+export async function createPaidServiceDetail(
+  companyId: string,
+  usageName: string,
+  loginId: string,
+  loginPw: string,
+): Promise<BillingUsageDetail> {
+  if (typeof companyId !== "string" || typeof usageName !== "string") {
+    throw new Error("Paid利用サービスの入力内容を確認できませんでした。");
+  }
+  const name = normalizeBillingUsageName(usageName);
+  const normalizedLoginId = normalizeBillingCredential(loginId, "ログインID");
+  const normalizedLoginPw = normalizeBillingCredential(loginPw, "ログインPW");
+  const supabase = getSupabase();
+  if (supabase) {
+    const { data, error } = await supabase
+      .from("billing_usage_details")
+      .insert({
+        company_id: companyId,
+        service: "Paid",
+        usage_name: name,
+        login_id: normalizedLoginId,
+        login_pw: normalizedLoginPw,
+      })
+      .select("*")
+      .single();
+    if (error) throw new Error(error.message);
+    return data as BillingUsageDetail;
+  }
+
+  const ts = nowIso();
+  const detail: BillingUsageDetail = {
+    id: crypto.randomUUID(),
+    company_id: companyId,
+    service: "Paid",
+    usage_name: name,
+    login_id: normalizedLoginId,
+    login_pw: normalizedLoginPw,
+    created_at: ts,
+    updated_at: ts,
+  };
+  getMockDb().billingUsageDetails.push(detail);
+  return detail;
+}
+
+/** Paid利用サービス側のログインID・PWをまとめて更新する */
+export async function updatePaidServiceCredentials(
+  companyId: string,
+  id: string,
+  loginId: string,
+  loginPw: string,
+): Promise<void> {
+  if (typeof companyId !== "string" || typeof id !== "string") {
+    throw new Error("Paid利用サービスの入力内容を確認できませんでした。");
+  }
+  const normalizedLoginId = normalizeBillingCredential(loginId, "ログインID");
+  const normalizedLoginPw = normalizeBillingCredential(loginPw, "ログインPW");
+  const supabase = getSupabase();
+  if (supabase) {
+    const { data, error } = await supabase
+      .from("billing_usage_details")
+      .update({ login_id: normalizedLoginId, login_pw: normalizedLoginPw })
+      .eq("id", id)
+      .eq("company_id", companyId)
+      .eq("service", "Paid")
+      .select("id")
+      .maybeSingle();
+    if (error) throw new Error(error.message);
+    if (!data) throw new Error("Paid利用サービスが見つかりませんでした。");
+    return;
+  }
+
+  const detail = getMockDb().billingUsageDetails.find(
+    (item) =>
+      item.id === id &&
+      item.company_id === companyId &&
+      item.service === "Paid",
+  );
+  if (!detail) throw new Error("Paid利用サービスが見つかりませんでした。");
+  detail.login_id = normalizedLoginId;
+  detail.login_pw = normalizedLoginPw;
   detail.updated_at = nowIso();
 }
 
@@ -493,7 +609,12 @@ export async function updateBillingUsageDetail(
 export async function deleteBillingUsageDetail(
   companyId: string,
   id: string,
+  service: string,
 ): Promise<void> {
+  if (typeof companyId !== "string" || typeof id !== "string") {
+    throw new Error("利用先・用途の入力内容を確認できませんでした。");
+  }
+  assertBillingService(service);
   const supabase = getSupabase();
   if (supabase) {
     const { data, error } = await supabase
@@ -501,6 +622,7 @@ export async function deleteBillingUsageDetail(
       .delete()
       .eq("id", id)
       .eq("company_id", companyId)
+      .eq("service", service)
       .select("id")
       .maybeSingle();
     if (error) throw new Error(error.message);
@@ -511,7 +633,12 @@ export async function deleteBillingUsageDetail(
   const db = getMockDb();
   const before = db.billingUsageDetails.length;
   db.billingUsageDetails = db.billingUsageDetails.filter(
-    (item) => !(item.id === id && item.company_id === companyId),
+    (item) =>
+      !(
+        item.id === id &&
+        item.company_id === companyId &&
+        item.service === service
+      ),
   );
   if (db.billingUsageDetails.length === before) {
     throw new Error("利用先・用途が見つかりませんでした。");

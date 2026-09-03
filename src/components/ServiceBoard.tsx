@@ -9,6 +9,7 @@ import { ServiceContactInput } from "@/components/ServiceContactInput";
 import { MobileContractDetails } from "@/components/MobileContractDetails";
 import { BillingStatusFields } from "@/components/BillingStatusFields";
 import { BillingUsageDetails } from "@/components/BillingUsageDetails";
+import { PaidServiceDetails } from "@/components/PaidServiceDetails";
 import { reorderCompaniesAction } from "@/app/actions";
 
 // サービス群ごとの保存先フィールド定義
@@ -186,6 +187,14 @@ export function ServiceBoard({
                         )}
                       />
                     )}
+                    {prefix === "billing" && s === "Paid" && (
+                      <PaidServiceDetails
+                        companyId={c.id}
+                        details={(c.billing_usage_details ?? []).filter(
+                          (detail) => detail.service === "Paid",
+                        )}
+                      />
+                    )}
                     {prefix === "mobile" && (
                       <MobileContractDetails
                         companyId={c.id}
@@ -253,14 +262,22 @@ export function ServiceBoard({
                       field={fields.loginId}
                       service={s}
                       value={loginIdMap[s]}
-                      placeholder="ログインID"
+                      placeholder={
+                        prefix === "billing"
+                          ? `${s}管理画面のログインID`
+                          : "ログインID"
+                      }
                     />
                     <ServiceContactInput
                       companyId={c.id}
                       field={fields.loginPw}
                       service={s}
                       value={loginPwMap[s]}
-                      placeholder="ログインPW"
+                      placeholder={
+                        prefix === "billing"
+                          ? `${s}管理画面のログインPW`
+                          : "ログインPW"
+                      }
                     />
                   </div>
                 </details>
