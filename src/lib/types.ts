@@ -131,6 +131,75 @@ export const MOBILE_SERVICES = ["ドコモ", "UQ"] as const;
 export const BILLING_SERVICES = ["NPかけ払い", "Paid"] as const;
 
 /**
+ * NP掛け払いでの支払いに対応していることを各販売サイトの公式情報で確認した候補。
+ * 公開された全加盟店一覧はないため、候補外は「その他」から登録する。
+ * 確認日: 2026-09-03
+ */
+export const NP_KAKEBARAI_SITE_GROUPS = [
+  {
+    label: "美容・サロン",
+    options: ["ビューティガレージ", "サロンプリント"],
+  },
+  {
+    label: "店舗用品・工具・設備",
+    options: [
+      "シモジマオンラインショップ",
+      "DCMオンライン",
+      "ミドリ安全.com",
+      "現場市場",
+      "電材ネット",
+      "八幡ねじ YHTネットショップ",
+      "as kitchen（アズキッチン）",
+      "アネスト岩田公式ECショップ",
+    ],
+  },
+  {
+    label: "卸・仕入れ",
+    options: ["NETSEA", "卸売ドットコム"],
+  },
+  {
+    label: "オフィス家具・インテリア",
+    options: [
+      "オフィスコム",
+      "オフィス家具ドットコム",
+      "office work.jp",
+      "KANADEMONO",
+      "カグクロ",
+      "LOOKIT!（楽天市場店）",
+    ],
+  },
+  {
+    label: "パソコン・映像・電子機器",
+    options: [
+      "SYSTEM5",
+      "Rock oN Line eStore",
+      "中古パソコン直販",
+      "共立エレショップ",
+    ],
+  },
+  {
+    label: "印刷・販促物",
+    options: [
+      "東京カラー印刷通販",
+      "みんなのプレス屋さん",
+      "デジタ",
+      "大判プリントの達人",
+    ],
+  },
+  {
+    label: "食品・贈答品",
+    options: [
+      "ナカヤマフーズオンライン",
+      "まい泉 法人向け弁当",
+      "DEMEL公式オンラインショップ",
+    ],
+  },
+] as const;
+
+export const NP_KAKEBARAI_SITE_OPTIONS =
+  NP_KAKEBARAI_SITE_GROUPS.flatMap((group) => group.options);
+
+/**
  * Paidでの支払いに対応していることを公式情報で確認できたサービス。
  * Paidの全加盟先は公開されていないため、候補外は「その他」から登録する。
  * 確認日: 2026-09-03
