@@ -56,6 +56,7 @@ export function BillingUsageDetails({
         company_id: companyId,
         service,
         usage_name: "",
+        admin_url: null,
         login_id: null,
         login_pw: null,
         created_at: now,
