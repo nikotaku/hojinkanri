@@ -285,16 +285,18 @@ export async function updateBillingUsageDetailAction(
   revalidatePath("/billing");
 }
 
-/** Paidの利用サービスとサービス側ログイン情報をまとめて追加する */
+/** Paidの利用サービスとサービス側の管理画面情報をまとめて追加する */
 export async function createPaidServiceDetailAction(
   companyId: string,
   usageName: string,
+  adminUrl: string,
   loginId: string,
   loginPw: string,
 ): Promise<BillingUsageDetail> {
   const detail = await createPaidServiceDetail(
     companyId,
     usageName,
+    adminUrl,
     loginId,
     loginPw,
   );
@@ -302,14 +304,15 @@ export async function createPaidServiceDetailAction(
   return detail;
 }
 
-/** Paid利用サービス側のログインID・PWをまとめて更新する */
+/** Paid利用サービス側の管理画面URL・ログインID・PWをまとめて更新する */
 export async function updatePaidServiceCredentialsAction(
   companyId: string,
   id: string,
+  adminUrl: string,
   loginId: string,
   loginPw: string,
 ) {
-  await updatePaidServiceCredentials(companyId, id, loginId, loginPw);
+  await updatePaidServiceCredentials(companyId, id, adminUrl, loginId, loginPw);
   revalidatePath("/billing");
 }
 

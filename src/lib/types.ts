@@ -29,6 +29,7 @@ export interface BillingUsageDetail {
   company_id: string;
   service: "NPかけ払い" | "Paid";
   usage_name: string;
+  admin_url: string | null;
   login_id: string | null;
   login_pw: string | null;
   created_at: string;

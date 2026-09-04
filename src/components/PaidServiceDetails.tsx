@@ -15,6 +15,7 @@ const CUSTOM_SERVICE_VALUE = "__other__";
 
 type EditablePaidService = BillingUsageDetail & {
   persisted: boolean;
+  savedAdminUrl: string;
   savedLoginId: string;
   savedLoginPw: string;
   customMode: boolean;
@@ -24,10 +25,22 @@ function isListedPaidService(value: string): boolean {
   return PAID_SERVICE_OPTIONS.some((option) => option === value);
 }
 
+function isValidHttpUrl(value: string): boolean {
+  if (!value) return true;
+  try {
+    const url = new URL(value);
+    return url.protocol === "http:" || url.protocol === "https:";
+  } catch {
+    return false;
+  }
+}
+
 function TextField({
   label,
   value,
   password = false,
+  type = "text",
+  maxLength = 500,
   visible = false,
   disabled = false,
   onChange,
@@ -36,6 +49,8 @@ function TextField({
   label: string;
   value: string;
   password?: boolean;
+  type?: "text" | "url";
+  maxLength?: number;
   visible?: boolean;
   disabled?: boolean;
   onChange: (value: string) => void;
@@ -48,9 +63,10 @@ function TextField({
       </span>
       <span className="flex items-stretch">
         <input
-          type={password && !visible ? "password" : "text"}
-          autoComplete="off"
-          maxLength={500}
+          type={password && !visible ? "password" : type}
+          inputMode={type === "url" ? "url" : "text"}
+          autoComplete={type === "url" ? "url" : "off"}
+          maxLength={maxLength}
           value={value}
           placeholder={label}
           disabled={disabled}
@@ -88,6 +104,7 @@ export function PaidServiceDetails({
     details.map((detail) => ({
       ...detail,
       persisted: true,
+      savedAdminUrl: detail.admin_url ?? "",
       savedLoginId: detail.login_id ?? "",
       savedLoginPw: detail.login_pw ?? "",
       customMode: !isListedPaidService(detail.usage_name),
@@ -110,11 +127,13 @@ export function PaidServiceDetails({
         company_id: companyId,
         service: "Paid",
         usage_name: "",
+        admin_url: null,
         login_id: null,
         login_pw: null,
         created_at: now,
         updated_at: now,
         persisted: false,
+        savedAdminUrl: "",
         savedLoginId: "",
         savedLoginPw: "",
         customMode: false,
@@ -124,7 +143,16 @@ export function PaidServiceDetails({
 
   const updateRow = (
     id: string,
-    patch: Partial<Pick<EditablePaidService, "usage_name" | "login_id" | "login_pw" | "customMode">>,
+    patch: Partial<
+      Pick<
+        EditablePaidService,
+        | "usage_name"
+        | "admin_url"
+        | "login_id"
+        | "login_pw"
+        | "customMode"
+      >
+    >,
   ) => {
     setRows((current) =>
       current.map((row) => (row.id === id ? { ...row, ...patch } : row)),
@@ -149,6 +177,11 @@ export function PaidServiceDetails({
       return;
     }
 
+    const adminUrl = row.admin_url?.trim() ?? "";
+    if (!isValidHttpUrl(adminUrl)) {
+      setError("管理画面URLはhttp://またはhttps://から入力してください。");
+      return;
+    }
     const loginId = row.login_id?.trim() ?? "";
     const loginPw = row.login_pw ?? "";
     setBusyId(row.id);
@@ -158,6 +191,7 @@ export function PaidServiceDetails({
         await updatePaidServiceCredentialsAction(
           companyId,
           row.id,
+          adminUrl,
           loginId,
           loginPw,
         );
@@ -166,8 +200,10 @@ export function PaidServiceDetails({
             item.id === row.id
               ? {
                   ...item,
+                  admin_url: adminUrl || null,
                   login_id: loginId || null,
                   login_pw: loginPw || null,
+                  savedAdminUrl: adminUrl,
                   savedLoginId: loginId,
                   savedLoginPw: loginPw,
                 }
@@ -178,6 +214,7 @@ export function PaidServiceDetails({
         const created = await createPaidServiceDetailAction(
           companyId,
           usageName,
+          adminUrl,
           loginId,
           loginPw,
         );
@@ -187,6 +224,7 @@ export function PaidServiceDetails({
               ? {
                   ...created,
                   persisted: true,
+                  savedAdminUrl: created.admin_url ?? "",
                   savedLoginId: created.login_id ?? "",
                   savedLoginPw: created.login_pw ?? "",
                   customMode: !isListedPaidService(created.usage_name),
@@ -267,6 +305,7 @@ export function PaidServiceDetails({
             const busy = busyId === row.id;
             const dirty =
               !row.persisted ||
+              (row.admin_url ?? "") !== row.savedAdminUrl ||
               (row.login_id ?? "") !== row.savedLoginId ||
               (row.login_pw ?? "") !== row.savedLoginPw;
             const selectedValue = row.customMode
@@ -333,6 +372,19 @@ export function PaidServiceDetails({
                     />
                   </label>
                 )}
+
+                <div className="mt-2">
+                  <TextField
+                    label="サービス管理画面URL"
+                    type="url"
+                    maxLength={2000}
+                    value={row.admin_url ?? ""}
+                    disabled={busy}
+                    onChange={(value) =>
+                      updateRow(row.id, { admin_url: value })
+                    }
+                  />
+                </div>
 
                 <div className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-2">
                   <TextField

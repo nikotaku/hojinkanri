@@ -442,6 +442,26 @@ function normalizeBillingCredential(
   return normalized === "" ? null : normalized;
 }
 
+function normalizeBillingAdminUrl(value: string): string | null {
+  if (typeof value !== "string") {
+    throw new Error("管理画面URLの入力内容を確認できませんでした。");
+  }
+  const normalized = value.trim();
+  if (!normalized) return null;
+  if (normalized.length > 2000) {
+    throw new Error("管理画面URLは2000文字以内で入力してください。");
+  }
+  try {
+    const url = new URL(normalized);
+    if (url.protocol !== "http:" && url.protocol !== "https:") {
+      throw new Error();
+    }
+  } catch {
+    throw new Error("管理画面URLはhttp://またはhttps://から入力してください。");
+  }
+  return normalized;
+}
+
 /** NPかけ払いの利用先・用途を1件追加する */
 export async function createNpBillingUsageDetail(
   companyId: string,
@@ -472,6 +492,7 @@ export async function createNpBillingUsageDetail(
     company_id: companyId,
     service: "NPかけ払い",
     usage_name: name,
+    admin_url: null,
     login_id: null,
     login_pw: null,
     created_at: ts,
@@ -521,10 +542,11 @@ export async function updateNpBillingUsageDetail(
   detail.updated_at = nowIso();
 }
 
-/** Paidの利用サービスとサービス側ログイン情報をまとめて追加する */
+/** Paidの利用サービスとサービス側の管理画面情報をまとめて追加する */
 export async function createPaidServiceDetail(
   companyId: string,
   usageName: string,
+  adminUrl: string,
   loginId: string,
   loginPw: string,
 ): Promise<BillingUsageDetail> {
@@ -532,6 +554,7 @@ export async function createPaidServiceDetail(
     throw new Error("Paid利用サービスの入力内容を確認できませんでした。");
   }
   const name = normalizeBillingUsageName(usageName);
+  const normalizedAdminUrl = normalizeBillingAdminUrl(adminUrl);
   const normalizedLoginId = normalizeBillingCredential(loginId, "ログインID");
   const normalizedLoginPw = normalizeBillingCredential(loginPw, "ログインPW");
   const supabase = getSupabase();
@@ -542,6 +565,7 @@ export async function createPaidServiceDetail(
         company_id: companyId,
         service: "Paid",
         usage_name: name,
+        admin_url: normalizedAdminUrl,
         login_id: normalizedLoginId,
         login_pw: normalizedLoginPw,
       })
@@ -557,6 +581,7 @@ export async function createPaidServiceDetail(
     company_id: companyId,
     service: "Paid",
     usage_name: name,
+    admin_url: normalizedAdminUrl,
     login_id: normalizedLoginId,
     login_pw: normalizedLoginPw,
     created_at: ts,
@@ -566,23 +591,29 @@ export async function createPaidServiceDetail(
   return detail;
 }
 
-/** Paid利用サービス側のログインID・PWをまとめて更新する */
+/** Paid利用サービス側の管理画面URL・ログインID・PWをまとめて更新する */
 export async function updatePaidServiceCredentials(
   companyId: string,
   id: string,
+  adminUrl: string,
   loginId: string,
   loginPw: string,
 ): Promise<void> {
   if (typeof companyId !== "string" || typeof id !== "string") {
     throw new Error("Paid利用サービスの入力内容を確認できませんでした。");
   }
+  const normalizedAdminUrl = normalizeBillingAdminUrl(adminUrl);
   const normalizedLoginId = normalizeBillingCredential(loginId, "ログインID");
   const normalizedLoginPw = normalizeBillingCredential(loginPw, "ログインPW");
   const supabase = getSupabase();
   if (supabase) {
     const { data, error } = await supabase
       .from("billing_usage_details")
-      .update({ login_id: normalizedLoginId, login_pw: normalizedLoginPw })
+      .update({
+        admin_url: normalizedAdminUrl,
+        login_id: normalizedLoginId,
+        login_pw: normalizedLoginPw,
+      })
       .eq("id", id)
       .eq("company_id", companyId)
       .eq("service", "Paid")
@@ -600,6 +631,7 @@ export async function updatePaidServiceCredentials(
       item.service === "Paid",
   );
   if (!detail) throw new Error("Paid利用サービスが見つかりませんでした。");
+  detail.admin_url = normalizedAdminUrl;
   detail.login_id = normalizedLoginId;
   detail.login_pw = normalizedLoginPw;
   detail.updated_at = nowIso();
