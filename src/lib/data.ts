@@ -462,6 +462,21 @@ function normalizeBillingAdminUrl(value: string): string | null {
   return normalized;
 }
 
+function normalizeAutoBoxCardField(
+  value: string,
+  label: "会員カードの送付先住所" | "会員カードの発注名義",
+  maxLength: number,
+): string | null {
+  if (typeof value !== "string") {
+    throw new Error(`${label}の入力内容を確認できませんでした。`);
+  }
+  const normalized = value.trim();
+  if (normalized.length > maxLength) {
+    throw new Error(`${label}は${maxLength}文字以内で入力してください。`);
+  }
+  return normalized || null;
+}
+
 /** NPかけ払いの利用先・用途を1件追加する */
 export async function createNpBillingUsageDetail(
   companyId: string,
@@ -495,6 +510,8 @@ export async function createNpBillingUsageDetail(
     admin_url: null,
     login_id: null,
     login_pw: null,
+    card_delivery_address: null,
+    card_ordered_by: null,
     created_at: ts,
     updated_at: ts,
   };
@@ -549,6 +566,8 @@ export async function createPaidServiceDetail(
   adminUrl: string,
   loginId: string,
   loginPw: string,
+  cardDeliveryAddress: string,
+  cardOrderedBy: string,
 ): Promise<BillingUsageDetail> {
   if (typeof companyId !== "string" || typeof usageName !== "string") {
     throw new Error("Paid利用サービスの入力内容を確認できませんでした。");
@@ -557,6 +576,13 @@ export async function createPaidServiceDetail(
   const normalizedAdminUrl = normalizeBillingAdminUrl(adminUrl);
   const normalizedLoginId = normalizeBillingCredential(loginId, "ログインID");
   const normalizedLoginPw = normalizeBillingCredential(loginPw, "ログインPW");
+  const isAutoBox = name === "AutoBox";
+  const normalizedCardDeliveryAddress = isAutoBox
+    ? normalizeAutoBoxCardField(cardDeliveryAddress, "会員カードの送付先住所", 500)
+    : null;
+  const normalizedCardOrderedBy = isAutoBox
+    ? normalizeAutoBoxCardField(cardOrderedBy, "会員カードの発注名義", 200)
+    : null;
   const supabase = getSupabase();
   if (supabase) {
     const { data, error } = await supabase
@@ -568,6 +594,8 @@ export async function createPaidServiceDetail(
         admin_url: normalizedAdminUrl,
         login_id: normalizedLoginId,
         login_pw: normalizedLoginPw,
+        card_delivery_address: normalizedCardDeliveryAddress,
+        card_ordered_by: normalizedCardOrderedBy,
       })
       .select("*")
       .single();
@@ -584,6 +612,8 @@ export async function createPaidServiceDetail(
     admin_url: normalizedAdminUrl,
     login_id: normalizedLoginId,
     login_pw: normalizedLoginPw,
+    card_delivery_address: normalizedCardDeliveryAddress,
+    card_ordered_by: normalizedCardOrderedBy,
     created_at: ts,
     updated_at: ts,
   };
@@ -598,6 +628,8 @@ export async function updatePaidServiceCredentials(
   adminUrl: string,
   loginId: string,
   loginPw: string,
+  cardDeliveryAddress: string,
+  cardOrderedBy: string,
 ): Promise<void> {
   if (typeof companyId !== "string" || typeof id !== "string") {
     throw new Error("Paid利用サービスの入力内容を確認できませんでした。");
@@ -607,12 +639,30 @@ export async function updatePaidServiceCredentials(
   const normalizedLoginPw = normalizeBillingCredential(loginPw, "ログインPW");
   const supabase = getSupabase();
   if (supabase) {
+    const { data: detail, error: detailError } = await supabase
+      .from("billing_usage_details")
+      .select("usage_name")
+      .eq("id", id)
+      .eq("company_id", companyId)
+      .eq("service", "Paid")
+      .maybeSingle();
+    if (detailError) throw new Error(detailError.message);
+    if (!detail) throw new Error("Paid利用サービスが見つかりませんでした。");
+    const isAutoBox = detail.usage_name === "AutoBox";
+    const normalizedCardDeliveryAddress = isAutoBox
+      ? normalizeAutoBoxCardField(cardDeliveryAddress, "会員カードの送付先住所", 500)
+      : null;
+    const normalizedCardOrderedBy = isAutoBox
+      ? normalizeAutoBoxCardField(cardOrderedBy, "会員カードの発注名義", 200)
+      : null;
     const { data, error } = await supabase
       .from("billing_usage_details")
       .update({
         admin_url: normalizedAdminUrl,
         login_id: normalizedLoginId,
         login_pw: normalizedLoginPw,
+        card_delivery_address: normalizedCardDeliveryAddress,
+        card_ordered_by: normalizedCardOrderedBy,
       })
       .eq("id", id)
       .eq("company_id", companyId)
@@ -631,9 +681,18 @@ export async function updatePaidServiceCredentials(
       item.service === "Paid",
   );
   if (!detail) throw new Error("Paid利用サービスが見つかりませんでした。");
+  const isAutoBox = detail.usage_name === "AutoBox";
+  const normalizedCardDeliveryAddress = isAutoBox
+    ? normalizeAutoBoxCardField(cardDeliveryAddress, "会員カードの送付先住所", 500)
+    : null;
+  const normalizedCardOrderedBy = isAutoBox
+    ? normalizeAutoBoxCardField(cardOrderedBy, "会員カードの発注名義", 200)
+    : null;
   detail.admin_url = normalizedAdminUrl;
   detail.login_id = normalizedLoginId;
   detail.login_pw = normalizedLoginPw;
+  detail.card_delivery_address = normalizedCardDeliveryAddress;
+  detail.card_ordered_by = normalizedCardOrderedBy;
   detail.updated_at = nowIso();
 }
 
