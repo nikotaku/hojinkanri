@@ -32,6 +32,10 @@ export interface BillingUsageDetail {
   admin_url: string | null;
   login_id: string | null;
   login_pw: string | null;
+  /** AutoBox会員カードの送付先住所 */
+  card_delivery_address: string | null;
+  /** AutoBox会員カードの発注名義 */
+  card_ordered_by: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -206,6 +210,7 @@ export const NP_KAKEBARAI_SITE_OPTIONS =
  * 確認日: 2026-09-03
  */
 export const PAID_SERVICE_OPTIONS = [
+  "AutoBox",
   "スーパーデリバリー",
   "ニトリネット（法人会員）",
   "タンスのゲン本店（法人）",
