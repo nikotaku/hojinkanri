@@ -13,12 +13,28 @@ export type CasePriority = "low" | "medium" | "high";
 export interface MobileContractDetail {
   id: string;
   company_id: string;
-  service: "ドコモ" | "UQ";
+  service: "ドコモ" | "UQ" | "ワイモバイル";
   device_model: string | null;
   sale_price: number | null;
   sale_destination: string | null;
   contract_person: string | null;
   contracted_on: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+/** Notion法人一覧から移行した、法人ごとの追加台帳項目 */
+export interface CompanyRegistryEntry {
+  id: string;
+  company_id: string;
+  /** 安定した内部キー（Notionのプロパティ名を元に生成） */
+  property_key: string;
+  /** 画面に表示する項目名 */
+  label: string;
+  /** 法人詳細画面での表示グループ */
+  category: string;
+  /** 文字列・数値・真偽値・配列を保持する値 */
+  value: unknown;
   created_at: string;
   updated_at: string;
 }
@@ -52,6 +68,12 @@ export interface Company {
   established_on?: string | null;
   /** 資本金（円） */
   capital?: number | null;
+  /** 会社法人等番号（法人番号） */
+  corporate_number?: string | null;
+  /** 法人設立届の手続き状況 */
+  incorporation_filing_status?: string | null;
+  /** 着金目標日 */
+  payment_target_on?: string | null;
   status: CompanyStatus;
   notes: string | null;
   /** 会社HPのURL */
@@ -110,6 +132,8 @@ export interface Company {
   billing_usage_details?: BillingUsageDetail[];
   /** 口座関連サービスの状況 (サービス名 -> ステータス) */
   accounts?: Record<string, string> | null;
+  /** Notion法人一覧から移行した追加項目 */
+  company_registry_entries?: CompanyRegistryEntry[];
   created_at: string;
   updated_at: string;
 }
@@ -126,7 +150,7 @@ export const ACCOUNT_SERVICES = [
 ] as const;
 
 /** 法人モバイル回線で表示するサービス列 */
-export const MOBILE_SERVICES = ["ドコモ", "UQ"] as const;
+export const MOBILE_SERVICES = ["ドコモ", "UQ", "ワイモバイル"] as const;
 
 /** 掛け払いで表示するサービス列 */
 export const BILLING_SERVICES = ["NPかけ払い", "Paid"] as const;
@@ -233,13 +257,17 @@ export const PAID_SERVICE_OPTIONS = [
 export const BILLING_STATUS_OPTIONS = [
   "未着手",
   "書類準備中",
+  "進行中",
   "申請済み",
   "審査中",
   "追加書類待ち",
   "審査通過",
+  "完了",
+  "使用済み",
   "利用開始",
   "保留",
   "審査落ち",
+  "中止",
   "利用不可",
 ] as const;
 

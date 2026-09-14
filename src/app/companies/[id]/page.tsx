@@ -10,6 +10,8 @@ import {
 } from "@/components/StatusBadge";
 import { CompanyHpInput } from "@/components/CompanyHpInput";
 import { ToukiUpload } from "@/components/ToukiUpload";
+import { CompanyProfileEditor } from "@/components/CompanyProfileEditor";
+import { CompanyRegistryEntries } from "@/components/CompanyRegistryEntries";
 
 export const dynamic = "force-dynamic";
 
@@ -80,6 +82,24 @@ export default async function CompanyDetailPage({
               {formatCurrency(company.capital)}
             </dd>
           </div>
+          <div>
+            <dt className="text-sm text-gray-500">法人番号</dt>
+            <dd className="mt-1 text-sm text-gray-900">
+              {company.corporate_number ?? "—"}
+            </dd>
+          </div>
+          <div>
+            <dt className="text-sm text-gray-500">法人設立届</dt>
+            <dd className="mt-1 text-sm text-gray-900">
+              {company.incorporation_filing_status ?? "—"}
+            </dd>
+          </div>
+          <div>
+            <dt className="text-sm text-gray-500">着金目標日</dt>
+            <dd className="mt-1 text-sm text-gray-900">
+              {formatDate(company.payment_target_on)}
+            </dd>
+          </div>
         </dl>
       </section>
 
@@ -88,6 +108,20 @@ export default async function CompanyDetailPage({
         <section className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm lg:col-span-1">
           <h2 className="mb-4 text-base font-semibold text-gray-900">管理情報</h2>
           <div className="space-y-5">
+            <div>
+              <p className="mb-1.5 text-sm text-gray-500">登記・設立情報を更新</p>
+              <CompanyProfileEditor
+                companyId={company.id}
+                values={{
+                  representativeName: company.representative_name,
+                  corporateNumber: company.corporate_number,
+                  establishedOn: company.established_on,
+                  capital: company.capital,
+                  incorporationFilingStatus: company.incorporation_filing_status,
+                  paymentTargetOn: company.payment_target_on,
+                }}
+              />
+            </div>
             <div>
               <p className="mb-1.5 text-sm text-gray-500">会社URLを更新</p>
               <CompanyHpInput companyId={company.id} value={company.hp} />
@@ -137,6 +171,16 @@ export default async function CompanyDetailPage({
           )}
         </section>
       </div>
+
+      <section className="mt-6 rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
+        <h2 className="mb-4 text-base font-semibold text-gray-900">
+          移行済み追加情報
+        </h2>
+        <CompanyRegistryEntries
+          companyId={company.id}
+          entries={company.company_registry_entries ?? []}
+        />
+      </section>
     </div>
   );
 }

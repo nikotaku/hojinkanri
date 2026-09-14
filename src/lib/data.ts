@@ -2,6 +2,7 @@ import { getSupabase } from "./supabase";
 import { getMockDb } from "./mock-store";
 import {
   type Company,
+  type CompanyRegistryEntry,
   type Case,
   type CaseWithCompany,
   type CaseTask,
@@ -39,6 +40,15 @@ export interface CompanyInput {
   hp?: string | null;
   status: CompanyStatus;
   notes?: string | null;
+}
+
+export interface CompanyProfileInput {
+  representative_name?: string | null;
+  corporate_number?: string | null;
+  established_on?: string | null;
+  capital?: number | null;
+  incorporation_filing_status?: string | null;
+  payment_target_on?: string | null;
 }
 
 export interface CaseInput {
@@ -206,13 +216,94 @@ export async function getCompany(id: string): Promise<Company | null> {
   if (supabase) {
     const { data, error } = await supabase
       .from("companies")
-      .select("*")
+      .select("*, company_registry_entries(*)")
       .eq("id", id)
       .maybeSingle();
     if (error) throw new Error(error.message);
-    return (data as Company) ?? null;
+    if (!data) return null;
+    const company = data as Company;
+    const registryEntries: CompanyRegistryEntry[] =
+      company.company_registry_entries ?? [];
+    return {
+      ...company,
+      company_registry_entries: [...registryEntries].sort((a, b) =>
+        a.category.localeCompare(b.category, "ja") ||
+        a.label.localeCompare(b.label, "ja"),
+      ),
+    };
   }
   return getMockDb().companies.find((c) => c.id === id) ?? null;
+}
+
+/** 法人詳細画面で管理する登記・設立情報を更新する */
+export async function updateCompanyProfile(
+  id: string,
+  input: CompanyProfileInput,
+): Promise<void> {
+  const supabase = getSupabase();
+  if (supabase) {
+    const { error } = await supabase
+      .from("companies")
+      .update(input)
+      .eq("id", id);
+    if (error) throw new Error(error.message);
+    return;
+  }
+
+  const company = getMockDb().companies.find((item) => item.id === id);
+  if (company) Object.assign(company, input);
+}
+
+function normalizeRegistryValue(
+  value: unknown,
+): string | number | boolean | null | unknown[] | Record<string, unknown> {
+  if (
+    value == null ||
+    typeof value === "string" ||
+    typeof value === "number" ||
+    typeof value === "boolean"
+  ) {
+    return value ?? null;
+  }
+  if (Array.isArray(value)) return value.map(normalizeRegistryValue);
+  if (typeof value === "object") {
+    return Object.fromEntries(
+      Object.entries(value).map(([key, entry]) => [
+        key,
+        normalizeRegistryValue(entry),
+      ]),
+    );
+  }
+  throw new Error("追加台帳の値の形式が正しくありません。");
+}
+
+/** Notionから移行した追加台帳項目を更新する */
+export async function updateCompanyRegistryEntry(
+  companyId: string,
+  propertyKey: string,
+  value: unknown,
+): Promise<void> {
+  if (!propertyKey.trim()) throw new Error("更新する項目が指定されていません。");
+  const normalizedValue = normalizeRegistryValue(value);
+  if (JSON.stringify(normalizedValue).length > 50_000) {
+    throw new Error("入力内容が長すぎます。");
+  }
+
+  const supabase = getSupabase();
+  if (supabase) {
+    const { error } = await supabase
+      .from("company_registry_entries")
+      .update({ value: normalizedValue })
+      .eq("company_id", companyId)
+      .eq("property_key", propertyKey);
+    if (error) throw new Error(error.message);
+    return;
+  }
+
+  const company = getMockDb().companies.find((item) => item.id === companyId);
+  const entries = company?.company_registry_entries;
+  const entry = entries?.find((item) => item.property_key === propertyKey);
+  if (entry) entry.value = normalizedValue;
 }
 
 export async function createCompany(input: CompanyInput): Promise<Company> {

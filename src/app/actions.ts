@@ -12,6 +12,8 @@ import {
   setCompanyHp,
   saveToukiImage,
   reorderCompanies,
+  updateCompanyProfile,
+  updateCompanyRegistryEntry,
   createBacklogEntry,
   deleteBacklogEntry,
   createContact,
@@ -324,6 +326,42 @@ export async function deleteBillingUsageDetailAction(
 ) {
   await deleteBillingUsageDetail(companyId, id, service);
   revalidatePath("/billing");
+}
+
+/** 法人の登記・設立に関する基本情報を更新する */
+export async function updateCompanyProfileAction(formData: FormData) {
+  const companyId = str(formData, "company_id");
+  if (!companyId) throw new Error("法人が指定されていません。");
+
+  const capitalRaw = str(formData, "capital");
+  const capital = capitalRaw
+    ? Number(capitalRaw.replace(/[,，]/g, ""))
+    : null;
+  if (capital != null && (!Number.isFinite(capital) || capital < 0)) {
+    throw new Error("資本金は0以上の数値で入力してください。");
+  }
+
+  await updateCompanyProfile(companyId, {
+    representative_name: str(formData, "representative_name"),
+    corporate_number: str(formData, "corporate_number"),
+    established_on: str(formData, "established_on"),
+    capital,
+    incorporation_filing_status: str(formData, "incorporation_filing_status"),
+    payment_target_on: str(formData, "payment_target_on"),
+  });
+  revalidatePath(`/companies/${companyId}`);
+  revalidatePath("/companies");
+}
+
+/** Notionから移行した追加台帳項目を更新する */
+export async function updateCompanyRegistryEntryAction(
+  companyId: string,
+  propertyKey: string,
+  value: unknown,
+) {
+  if (!companyId) throw new Error("法人が指定されていません。");
+  await updateCompanyRegistryEntry(companyId, propertyKey, value);
+  revalidatePath(`/companies/${companyId}`);
 }
 
 function str(form: FormData, key: string): string | null {
