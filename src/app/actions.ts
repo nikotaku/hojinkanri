@@ -14,6 +14,7 @@ import {
   reorderCompanies,
   updateCompanyProfile,
   updateCompanyRegistryEntry,
+  uploadCompanyRegistryFiles,
   createBacklogEntry,
   deleteBacklogEntry,
   createContact,
@@ -361,6 +362,20 @@ export async function updateCompanyRegistryEntryAction(
 ) {
   if (!companyId) throw new Error("法人が指定されていません。");
   await updateCompanyRegistryEntry(companyId, propertyKey, value);
+  revalidatePath(`/companies/${companyId}`);
+}
+
+/** Notionから移行した書類項目へファイルをアップロードする */
+export async function uploadCompanyRegistryFilesAction(formData: FormData) {
+  const companyId = str(formData, "company_id");
+  const propertyKey = str(formData, "property_key");
+  const files = formData
+    .getAll("files")
+    .filter((value): value is File => value instanceof File && value.size > 0);
+  if (!companyId || !propertyKey) {
+    throw new Error("アップロード先の法人・書類項目が指定されていません。");
+  }
+  await uploadCompanyRegistryFiles(companyId, propertyKey, files);
   revalidatePath(`/companies/${companyId}`);
 }
 

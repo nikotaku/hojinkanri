@@ -216,14 +216,22 @@ export async function getCompany(id: string): Promise<Company | null> {
   if (supabase) {
     const { data, error } = await supabase
       .from("companies")
-      .select("*, company_registry_entries(*)")
+      .select("*")
       .eq("id", id)
       .maybeSingle();
     if (error) throw new Error(error.message);
     if (!data) return null;
+
+    // Relationを埋め込みselectすると、PostgRESTのスキーマキャッシュ更新時に
+    // 最新の台帳行が表示されない場合があるため、追加台帳は明示的に取得する。
+    const { data: registryData, error: registryError } = await supabase
+      .from("company_registry_entries")
+      .select("*")
+      .eq("company_id", id);
+    if (registryError) throw new Error(registryError.message);
+    const registryEntries = (registryData ?? []) as CompanyRegistryEntry[];
+
     const company = data as Company;
-    const registryEntries: CompanyRegistryEntry[] =
-      company.company_registry_entries ?? [];
     return {
       ...company,
       company_registry_entries: [...registryEntries].sort((a, b) =>
@@ -304,6 +312,95 @@ export async function updateCompanyRegistryEntry(
   const entries = company?.company_registry_entries;
   const entry = entries?.find((item) => item.property_key === propertyKey);
   if (entry) entry.value = normalizedValue;
+}
+
+function normalizeStorageFileName(name: string): string {
+  const extension = name.match(/\.([a-zA-Z0-9]{1,12})$/)?.[1].toLowerCase();
+  const baseName = name
+    .normalize("NFKC")
+    .replace(/\.[^.]+$/, "")
+    .replace(/[^\w.-]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .replace(/^\.+|\.+$/g, "")
+    .slice(0, 120) || "document";
+  return extension ? `${baseName}.${extension}` : baseName;
+}
+
+function addUploadedRegistryFiles(
+  currentValue: unknown,
+  files: Array<{ name: string; url: string }>,
+): unknown {
+  const values = Array.isArray(currentValue) ? [...currentValue] : [currentValue];
+
+  for (const file of files) {
+    const existingIndex = values.findIndex((value) => {
+      if (!value || typeof value !== "object" || Array.isArray(value)) return false;
+      const record = value as Record<string, unknown>;
+      return record.kind === "Notion添付ファイル" && record.file_name === file.name;
+    });
+
+    const uploaded = {
+      kind: "Notion添付ファイル",
+      file_name: file.name,
+      uploaded_url: file.url,
+      migration_status: "法人管理に保存済み。",
+    };
+    if (existingIndex >= 0) {
+      const previous = values[existingIndex] as Record<string, unknown>;
+      values[existingIndex] = { ...previous, ...uploaded };
+    } else {
+      values.push(uploaded);
+    }
+  }
+  return Array.isArray(currentValue) ? values : values[0] ?? null;
+}
+
+/** Notion保護ファイルを法人管理のストレージへ移行して、追加台帳項目へ紐づける */
+export async function uploadCompanyRegistryFiles(
+  companyId: string,
+  propertyKey: string,
+  files: File[],
+): Promise<void> {
+  if (!propertyKey.trim()) throw new Error("アップロード先の項目が指定されていません。");
+  if (files.length === 0) throw new Error("ファイルを選択してください。");
+  if (files.length > 20) throw new Error("一度にアップロードできるのは20ファイルまでです。");
+  if (files.some((file) => file.size === 0 || file.size > 25 * 1024 * 1024)) {
+    throw new Error("各ファイルは1バイト以上25MB以下にしてください。");
+  }
+
+  const supabase = getSupabase();
+  if (!supabase) {
+    throw new Error("ファイルのアップロードはデータベース接続時のみ利用できます。");
+  }
+
+  const { data: entry, error: entryError } = await supabase
+    .from("company_registry_entries")
+    .select("value")
+    .eq("company_id", companyId)
+    .eq("property_key", propertyKey)
+    .maybeSingle();
+  if (entryError) throw new Error(entryError.message);
+  if (!entry) throw new Error("アップロード先の台帳項目が見つかりません。");
+
+  const uploadedFiles: Array<{ name: string; url: string }> = [];
+  for (const [index, file] of files.entries()) {
+    const filename = normalizeStorageFileName(file.name);
+    const objectPath = `${companyId}/registry/${propertyKey}/${Date.now()}-${index}-${filename}`;
+    const body = await file.arrayBuffer();
+    const { error: uploadError } = await supabase.storage
+      .from("touki")
+      .upload(objectPath, body, { contentType: file.type || undefined, upsert: false });
+    if (uploadError) throw new Error(uploadError.message);
+    const { data: publicUrl } = supabase.storage.from("touki").getPublicUrl(objectPath);
+    uploadedFiles.push({ name: file.name, url: publicUrl.publicUrl });
+  }
+
+  const { error: updateError } = await supabase
+    .from("company_registry_entries")
+    .update({ value: addUploadedRegistryFiles(entry.value, uploadedFiles) })
+    .eq("company_id", companyId)
+    .eq("property_key", propertyKey);
+  if (updateError) throw new Error(updateError.message);
 }
 
 export async function createCompany(input: CompanyInput): Promise<Company> {
