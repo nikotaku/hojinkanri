@@ -27,7 +27,7 @@ export interface MobileContractDetail {
 export interface BillingUsageDetail {
   id: string;
   company_id: string;
-  service: "NPかけ払い" | "Paid";
+  service: "NPかけ払い" | "Paid" | "GMOかけ払い";
   usage_name: string;
   admin_url: string | null;
   login_id: string | null;
@@ -129,7 +129,7 @@ export const ACCOUNT_SERVICES = [
 export const MOBILE_SERVICES = ["ドコモ", "UQ"] as const;
 
 /** 掛け払いで表示するサービス列 */
-export const BILLING_SERVICES = ["NPかけ払い", "Paid"] as const;
+export const BILLING_SERVICES = ["NPかけ払い", "Paid", "GMOかけ払い"] as const;
 
 /**
  * NP掛け払いでの支払いに対応していることを各販売サイトの公式情報で確認した候補。
