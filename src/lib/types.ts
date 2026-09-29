@@ -238,6 +238,7 @@ export const BILLING_STATUS_OPTIONS = [
   "追加書類待ち",
   "審査通過",
   "利用開始",
+  "限度額まで使用",
   "保留",
   "審査落ち",
   "利用不可",
@@ -255,6 +256,7 @@ export const MOBILE_STATUS_OPTIONS = [
   "4台契約",
   "5台契約",
   "使用中",
+  "限度額まで使用",
   "設定不可",
   "印鑑証明待ち",
   "審査落ち",
@@ -280,6 +282,7 @@ export const ACCOUNT_STATUS_OPTIONS = [
   "審査中",
   "開設済み",
   "使用中",
+  "限度額まで使用",
   "審査落ち",
 ] as const;
 
