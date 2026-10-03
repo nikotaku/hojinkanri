@@ -27,7 +27,7 @@ export interface MobileContractDetail {
 export interface BillingUsageDetail {
   id: string;
   company_id: string;
-  service: "NPかけ払い" | "Paid";
+  service: "NPかけ払い" | "Paid" | "GMOかけ払い";
   usage_name: string;
   admin_url: string | null;
   login_id: string | null;
@@ -56,6 +56,8 @@ export interface Company {
   notes: string | null;
   /** 会社HPのURL */
   hp?: string | null;
+  /** 適格請求書発行事業者の登録番号（インボイス番号 / T+13桁） */
+  invoice_number?: string | null;
   /** 登記簿謄本(画像)のURL */
   touki_url?: string | null;
   /** 並び順（ドラッグ&ドロップで変更） */
@@ -129,7 +131,7 @@ export const ACCOUNT_SERVICES = [
 export const MOBILE_SERVICES = ["ドコモ", "UQ"] as const;
 
 /** 掛け払いで表示するサービス列 */
-export const BILLING_SERVICES = ["NPかけ払い", "Paid"] as const;
+export const BILLING_SERVICES = ["NPかけ払い", "Paid", "GMOかけ払い"] as const;
 
 /**
  * NP掛け払いでの支払いに対応していることを各販売サイトの公式情報で確認した候補。
@@ -238,6 +240,7 @@ export const BILLING_STATUS_OPTIONS = [
   "追加書類待ち",
   "審査通過",
   "利用開始",
+  "限度額まで使用",
   "保留",
   "審査落ち",
   "利用不可",
@@ -255,6 +258,7 @@ export const MOBILE_STATUS_OPTIONS = [
   "4台契約",
   "5台契約",
   "使用中",
+  "限度額まで使用",
   "設定不可",
   "印鑑証明待ち",
   "審査落ち",
@@ -280,6 +284,7 @@ export const ACCOUNT_STATUS_OPTIONS = [
   "審査中",
   "開設済み",
   "使用中",
+  "限度額まで使用",
   "審査落ち",
 ] as const;
 

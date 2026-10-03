@@ -9,6 +9,7 @@ import {
   PriorityBadge,
 } from "@/components/StatusBadge";
 import { CompanyHpInput } from "@/components/CompanyHpInput";
+import { CompanyInvoiceNumberInput } from "@/components/CompanyInvoiceNumberInput";
 import { ToukiUpload } from "@/components/ToukiUpload";
 
 export const dynamic = "force-dynamic";
@@ -80,6 +81,12 @@ export default async function CompanyDetailPage({
               {formatCurrency(company.capital)}
             </dd>
           </div>
+          <div>
+            <dt className="text-sm text-gray-500">登録番号（インボイス）</dt>
+            <dd className="mt-1 font-mono text-sm text-gray-900">
+              {company.invoice_number ?? "—"}
+            </dd>
+          </div>
         </dl>
       </section>
 
@@ -91,6 +98,15 @@ export default async function CompanyDetailPage({
             <div>
               <p className="mb-1.5 text-sm text-gray-500">会社URLを更新</p>
               <CompanyHpInput companyId={company.id} value={company.hp} />
+            </div>
+            <div>
+              <p className="mb-1.5 text-sm text-gray-500">
+                登録番号（インボイス）を更新
+              </p>
+              <CompanyInvoiceNumberInput
+                companyId={company.id}
+                value={company.invoice_number}
+              />
             </div>
             <div>
               <p className="mb-1.5 text-sm text-gray-500">登記簿謄本（画像）</p>

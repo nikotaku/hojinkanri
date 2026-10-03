@@ -10,6 +10,8 @@ import {
   setCaseTaskCompleted,
   setCompanyService,
   setCompanyHp,
+  setCompanyInvoiceNumber,
+  normalizeInvoiceNumber,
   saveToukiImage,
   reorderCompanies,
   createBacklogEntry,
@@ -169,6 +171,16 @@ export async function deleteContactAction(formData: FormData) {
 /** 会社HPのURLを更新する（インライン編集用） */
 export async function setCompanyHpAction(companyId: string, hp: string) {
   await setCompanyHp(companyId, hp);
+  revalidatePath(`/companies/${companyId}`);
+  revalidatePath("/companies");
+}
+
+/** 適格請求書発行事業者の登録番号（インボイス番号）を保存する */
+export async function setCompanyInvoiceNumberAction(
+  companyId: string,
+  invoiceNumber: string,
+) {
+  await setCompanyInvoiceNumber(companyId, invoiceNumber);
   revalidatePath(`/companies/${companyId}`);
   revalidatePath("/companies");
 }
@@ -353,6 +365,7 @@ export async function createCompanyAction(formData: FormData) {
     established_on: str(formData, "established_on"),
     capital: capital != null && Number.isFinite(capital) ? capital : null,
     hp: str(formData, "hp"),
+    invoice_number: normalizeInvoiceNumber(str(formData, "invoice_number") ?? ""),
     status: (str(formData, "status") as CompanyStatus) ?? "prospect",
     notes: str(formData, "notes"),
   });

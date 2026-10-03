@@ -37,6 +37,7 @@ export interface CompanyInput {
   established_on?: string | null;
   capital?: number | null;
   hp?: string | null;
+  invoice_number?: string | null;
   status: CompanyStatus;
   notes?: string | null;
 }
@@ -151,6 +152,40 @@ export async function setCompanyHp(id: string, hp: string): Promise<void> {
   if (c) c.hp = value;
 }
 
+/**
+ * 適格請求書発行事業者の登録番号を整える。
+ * 空白・ハイフンを取り除き、小文字の t も大文字に揃えてから形式を確認する。
+ * 未入力は null を返す。
+ */
+export function normalizeInvoiceNumber(value: string): string | null {
+  const normalized = value.replace(/[\s-－―ー]/g, "").toUpperCase();
+  if (!normalized) return null;
+  if (!/^T\d{13}$/.test(normalized)) {
+    throw new Error("登録番号は T と13桁の数字で入力してください。");
+  }
+  return normalized;
+}
+
+/** 適格請求書発行事業者の登録番号（インボイス番号）を保存する */
+export async function setCompanyInvoiceNumber(
+  id: string,
+  invoiceNumber: string,
+): Promise<void> {
+  const value = normalizeInvoiceNumber(invoiceNumber);
+
+  const supabase = getSupabase();
+  if (supabase) {
+    const { error } = await supabase
+      .from("companies")
+      .update({ invoice_number: value })
+      .eq("id", id);
+    if (error) throw new Error(error.message);
+    return;
+  }
+  const c = getMockDb().companies.find((x) => x.id === id);
+  if (c) c.invoice_number = value;
+}
+
 /** 登記簿謄本の画像を保存し、公開URLを会社に紐づける */
 export async function saveToukiImage(
   companyId: string,
@@ -241,6 +276,7 @@ export async function createCompany(input: CompanyInput): Promise<Company> {
     established_on: input.established_on ?? null,
     capital: input.capital ?? null,
     hp: input.hp ?? null,
+    invoice_number: input.invoice_number ?? null,
     status: input.status,
     notes: input.notes ?? null,
     created_at: ts,
