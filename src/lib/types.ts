@@ -56,6 +56,8 @@ export interface Company {
   notes: string | null;
   /** 会社HPのURL */
   hp?: string | null;
+  /** 適格請求書発行事業者の登録番号（インボイス番号 / T+13桁） */
+  invoice_number?: string | null;
   /** 登記簿謄本(画像)のURL */
   touki_url?: string | null;
   /** 並び順（ドラッグ&ドロップで変更） */

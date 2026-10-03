@@ -53,6 +53,9 @@ export default function NewCompanyPage() {
           <Field label="設立年月日">
             <TextInput type="date" name="established_on" />
           </Field>
+          <Field label="登録番号（インボイス）">
+            <TextInput name="invoice_number" placeholder="T1234567890123" />
+          </Field>
           <Field label="資本金（円）">
             <TextInput
               type="number"
