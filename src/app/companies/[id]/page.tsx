@@ -1,6 +1,10 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getCompany, getCasesByCompany } from "@/lib/data";
+import {
+  getCompany,
+  getCasesByCompany,
+  formatCompanyNumber,
+} from "@/lib/data";
 import { formatCurrency, formatDate } from "@/lib/format";
 import { PageHeader } from "@/components/PageHeader";
 import {
@@ -93,6 +97,18 @@ export default async function CompanyDetailPage({
             <dt className="text-sm text-gray-500">登録番号（インボイス）</dt>
             <dd className="mt-1 font-mono text-sm text-gray-900">
               {company.invoice_number ?? "—"}
+            </dd>
+          </div>
+          <div>
+            <dt className="text-sm text-gray-500">会社法人等番号</dt>
+            <dd className="mt-1 font-mono text-sm text-gray-900">
+              {formatCompanyNumber(company.company_number)}
+            </dd>
+          </div>
+          <div>
+            <dt className="text-sm text-gray-500">法人番号</dt>
+            <dd className="mt-1 font-mono text-sm text-gray-900">
+              {company.corporate_number ?? "—"}
             </dd>
           </div>
           <div>

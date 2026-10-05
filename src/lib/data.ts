@@ -38,6 +38,8 @@ export interface CompanyInput {
   capital?: number | null;
   hp?: string | null;
   invoice_number?: string | null;
+  company_number?: string | null;
+  corporate_number?: string | null;
   status: CompanyStatus;
   notes?: string | null;
 }
@@ -166,6 +168,43 @@ export function normalizeInvoiceNumber(value: string): string | null {
   return normalized;
 }
 
+/** 全角数字を半角にし、空白・ハイフンを取り除く */
+function toPlainDigits(value: string): string {
+  return value
+    .replace(/[０-９]/g, (c) => String.fromCharCode(c.charCodeAt(0) - 0xfee0))
+    .replace(/[\s-－―ー]/g, "");
+}
+
+/**
+ * 会社法人等番号（登記簿の12桁）を整える。
+ * 登記簿の「0300-01-103360」のようなハイフン付き表記も受け付ける。
+ */
+export function normalizeCompanyNumber(value: string): string | null {
+  const normalized = toPlainDigits(value);
+  if (!normalized) return null;
+  if (!/^\d{12}$/.test(normalized)) {
+    throw new Error("会社法人等番号は12桁の数字で入力してください。");
+  }
+  return normalized;
+}
+
+/** 法人番号（国税庁の13桁）を整える */
+export function normalizeCorporateNumber(value: string): string | null {
+  const normalized = toPlainDigits(value);
+  if (!normalized) return null;
+  if (!/^\d{13}$/.test(normalized)) {
+    throw new Error("法人番号は13桁の数字で入力してください。");
+  }
+  return normalized;
+}
+
+/** 会社法人等番号を「0300-01-103360」の形に整形して表示する */
+export function formatCompanyNumber(value?: string | null): string {
+  if (!value) return "—";
+  if (!/^\d{12}$/.test(value)) return value;
+  return `${value.slice(0, 4)}-${value.slice(4, 6)}-${value.slice(6)}`;
+}
+
 /** 適格請求書発行事業者の登録番号（インボイス番号）を保存する */
 export async function setCompanyInvoiceNumber(
   id: string,
@@ -277,6 +316,8 @@ export async function createCompany(input: CompanyInput): Promise<Company> {
     capital: input.capital ?? null,
     hp: input.hp ?? null,
     invoice_number: input.invoice_number ?? null,
+    company_number: input.company_number ?? null,
+    corporate_number: input.corporate_number ?? null,
     status: input.status,
     notes: input.notes ?? null,
     created_at: ts,
@@ -304,6 +345,8 @@ export async function updateCompany(
     capital: input.capital ?? null,
     hp: input.hp ?? null,
     invoice_number: input.invoice_number ?? null,
+    company_number: input.company_number ?? null,
+    corporate_number: input.corporate_number ?? null,
     status: input.status,
     notes: input.notes ?? null,
   };
