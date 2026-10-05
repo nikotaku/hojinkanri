@@ -40,7 +40,15 @@ export default async function CompanyDetailPage({
       </PageHeader>
 
       <section className="mb-6 rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
-        <h2 className="mb-5 text-base font-semibold text-gray-900">法人詳細</h2>
+        <div className="mb-5 flex items-center justify-between gap-3">
+          <h2 className="text-base font-semibold text-gray-900">法人詳細</h2>
+          <Link
+            href={`/companies/${company.id}/edit`}
+            className="inline-flex shrink-0 items-center rounded-lg border border-brand-600 bg-white px-4 py-1.5 text-sm font-medium text-brand-700 shadow-sm transition hover:bg-brand-50"
+          >
+            編集
+          </Link>
+        </div>
         <dl className="grid grid-cols-1 gap-x-8 gap-y-5 sm:grid-cols-2 lg:grid-cols-3">
           <div>
             <dt className="text-sm text-gray-500">登記住所</dt>
@@ -87,7 +95,58 @@ export default async function CompanyDetailPage({
               {company.invoice_number ?? "—"}
             </dd>
           </div>
+          <div>
+            <dt className="text-sm text-gray-500">業種</dt>
+            <dd className="mt-1 text-sm text-gray-900">
+              {company.industry ?? "—"}
+            </dd>
+          </div>
+          <div>
+            <dt className="text-sm text-gray-500">担当者名</dt>
+            <dd className="mt-1 text-sm text-gray-900">
+              {company.contact_person ?? "—"}
+            </dd>
+          </div>
+          <div>
+            <dt className="text-sm text-gray-500">電話番号</dt>
+            <dd className="mt-1 text-sm">
+              {company.phone ? (
+                <a
+                  href={`tel:${company.phone.replace(/[^\d+]/g, "")}`}
+                  className="text-brand-600 hover:text-brand-700 hover:underline"
+                >
+                  {company.phone}
+                </a>
+              ) : (
+                <span className="text-gray-900">—</span>
+              )}
+            </dd>
+          </div>
+          <div>
+            <dt className="text-sm text-gray-500">メールアドレス</dt>
+            <dd className="mt-1 break-all text-sm">
+              {company.email ? (
+                <a
+                  href={`mailto:${company.email}`}
+                  className="text-brand-600 hover:text-brand-700 hover:underline"
+                >
+                  {company.email}
+                </a>
+              ) : (
+                <span className="text-gray-900">—</span>
+              )}
+            </dd>
+          </div>
         </dl>
+
+        {company.notes && (
+          <div className="mt-5 border-t border-gray-100 pt-4">
+            <dt className="text-sm text-gray-500">メモ</dt>
+            <dd className="mt-1 whitespace-pre-wrap text-sm text-gray-900">
+              {company.notes}
+            </dd>
+          </div>
+        )}
       </section>
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">

@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import {
   createCompany,
+  updateCompany,
   deleteCompany,
   createCase,
   createCaseTasks,
@@ -373,6 +374,40 @@ export async function createCompanyAction(formData: FormData) {
   revalidatePath("/companies");
   revalidatePath("/");
   redirect(`/companies/${company.id}`);
+}
+
+/** 法人の基本情報を更新する */
+export async function updateCompanyAction(formData: FormData) {
+  const id = str(formData, "id");
+  if (!id) throw new Error("更新対象の法人が指定されていません。");
+  const name = str(formData, "name");
+  if (!name) throw new Error("会社名は必須です。");
+  const capitalRaw = str(formData, "capital");
+  const capital = capitalRaw
+    ? Number(capitalRaw.replace(/[,，]/g, ""))
+    : null;
+
+  await updateCompany(id, {
+    name,
+    name_kana: str(formData, "name_kana"),
+    industry: str(formData, "industry"),
+    contact_person: str(formData, "contact_person"),
+    email: str(formData, "email"),
+    phone: str(formData, "phone"),
+    address: str(formData, "address"),
+    representative_name: str(formData, "representative_name"),
+    established_on: str(formData, "established_on"),
+    capital: capital != null && Number.isFinite(capital) ? capital : null,
+    hp: str(formData, "hp"),
+    invoice_number: normalizeInvoiceNumber(str(formData, "invoice_number") ?? ""),
+    status: (str(formData, "status") as CompanyStatus) ?? "prospect",
+    notes: str(formData, "notes"),
+  });
+
+  revalidatePath("/companies");
+  revalidatePath(`/companies/${id}`);
+  revalidatePath("/");
+  redirect(`/companies/${id}`);
 }
 
 /** 法人と紐づく案件・名刺画像を削除する */
