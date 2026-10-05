@@ -317,6 +317,20 @@ export interface MeishiImageWithCompany extends MeishiImage {
   company_name: string;
 }
 
+/** GMO後払いを利用するサイトごとの申込・審査状況 */
+export interface GmoAtobaraiSite {
+  id: string;
+  site_name: string;
+  company_id: string | null;
+  status: string;
+  applied_on: string | null;
+  amount: number | null;
+  /** 審査結果について分かっていること（落ちた理由の推測など） */
+  result_note: string | null;
+  notes: string | null;
+  created_at: string;
+}
+
 // --- crow 案件管理 ---
 
 /** crow: 抱き合わせ営業依頼先 */

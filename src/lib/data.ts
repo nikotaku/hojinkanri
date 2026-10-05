@@ -13,6 +13,7 @@ import {
   type CrowPartner,
   type CrowContract,
   type CrowStore,
+  type GmoAtobaraiSite,
   type MeishiImage,
   type MeishiImageWithCompany,
   type MobileContractDetail,
@@ -1170,6 +1171,54 @@ export const createCrowStore = (row: Record<string, unknown>) =>
   crowInsert("crow_stores", "stores", row);
 export const deleteCrowStore = (id: string) =>
   crowDelete("crow_stores", "stores", id);
+
+// --- GMO後払い ---
+
+/** GMO後払いの利用サイトを申込日の新しい順に取得する */
+export async function listGmoAtobaraiSites(): Promise<GmoAtobaraiSite[]> {
+  const supabase = getSupabase();
+  if (supabase) {
+    const { data, error } = await supabase
+      .from("gmo_atobarai_sites")
+      .select("*")
+      .order("created_at", { ascending: false });
+    if (error) throw new Error(error.message);
+    return data as GmoAtobaraiSite[];
+  }
+  return [...getMockDb().gmoAtobaraiSites].sort((a, b) =>
+    b.created_at.localeCompare(a.created_at),
+  );
+}
+
+export async function createGmoAtobaraiSite(
+  row: Record<string, unknown>,
+): Promise<void> {
+  const supabase = getSupabase();
+  if (supabase) {
+    const { error } = await supabase.from("gmo_atobarai_sites").insert(row);
+    if (error) throw new Error(error.message);
+    return;
+  }
+  getMockDb().gmoAtobaraiSites.push({
+    id: crypto.randomUUID(),
+    created_at: nowIso(),
+    ...row,
+  } as unknown as GmoAtobaraiSite);
+}
+
+export async function deleteGmoAtobaraiSite(id: string): Promise<void> {
+  const supabase = getSupabase();
+  if (supabase) {
+    const { error } = await supabase
+      .from("gmo_atobarai_sites")
+      .delete()
+      .eq("id", id);
+    if (error) throw new Error(error.message);
+    return;
+  }
+  const db = getMockDb();
+  db.gmoAtobaraiSites = db.gmoAtobaraiSites.filter((r) => r.id !== id);
+}
 
 // --- 名刺画像管理 ---
 

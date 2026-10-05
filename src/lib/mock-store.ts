@@ -10,6 +10,7 @@ import type {
   MobileContractDetail,
   BillingUsageDetail,
   CaseTask,
+  GmoAtobaraiSite,
 } from "./types";
 
 // Supabase 未設定時に使うインメモリのサンプルデータ。
@@ -250,6 +251,7 @@ interface MockDb {
     contracts: CrowContract[];
     stores: CrowStore[];
   };
+  gmoAtobaraiSites: GmoAtobaraiSite[];
 }
 
 const globalForMock = globalThis as unknown as { __mockDb?: MockDb };
@@ -305,6 +307,7 @@ export function getMockDb(): MockDb {
           },
         ],
       },
+      gmoAtobaraiSites: [],
     };
   }
   return globalForMock.__mockDb;
