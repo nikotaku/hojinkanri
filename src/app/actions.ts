@@ -30,6 +30,8 @@ import {
   deleteCrowContract,
   createCrowStore,
   deleteCrowStore,
+  createGmoAtobaraiSite,
+  deleteGmoAtobaraiSite,
   createMobileContractDetail,
   updateMobileContractDetail,
   deleteMobileContractDetail,
@@ -116,6 +118,33 @@ export async function deleteCrowStoreAction(formData: FormData) {
   const id = str(formData, "id");
   if (id) await deleteCrowStore(id);
   revalidatePath("/crow");
+}
+
+// --- GMO後払い ---
+
+/** GMO後払いの利用サイトを1件追加する */
+export async function createGmoAtobaraiSiteAction(formData: FormData) {
+  const siteName = str(formData, "site_name");
+  if (!siteName) throw new Error("サイト名は必須です。");
+  const amountRaw = str(formData, "amount");
+  const amount = amountRaw ? Number(amountRaw.replace(/[,，]/g, "")) : null;
+
+  await createGmoAtobaraiSite({
+    site_name: siteName,
+    company_id: str(formData, "company_id"),
+    status: str(formData, "status") ?? "未着手",
+    applied_on: str(formData, "applied_on"),
+    amount: amount != null && Number.isFinite(amount) ? amount : null,
+    result_note: str(formData, "result_note"),
+    notes: str(formData, "notes"),
+  });
+  revalidatePath("/gmo-atobarai");
+}
+
+export async function deleteGmoAtobaraiSiteAction(formData: FormData) {
+  const id = str(formData, "id");
+  if (id) await deleteGmoAtobaraiSite(id);
+  revalidatePath("/gmo-atobarai");
 }
 
 /** 名刺画像をアップロードして会社に紐づける */
