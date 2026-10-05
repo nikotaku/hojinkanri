@@ -286,6 +286,46 @@ export async function createCompany(input: CompanyInput): Promise<Company> {
   return company;
 }
 
+/** 法人の基本情報を更新する（サービス状況などの個別項目はここでは触らない） */
+export async function updateCompany(
+  id: string,
+  input: CompanyInput,
+): Promise<Company> {
+  const patch = {
+    name: input.name,
+    name_kana: input.name_kana ?? null,
+    industry: input.industry ?? null,
+    contact_person: input.contact_person ?? null,
+    email: input.email ?? null,
+    phone: input.phone ?? null,
+    address: input.address ?? null,
+    representative_name: input.representative_name ?? null,
+    established_on: input.established_on ?? null,
+    capital: input.capital ?? null,
+    hp: input.hp ?? null,
+    invoice_number: input.invoice_number ?? null,
+    status: input.status,
+    notes: input.notes ?? null,
+  };
+
+  const supabase = getSupabase();
+  if (supabase) {
+    const { data, error } = await supabase
+      .from("companies")
+      .update(patch)
+      .eq("id", id)
+      .select("*")
+      .single();
+    if (error) throw new Error(error.message);
+    return data as Company;
+  }
+
+  const company = getMockDb().companies.find((c) => c.id === id);
+  if (!company) throw new Error("対象の法人が見つかりませんでした。");
+  Object.assign(company, patch, { updated_at: nowIso() });
+  return company;
+}
+
 function getStoragePathFromPublicUrl(
   url: string | null | undefined,
   bucket: string,
