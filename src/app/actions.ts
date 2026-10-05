@@ -13,6 +13,8 @@ import {
   setCompanyHp,
   setCompanyInvoiceNumber,
   normalizeInvoiceNumber,
+  normalizeCompanyNumber,
+  normalizeCorporateNumber,
   saveToukiImage,
   reorderCompanies,
   createBacklogEntry,
@@ -367,6 +369,10 @@ export async function createCompanyAction(formData: FormData) {
     capital: capital != null && Number.isFinite(capital) ? capital : null,
     hp: str(formData, "hp"),
     invoice_number: normalizeInvoiceNumber(str(formData, "invoice_number") ?? ""),
+    company_number: normalizeCompanyNumber(str(formData, "company_number") ?? ""),
+    corporate_number: normalizeCorporateNumber(
+      str(formData, "corporate_number") ?? "",
+    ),
     status: (str(formData, "status") as CompanyStatus) ?? "prospect",
     notes: str(formData, "notes"),
   });
@@ -400,6 +406,10 @@ export async function updateCompanyAction(formData: FormData) {
     capital: capital != null && Number.isFinite(capital) ? capital : null,
     hp: str(formData, "hp"),
     invoice_number: normalizeInvoiceNumber(str(formData, "invoice_number") ?? ""),
+    company_number: normalizeCompanyNumber(str(formData, "company_number") ?? ""),
+    corporate_number: normalizeCorporateNumber(
+      str(formData, "corporate_number") ?? "",
+    ),
     status: (str(formData, "status") as CompanyStatus) ?? "prospect",
     notes: str(formData, "notes"),
   });

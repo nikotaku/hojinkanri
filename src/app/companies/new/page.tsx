@@ -53,8 +53,14 @@ export default function NewCompanyPage() {
           <Field label="設立年月日">
             <TextInput type="date" name="established_on" />
           </Field>
+          <Field label="会社法人等番号（登記簿・12桁）">
+            <TextInput name="company_number" pattern="(?:[0-9０-９][\s\-－]*){12}" title="12桁の数字で入力してください（ハイフンあり可）" inputMode="numeric" placeholder="0300-01-103360" />
+          </Field>
+          <Field label="法人番号（国税庁・13桁）">
+            <TextInput name="corporate_number" pattern="(?:[0-9０-９][\s\-－]*){13}" title="13桁の数字で入力してください（ハイフンあり可）" inputMode="numeric" placeholder="9370003006437" />
+          </Field>
           <Field label="登録番号（インボイス）">
-            <TextInput name="invoice_number" placeholder="T1234567890123" />
+            <TextInput name="invoice_number" pattern="[TtＴｔ][\s\-－]*(?:[0-9０-９][\s\-－]*){13}" title="T のあとに13桁の数字で入力してください" placeholder="T1234567890123" />
           </Field>
           <Field label="資本金（円）">
             <TextInput

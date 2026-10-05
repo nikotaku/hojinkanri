@@ -58,6 +58,10 @@ export interface Company {
   hp?: string | null;
   /** 適格請求書発行事業者の登録番号（インボイス番号 / T+13桁） */
   invoice_number?: string | null;
+  /** 会社法人等番号（登記簿に記載される12桁） */
+  company_number?: string | null;
+  /** 法人番号（国税庁の13桁） */
+  corporate_number?: string | null;
   /** 登記簿謄本(画像)のURL */
   touki_url?: string | null;
   /** 並び順（ドラッグ&ドロップで変更） */
