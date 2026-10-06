@@ -402,6 +402,12 @@ export async function createCompanyAction(formData: FormData) {
     corporate_number: normalizeCorporateNumber(
       str(formData, "corporate_number") ?? "",
     ),
+    progress_status: str(formData, "progress_status"),
+    incorporation_filing_status: str(formData, "incorporation_filing_status"),
+    payment_target_on: str(formData, "payment_target_on"),
+    etax_id: str(formData, "etax_id"),
+    call_check: str(formData, "call_check"),
+    reason: str(formData, "reason"),
     status: (str(formData, "status") as CompanyStatus) ?? "prospect",
     notes: str(formData, "notes"),
   });
@@ -439,6 +445,12 @@ export async function updateCompanyAction(formData: FormData) {
     corporate_number: normalizeCorporateNumber(
       str(formData, "corporate_number") ?? "",
     ),
+    progress_status: str(formData, "progress_status"),
+    incorporation_filing_status: str(formData, "incorporation_filing_status"),
+    payment_target_on: str(formData, "payment_target_on"),
+    etax_id: str(formData, "etax_id"),
+    call_check: str(formData, "call_check"),
+    reason: str(formData, "reason"),
     status: (str(formData, "status") as CompanyStatus) ?? "prospect",
     notes: str(formData, "notes"),
   });

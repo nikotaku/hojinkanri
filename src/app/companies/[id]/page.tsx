@@ -139,6 +139,42 @@ export default async function CompanyDetailPage({
             </dd>
           </div>
           <div>
+            <dt className="text-sm text-gray-500">進行ステータス</dt>
+            <dd className="mt-1 text-sm text-gray-900">
+              {company.progress_status ?? "—"}
+            </dd>
+          </div>
+          <div>
+            <dt className="text-sm text-gray-500">法人設立届</dt>
+            <dd className="mt-1 text-sm text-gray-900">
+              {company.incorporation_filing_status ?? "—"}
+            </dd>
+          </div>
+          <div>
+            <dt className="text-sm text-gray-500">着金目標日</dt>
+            <dd className="mt-1 text-sm text-gray-900">
+              {formatDate(company.payment_target_on)}
+            </dd>
+          </div>
+          <div>
+            <dt className="text-sm text-gray-500">e-tax利用者識別番号</dt>
+            <dd className="mt-1 font-mono text-sm text-gray-900">
+              {company.etax_id ?? "—"}
+            </dd>
+          </div>
+          <div>
+            <dt className="text-sm text-gray-500">架電確認</dt>
+            <dd className="mt-1 text-sm text-gray-900">
+              {company.call_check ?? "—"}
+            </dd>
+          </div>
+          <div>
+            <dt className="text-sm text-gray-500">原因</dt>
+            <dd className="mt-1 whitespace-pre-wrap text-sm text-gray-900">
+              {company.reason ?? "—"}
+            </dd>
+          </div>
+          <div>
             <dt className="text-sm text-gray-500">メールアドレス</dt>
             <dd className="mt-1 break-all text-sm">
               {company.email ? (

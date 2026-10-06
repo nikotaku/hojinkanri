@@ -14,6 +14,7 @@ const nav = [
   { href: "/billing", label: "掛け払い", icon: "🧾" },
   { href: "/accounts", label: "口座関連", icon: "🏦" },
   { href: "/gmo-atobarai", label: "GMO後払い", icon: "🛒" },
+  { href: "/other-services", label: "その他サービス", icon: "🧩" },
   { href: "/backlog", label: "バックログ", icon: "📝" },
   { href: "/meishi", label: "名刺作成", icon: "💳" },
   { href: "/meishi-images", label: "名刺画像管理", icon: "🖼️" },
