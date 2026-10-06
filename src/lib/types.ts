@@ -64,6 +64,26 @@ export interface Company {
   corporate_number?: string | null;
   /** 登記簿謄本(画像)のURL */
   touki_url?: string | null;
+  /** 架電確認の記録 */
+  call_check?: string | null;
+  /** e-tax利用者識別番号 */
+  etax_id?: string | null;
+  /** 審査落ちなどの原因メモ */
+  reason?: string | null;
+  /** 進行ステータス（未着手/書類準備中/審査開始/完了/中止） */
+  progress_status?: string | null;
+  /** 法人設立届の提出状況 */
+  incorporation_filing_status?: string | null;
+  /** 着金目標日 */
+  payment_target_on?: string | null;
+  /** その他サービスの状況 (サービス名 -> ステータス) */
+  other_services?: Record<string, string> | null;
+  other_services_phone?: Record<string, string> | null;
+  other_services_email?: Record<string, string> | null;
+  other_services_name?: Record<string, string> | null;
+  other_services_admin_url?: Record<string, string> | null;
+  other_services_login_id?: Record<string, string> | null;
+  other_services_login_pw?: Record<string, string> | null;
   /** 並び順（ドラッグ&ドロップで変更） */
   sort_order?: number | null;
   /** タクシー関連サービスの状況 (サービス名 -> ステータス) */
@@ -132,7 +152,54 @@ export const ACCOUNT_SERVICES = [
 ] as const;
 
 /** 法人モバイル回線で表示するサービス列 */
-export const MOBILE_SERVICES = ["ドコモ", "UQ"] as const;
+export const MOBILE_SERVICES = [
+  "ドコモ",
+  "UQ",
+  "ワイモバイル",
+  "エクスモバイル",
+] as const;
+
+/** その他サービスで表示するサービス列 */
+export const OTHER_SERVICES = [
+  "Amazonビジネス",
+  "タイミー",
+  "シェアフル",
+  "bybit",
+  "OKコイン",
+  "ポーシャペイ",
+] as const;
+
+/** その他サービスのステータス選択肢 */
+export const OTHER_SERVICE_STATUS_OPTIONS = [
+  "未着手",
+  "未設定",
+  "申請済み",
+  "審査中",
+  "印鑑証明待ち",
+  "開設ずみ",
+  "進行中",
+  "使用中",
+  "限度額まで使用",
+  "要問い合わせ",
+  "設定不可",
+  "審査落ち",
+] as const;
+
+/** 法人の進行ステータス（Notionから移植） */
+export const PROGRESS_STATUS_OPTIONS = [
+  "未着手",
+  "書類準備中",
+  "審査開始",
+  "完了",
+  "中止",
+] as const;
+
+/** 法人設立届の提出状況 */
+export const INCORPORATION_FILING_OPTIONS = [
+  "未着手",
+  "進行中",
+  "完了",
+] as const;
 
 /** 掛け払いで表示するサービス列 */
 export const BILLING_SERVICES = ["NPかけ払い", "Paid", "GMOかけ払い"] as const;

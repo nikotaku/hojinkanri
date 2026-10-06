@@ -41,6 +41,12 @@ export interface CompanyInput {
   invoice_number?: string | null;
   company_number?: string | null;
   corporate_number?: string | null;
+  progress_status?: string | null;
+  incorporation_filing_status?: string | null;
+  payment_target_on?: string | null;
+  etax_id?: string | null;
+  call_check?: string | null;
+  reason?: string | null;
   status: CompanyStatus;
   notes?: string | null;
 }
@@ -319,6 +325,12 @@ export async function createCompany(input: CompanyInput): Promise<Company> {
     invoice_number: input.invoice_number ?? null,
     company_number: input.company_number ?? null,
     corporate_number: input.corporate_number ?? null,
+    progress_status: input.progress_status ?? null,
+    incorporation_filing_status: input.incorporation_filing_status ?? null,
+    payment_target_on: input.payment_target_on ?? null,
+    etax_id: input.etax_id ?? null,
+    call_check: input.call_check ?? null,
+    reason: input.reason ?? null,
     status: input.status,
     notes: input.notes ?? null,
     created_at: ts,
@@ -348,6 +360,12 @@ export async function updateCompany(
     invoice_number: input.invoice_number ?? null,
     company_number: input.company_number ?? null,
     corporate_number: input.corporate_number ?? null,
+    progress_status: input.progress_status ?? null,
+    incorporation_filing_status: input.incorporation_filing_status ?? null,
+    payment_target_on: input.payment_target_on ?? null,
+    etax_id: input.etax_id ?? null,
+    call_check: input.call_check ?? null,
+    reason: input.reason ?? null,
     status: input.status,
     notes: input.notes ?? null,
   };
@@ -490,7 +508,14 @@ export type ServiceField =
   | "billing_admin_url"
   | "billing_login_id"
   | "billing_login_pw"
-  | "billing_unavailable_reason";
+  | "billing_unavailable_reason"
+  | "other_services"
+  | "other_services_phone"
+  | "other_services_email"
+  | "other_services_name"
+  | "other_services_admin_url"
+  | "other_services_login_id"
+  | "other_services_login_pw";
 
 export async function setCompanyService(
   id: string,

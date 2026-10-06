@@ -2,7 +2,11 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getCompany } from "@/lib/data";
 import { updateCompanyAction } from "@/app/actions";
-import { COMPANY_STATUS_LABELS } from "@/lib/types";
+import {
+  COMPANY_STATUS_LABELS,
+  PROGRESS_STATUS_OPTIONS,
+  INCORPORATION_FILING_OPTIONS,
+} from "@/lib/types";
 import { PageHeader } from "@/components/PageHeader";
 import {
   Field,
@@ -154,6 +158,54 @@ export default async function EditCompanyPage({
             />
           </Field>
         </div>
+
+        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+          <Field label="進行ステータス">
+            <Select name="progress_status" defaultValue={company.progress_status ?? ""}>
+              <option value="">（未設定）</option>
+              {PROGRESS_STATUS_OPTIONS.map((v) => (
+                <option key={v} value={v}>{v}</option>
+              ))}
+            </Select>
+          </Field>
+          <Field label="法人設立届">
+            <Select
+              name="incorporation_filing_status"
+              defaultValue={company.incorporation_filing_status ?? ""}
+            >
+              <option value="">（未設定）</option>
+              {INCORPORATION_FILING_OPTIONS.map((v) => (
+                <option key={v} value={v}>{v}</option>
+              ))}
+            </Select>
+          </Field>
+          <Field label="着金目標日">
+            <TextInput
+              type="date"
+              name="payment_target_on"
+              defaultValue={company.payment_target_on ?? ""}
+            />
+          </Field>
+          <Field label="e-tax利用者識別番号">
+            <TextInput
+              name="etax_id"
+              inputMode="numeric"
+              defaultValue={company.etax_id ?? ""}
+              placeholder="1234567890123456"
+            />
+          </Field>
+          <Field label="架電確認">
+            <TextInput
+              name="call_check"
+              defaultValue={company.call_check ?? ""}
+              placeholder="例: 2026-10-01 繋がった"
+            />
+          </Field>
+        </div>
+
+        <Field label="原因（審査落ちの理由など）">
+          <TextArea name="reason" rows={2} defaultValue={company.reason ?? ""} />
+        </Field>
 
         <Field label="メモ">
           <TextArea

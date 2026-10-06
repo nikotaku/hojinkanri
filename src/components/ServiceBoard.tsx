@@ -41,6 +41,15 @@ const FIELD_SETS = {
     loginId: "billing_login_id",
     loginPw: "billing_login_pw",
   },
+  other: {
+    status: "other_services",
+    phone: "other_services_phone",
+    email: "other_services_email",
+    name: "other_services_name",
+    adminUrl: "other_services_admin_url",
+    loginId: "other_services_login_id",
+    loginPw: "other_services_login_pw",
+  },
 } as const;
 
 type Prefix = keyof typeof FIELD_SETS;
