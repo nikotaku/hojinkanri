@@ -1,5 +1,9 @@
 import { listGmoAtobaraiSites, listCompanies } from "@/lib/data";
-import { BILLING_STATUS_OPTIONS } from "@/lib/types";
+import {
+  BILLING_STATUS_OPTIONS,
+  GMO_ATOBARAI_SITE_GROUPS,
+  GMO_ATOBARAI_SITE_OPTIONS,
+} from "@/lib/types";
 import {
   createGmoAtobaraiSiteAction,
   deleteGmoAtobaraiSiteAction,
@@ -161,6 +165,43 @@ export default async function GmoAtobaraiPage() {
         </div>
       </section>
 
+      {/* 使えるサイト一覧 */}
+      <section className="mb-6 rounded-xl border border-gray-200 bg-white p-4 shadow-sm sm:p-6">
+        <h2 className="text-base font-semibold text-gray-900">
+          GMO後払いが使えるサイト
+          <span className="ml-2 text-sm font-normal text-gray-500">
+            （{GMO_ATOBARAI_SITE_OPTIONS.length}件）
+          </span>
+        </h2>
+        <p className="mt-1 rounded-lg bg-amber-50 p-2.5 text-xs leading-relaxed text-amber-800">
+          GMOペイメントサービスは加盟店の網羅リストを公開していません。以下は
+          各販売サイトの案内と後払い決済のまとめサイトで確認できたもので、
+          <strong>これで全てではありません</strong>。導入状況は変わるため、
+          申し込む前に各サイトの支払方法ページで最新をご確認ください（確認日: 2026-10-07）。
+        </p>
+
+        <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {GMO_ATOBARAI_SITE_GROUPS.map((g) => (
+            <div key={g.label} className="rounded-lg border border-gray-100 bg-gray-50/60 p-3">
+              <p className="text-xs font-semibold text-gray-700">{g.label}</p>
+              <ul className="mt-1.5 space-y-1">
+                {g.options.map((o) => (
+                  <li key={o} className="text-sm leading-snug text-gray-600">
+                    {o}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
+        </div>
+
+        <p className="mt-3 text-xs leading-relaxed text-gray-500">
+          GMO後払いは主に個人向け（BtoC）の後払い決済です。
+          <strong>法人名義で使えるかは販売サイトごとに異なる</strong>ため、
+          法人で申し込む場合は各サイトに確認してください。
+        </p>
+      </section>
+
       {/* 追加フォーム */}
       <form
         action={createGmoAtobaraiSiteAction}
@@ -171,7 +212,17 @@ export default async function GmoAtobaraiPage() {
         </h2>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <Field label="利用サイト" required>
-            <TextInput name="site_name" required placeholder="カクヤス" />
+            <TextInput
+              name="site_name"
+              required
+              list="gmo-atobarai-sites"
+              placeholder="入力すると候補が出ます（候補外も入力可）"
+            />
+            <datalist id="gmo-atobarai-sites">
+              {GMO_ATOBARAI_SITE_OPTIONS.map((o) => (
+                <option key={o} value={o} />
+              ))}
+            </datalist>
           </Field>
           <Field label="申し込んだ法人">
             <Select name="company_id" defaultValue="">

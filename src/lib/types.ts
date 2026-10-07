@@ -159,6 +159,82 @@ export const MOBILE_SERVICES = [
   "エクスモバイル",
 ] as const;
 
+/**
+ * GMO後払いでの支払いに対応していることを、各販売サイトの案内および
+ * 後払い決済のまとめサイトで確認できた候補。
+ * GMOペイメントサービスは加盟店の網羅リストを公開していないため、
+ * これで全てではない。候補外は「その他」から手入力する。
+ * 確認日: 2026-10-07
+ */
+export const GMO_ATOBARAI_SITE_GROUPS = [
+  {
+    label: "ファッション・アパレル",
+    options: [
+      "ORIHICA（オリヒカ）",
+      "KASHIYAMA",
+      "PAL CLOSET（パルクローゼット）",
+      "FREAK'S STORE",
+      "きもの365",
+      "MILESTO（ミレスト）",
+      "フェリージ オンラインショップ",
+      "レスブリス",
+      "ファイテン",
+      "Pinkoi（ピンコイ）",
+      "BLOOM（ブルーム）",
+    ],
+  },
+  {
+    label: "コスメ・化粧品",
+    options: [
+      "ポーラ公式オンラインストア",
+      "ドクターシーラボ",
+      "セフィーヌ",
+      "ナチュラルグラッセ",
+      "LCラブコスメ",
+      "HOLO BELL",
+      "ETVOS（エトヴォス）",
+      "MISSHA（ミシャ）",
+      "ヴェレダ（WELEDA）",
+    ],
+  },
+  {
+    label: "食品・グルメ・ギフト",
+    options: [
+      "JAタウン",
+      "アンリ・シャルパンティエ",
+      "C3（シーキューブ）",
+      "casaneo（カサネオ）",
+      "Cake.jp",
+      "婦人画報のお取り寄せ",
+    ],
+  },
+  {
+    label: "家具・インテリア・生活雑貨",
+    options: ["BRUNO online", "アクタスオンライン", "SEMPRE.JP"],
+  },
+  {
+    label: "ベビー・キッズ",
+    options: ["Hariti（ハーリティー）", "babybuba（ベビーブーバ）"],
+  },
+  {
+    label: "ホビー・楽器",
+    options: ["イケベ楽器店オンラインストア", "colleize（コレイズ）"],
+  },
+  {
+    label: "印刷・レンタル・その他",
+    options: [
+      "しまうまプリント",
+      "フジプリ",
+      "レンティオ（家電レンタル）",
+      "バッテリーストア.COM",
+    ],
+  },
+] as const;
+
+export const GMO_ATOBARAI_SITE_OPTIONS = GMO_ATOBARAI_SITE_GROUPS.flatMap(
+  (g) => g.options,
+);
+
 /** その他サービスで表示するサービス列 */
 export const OTHER_SERVICES = [
   "Amazonビジネス",
