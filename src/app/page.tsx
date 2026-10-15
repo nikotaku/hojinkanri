@@ -1,9 +1,10 @@
 import Link from "next/link";
-import { getDashboardStats } from "@/lib/data";
+import { getDashboardStats, listCases } from "@/lib/data";
 import { CASE_STATUS_LABELS, type CaseStatus } from "@/lib/types";
 import { formatCurrency, formatDate } from "@/lib/format";
 import { PageHeader } from "@/components/PageHeader";
 import { CaseStatusBadge, PriorityBadge } from "@/components/StatusBadge";
+import { ProgressBar } from "@/components/ProgressBar";
 
 export const dynamic = "force-dynamic";
 
@@ -27,6 +28,15 @@ function StatCard({
 
 export default async function DashboardPage() {
   const stats = await getDashboardStats();
+  // 小タスクのある案件だけを、進み具合の低い順に並べる
+  const casesWithTasks = (await listCases())
+    .filter((c) => c.case_tasks.length > 0)
+    .map((c) => {
+      const total = c.case_tasks.length;
+      const done = c.case_tasks.filter((t) => t.is_completed).length;
+      return { ...c, total, done, percent: Math.round((done / total) * 100) };
+    })
+    .sort((a, b) => a.percent - b.percent);
   const statusOrder: CaseStatus[] = [
     "new",
     "in_progress",
@@ -129,6 +139,32 @@ export default async function DashboardPage() {
           )}
         </section>
       </div>
+
+      {casesWithTasks.length > 0 && (
+        <section className="mt-6 rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
+          <h2 className="mb-1 text-base font-semibold text-gray-900">
+            案件の進捗
+          </h2>
+          <p className="mb-4 text-xs text-gray-500">
+            小タスクを登録した案件を、進み具合の低い順に表示しています。
+          </p>
+          <ul className="space-y-3.5">
+            {casesWithTasks.map((c) => (
+              <li key={c.id}>
+                <div className="mb-1 flex items-baseline justify-between gap-3">
+                  <p className="min-w-0 truncate text-sm font-medium text-gray-900">
+                    {c.title}
+                  </p>
+                  <span className="shrink-0 text-xs text-gray-500">
+                    {c.company_name ?? "法人未設定"}
+                  </span>
+                </div>
+                <ProgressBar completed={c.done} total={c.total} />
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
 
       <div className="mt-8 flex gap-3">
         <Link

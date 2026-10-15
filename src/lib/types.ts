@@ -586,6 +586,11 @@ export interface CaseTask {
 }
 
 /** 法人名を結合した案件(一覧表示用) */
+/** 小タスク付きの案件（進捗表示用） */
+export interface CaseWithTasks extends Case {
+  case_tasks: CaseTask[];
+}
+
 export interface CaseWithCompany extends Case {
   company_name: string;
   case_tasks: CaseTask[];
