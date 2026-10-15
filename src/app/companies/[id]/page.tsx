@@ -15,6 +15,7 @@ import {
 import { CompanyHpInput } from "@/components/CompanyHpInput";
 import { CompanyInvoiceNumberInput } from "@/components/CompanyInvoiceNumberInput";
 import { ToukiUpload } from "@/components/ToukiUpload";
+import { ProgressBar } from "@/components/ProgressBar";
 
 export const dynamic = "force-dynamic";
 
@@ -27,6 +28,9 @@ export default async function CompanyDetailPage({
   if (!company) notFound();
 
   const cases = await getCasesByCompany(company.id);
+  const allTasks = cases.flatMap((c) => c.case_tasks);
+  const totalTasks = allTasks.length;
+  const doneTasks = allTasks.filter((t) => t.is_completed).length;
 
   return (
     <div>
@@ -247,6 +251,15 @@ export default async function CompanyDetailPage({
             </Link>
           </div>
 
+          {totalTasks > 0 && (
+            <div className="mb-4 rounded-lg border border-gray-100 bg-gray-50/70 p-3">
+              <p className="mb-1.5 text-xs font-semibold text-gray-700">
+                この法人の案件全体の進捗
+              </p>
+              <ProgressBar completed={doneTasks} total={totalTasks} />
+            </div>
+          )}
+
           {cases.length === 0 ? (
             <p className="py-6 text-center text-sm text-gray-500">
               この法人にはまだ案件がありません。
@@ -264,6 +277,14 @@ export default async function CompanyDetailPage({
                     <span>担当: {c.assignee ?? "—"}</span>
                     <span>金額: {formatCurrency(c.amount)}</span>
                     <span>期限: {formatDate(c.due_date)}</span>
+                  </div>
+                  <div className="mt-2">
+                    <ProgressBar
+                      completed={
+                        c.case_tasks.filter((t) => t.is_completed).length
+                      }
+                      total={c.case_tasks.length}
+                    />
                   </div>
                 </li>
               ))}

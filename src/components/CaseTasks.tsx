@@ -3,6 +3,7 @@ import {
   toggleCaseTaskAction,
 } from "@/app/actions";
 import type { CaseTask } from "@/lib/types";
+import { ProgressBar } from "@/components/ProgressBar";
 
 export function CaseTasks({
   caseId,
@@ -16,7 +17,21 @@ export function CaseTasks({
   return (
     <details className="group mt-4 border-t border-gray-100 pt-3">
       <summary className="flex cursor-pointer list-none items-center justify-between rounded-lg py-1 text-sm font-medium text-gray-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 [&::-webkit-details-marker]:hidden">
-        <span>小タスク {completed}/{tasks.length}</span>
+        <span className="flex min-w-0 flex-1 items-center gap-3">
+          <span className="shrink-0">
+            小タスク {completed}/{tasks.length}
+          </span>
+          {tasks.length > 0 && (
+            <span className="min-w-0 flex-1">
+              <ProgressBar
+                completed={completed}
+                total={tasks.length}
+                size="sm"
+                showLabel={false}
+              />
+            </span>
+          )}
+        </span>
         <span
           aria-hidden="true"
           className="text-gray-400 transition-transform group-open:rotate-180"

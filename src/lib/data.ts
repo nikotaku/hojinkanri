@@ -5,6 +5,7 @@ import {
   type Case,
   type CaseWithCompany,
   type CaseTask,
+  type CaseWithTasks,
   type CompanyStatus,
   type CaseStatus,
   type CasePriority,
@@ -998,20 +999,35 @@ export async function listCases(): Promise<CaseWithCompany[]> {
     }));
 }
 
-export async function getCasesByCompany(companyId: string): Promise<Case[]> {
+/** 法人に紐づく案件を、進捗表示のために小タスクごと取得する */
+export async function getCasesByCompany(
+  companyId: string,
+): Promise<CaseWithTasks[]> {
   const supabase = getSupabase();
   if (supabase) {
     const { data, error } = await supabase
       .from("cases")
-      .select("*")
+      .select("*, case_tasks(*)")
       .eq("company_id", companyId)
       .order("created_at", { ascending: false });
     if (error) throw new Error(error.message);
-    return data as Case[];
+    return (data as (Case & { case_tasks: CaseTask[] | null })[]).map((c) => ({
+      ...c,
+      case_tasks: (c.case_tasks ?? []).sort(
+        (a, b) => a.sort_order - b.sort_order,
+      ),
+    }));
   }
-  return getMockDb()
-    .cases.filter((c) => c.company_id === companyId)
-    .sort((a, b) => b.created_at.localeCompare(a.created_at));
+  const db = getMockDb();
+  return db.cases
+    .filter((c) => c.company_id === companyId)
+    .sort((a, b) => b.created_at.localeCompare(a.created_at))
+    .map((c) => ({
+      ...c,
+      case_tasks: db.caseTasks
+        .filter((t) => t.case_id === c.id)
+        .sort((a, b) => a.sort_order - b.sort_order),
+    }));
 }
 
 export async function createCase(input: CaseInput): Promise<Case> {
