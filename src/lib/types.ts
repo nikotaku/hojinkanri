@@ -46,6 +46,8 @@ export interface Company {
   email: string | null;
   phone: string | null;
   address: string | null;
+  /** 郵便番号（123-4567） */
+  postal_code?: string | null;
   /** 代表者名 */
   representative_name?: string | null;
   /** 設立年月日 */

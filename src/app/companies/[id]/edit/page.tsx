@@ -8,6 +8,7 @@ import {
   INCORPORATION_FILING_OPTIONS,
 } from "@/lib/types";
 import { PageHeader } from "@/components/PageHeader";
+import { PostalCodeField } from "@/components/PostalCodeField";
 import {
   Field,
   TextInput,
@@ -94,13 +95,10 @@ export default async function EditCompanyPage({
               placeholder="info@example.com"
             />
           </Field>
-          <Field label="住所">
-            <TextInput
-              name="address"
-              defaultValue={company.address ?? ""}
-              placeholder="東京都千代田区..."
-            />
-          </Field>
+          <PostalCodeField
+            defaultPostalCode={company.postal_code}
+            defaultAddress={company.address}
+          />
           <Field label="会社URL">
             <TextInput
               type="url"

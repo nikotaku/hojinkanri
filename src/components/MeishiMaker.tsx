@@ -200,7 +200,12 @@ export function MeishiMaker({ companies }: { companies: Company[] }) {
       companyName: company.name,
       personName,
       personTitle,
-      address: company.address ?? "",
+      address: [
+        company.postal_code ? `〒${company.postal_code}` : "",
+        company.address ?? "",
+      ]
+        .filter(Boolean)
+        .join(" "),
       phone: tel,
       email: mail,
     });

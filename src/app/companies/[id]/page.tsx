@@ -56,7 +56,14 @@ export default async function CompanyDetailPage({
         <dl className="grid grid-cols-1 gap-x-8 gap-y-5 sm:grid-cols-2 lg:grid-cols-3">
           <div>
             <dt className="text-sm text-gray-500">登記住所</dt>
-            <dd className="mt-1 text-sm text-gray-900">{company.address ?? "—"}</dd>
+            <dd className="mt-1 text-sm text-gray-900">
+              {company.postal_code && (
+                <span className="mr-1.5 font-mono text-gray-600">
+                  〒{company.postal_code}
+                </span>
+              )}
+              {company.address ?? "—"}
+            </dd>
           </div>
           <div>
             <dt className="text-sm text-gray-500">会社URL</dt>

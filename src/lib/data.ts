@@ -34,6 +34,7 @@ export interface CompanyInput {
   email?: string | null;
   phone?: string | null;
   address?: string | null;
+  postal_code?: string | null;
   representative_name?: string | null;
   established_on?: string | null;
   capital?: number | null;
@@ -318,6 +319,7 @@ export async function createCompany(input: CompanyInput): Promise<Company> {
     email: input.email ?? null,
     phone: input.phone ?? null,
     address: input.address ?? null,
+    postal_code: input.postal_code ?? null,
     representative_name: input.representative_name ?? null,
     established_on: input.established_on ?? null,
     capital: input.capital ?? null,
@@ -353,6 +355,7 @@ export async function updateCompany(
     email: input.email ?? null,
     phone: input.phone ?? null,
     address: input.address ?? null,
+    postal_code: input.postal_code ?? null,
     representative_name: input.representative_name ?? null,
     established_on: input.established_on ?? null,
     capital: input.capital ?? null,

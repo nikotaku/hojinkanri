@@ -3,6 +3,7 @@ import { createCompanyAction } from "@/app/actions";
 import { COMPANY_STATUS_LABELS } from "@/lib/types";
 import { PageHeader } from "@/components/PageHeader";
 import { Field, TextInput, TextArea, Select, SubmitButton } from "@/components/Form";
+import { PostalCodeField } from "@/components/PostalCodeField";
 
 export default function NewCompanyPage() {
   return (
@@ -41,9 +42,7 @@ export default function NewCompanyPage() {
           <Field label="メールアドレス">
             <TextInput type="email" name="email" placeholder="info@example.com" />
           </Field>
-          <Field label="住所">
-            <TextInput name="address" placeholder="東京都千代田区..." />
-          </Field>
+          <PostalCodeField />
           <Field label="会社URL">
             <TextInput type="url" name="hp" placeholder="https://example.com" />
           </Field>
