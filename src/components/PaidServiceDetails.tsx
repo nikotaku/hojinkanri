@@ -18,6 +18,8 @@ type EditablePaidService = BillingUsageDetail & {
   savedAdminUrl: string;
   savedLoginId: string;
   savedLoginPw: string;
+  savedCardDeliveryAddress: string;
+  savedCardOrderedBy: string;
   customMode: boolean;
 };
 
@@ -107,6 +109,8 @@ export function PaidServiceDetails({
       savedAdminUrl: detail.admin_url ?? "",
       savedLoginId: detail.login_id ?? "",
       savedLoginPw: detail.login_pw ?? "",
+      savedCardDeliveryAddress: detail.card_delivery_address ?? "",
+      savedCardOrderedBy: detail.card_ordered_by ?? "",
       customMode: !isListedPaidService(detail.usage_name),
     })),
   );
@@ -130,12 +134,16 @@ export function PaidServiceDetails({
         admin_url: null,
         login_id: null,
         login_pw: null,
+        card_delivery_address: null,
+        card_ordered_by: null,
         created_at: now,
         updated_at: now,
         persisted: false,
         savedAdminUrl: "",
         savedLoginId: "",
         savedLoginPw: "",
+        savedCardDeliveryAddress: "",
+        savedCardOrderedBy: "",
         customMode: false,
       },
     ]);
@@ -150,6 +158,8 @@ export function PaidServiceDetails({
         | "admin_url"
         | "login_id"
         | "login_pw"
+        | "card_delivery_address"
+        | "card_ordered_by"
         | "customMode"
       >
     >,
@@ -163,10 +173,20 @@ export function PaidServiceDetails({
     if (row.persisted) return;
     setError(null);
     if (selected === CUSTOM_SERVICE_VALUE) {
-      updateRow(row.id, { usage_name: "", customMode: true });
+      updateRow(row.id, {
+        usage_name: "",
+        card_delivery_address: null,
+        card_ordered_by: null,
+        customMode: true,
+      });
       return;
     }
-    updateRow(row.id, { usage_name: selected, customMode: false });
+    updateRow(row.id, {
+      usage_name: selected,
+      card_delivery_address: selected === "AutoBox" ? row.card_delivery_address : null,
+      card_ordered_by: selected === "AutoBox" ? row.card_ordered_by : null,
+      customMode: false,
+    });
   };
 
   const saveRow = async (row: EditablePaidService) => {
@@ -184,6 +204,8 @@ export function PaidServiceDetails({
     }
     const loginId = row.login_id?.trim() ?? "";
     const loginPw = row.login_pw ?? "";
+    const cardDeliveryAddress = row.card_delivery_address?.trim() ?? "";
+    const cardOrderedBy = row.card_ordered_by?.trim() ?? "";
     setBusyId(row.id);
     setError(null);
     try {
@@ -194,6 +216,8 @@ export function PaidServiceDetails({
           adminUrl,
           loginId,
           loginPw,
+          cardDeliveryAddress,
+          cardOrderedBy,
         );
         setRows((current) =>
           current.map((item) =>
@@ -206,6 +230,10 @@ export function PaidServiceDetails({
                   savedAdminUrl: adminUrl,
                   savedLoginId: loginId,
                   savedLoginPw: loginPw,
+                  card_delivery_address: cardDeliveryAddress || null,
+                  card_ordered_by: cardOrderedBy || null,
+                  savedCardDeliveryAddress: cardDeliveryAddress,
+                  savedCardOrderedBy: cardOrderedBy,
                 }
               : item,
           ),
@@ -217,6 +245,8 @@ export function PaidServiceDetails({
           adminUrl,
           loginId,
           loginPw,
+          cardDeliveryAddress,
+          cardOrderedBy,
         );
         setRows((current) =>
           current.map((item) =>
@@ -227,6 +257,8 @@ export function PaidServiceDetails({
                   savedAdminUrl: created.admin_url ?? "",
                   savedLoginId: created.login_id ?? "",
                   savedLoginPw: created.login_pw ?? "",
+                  savedCardDeliveryAddress: created.card_delivery_address ?? "",
+                  savedCardOrderedBy: created.card_ordered_by ?? "",
                   customMode: !isListedPaidService(created.usage_name),
                 }
               : item,
@@ -303,11 +335,16 @@ export function PaidServiceDetails({
         <div className="mt-2 space-y-2">
           {rows.map((row, index) => {
             const busy = busyId === row.id;
+            const isAutoBox = row.usage_name === "AutoBox";
             const dirty =
               !row.persisted ||
               (row.admin_url ?? "") !== row.savedAdminUrl ||
               (row.login_id ?? "") !== row.savedLoginId ||
-              (row.login_pw ?? "") !== row.savedLoginPw;
+              (row.login_pw ?? "") !== row.savedLoginPw ||
+              (isAutoBox &&
+                ((row.card_delivery_address ?? "") !==
+                  row.savedCardDeliveryAddress ||
+                  (row.card_ordered_by ?? "") !== row.savedCardOrderedBy));
             const selectedValue = row.customMode
               ? CUSTOM_SERVICE_VALUE
               : row.usage_name;
@@ -403,6 +440,37 @@ export function PaidServiceDetails({
                     onToggleVisibility={() => togglePassword(row.id)}
                   />
                 </div>
+
+                {isAutoBox && (
+                  <div className="mt-2 rounded-md border border-brand-100 bg-brand-50/60 p-2">
+                    <p className="text-xs font-semibold text-brand-800">
+                      AutoBox会員カード情報
+                    </p>
+                    <p className="mt-0.5 text-[11px] leading-4 text-brand-700">
+                      会員カードの送付先と、発注に使用した名義を記録します。
+                    </p>
+                    <div className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-2">
+                      <TextField
+                        label="会員カードの送付先住所"
+                        maxLength={500}
+                        value={row.card_delivery_address ?? ""}
+                        disabled={busy}
+                        onChange={(value) =>
+                          updateRow(row.id, { card_delivery_address: value })
+                        }
+                      />
+                      <TextField
+                        label="会員カードの発注名義"
+                        maxLength={200}
+                        value={row.card_ordered_by ?? ""}
+                        disabled={busy}
+                        onChange={(value) =>
+                          updateRow(row.id, { card_ordered_by: value })
+                        }
+                      />
+                    </div>
+                  </div>
+                )}
 
                 <div className="mt-2 flex items-center justify-end gap-2">
                   {row.persisted && (

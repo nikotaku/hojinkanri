@@ -336,6 +336,8 @@ export async function createPaidServiceDetailAction(
   adminUrl: string,
   loginId: string,
   loginPw: string,
+  cardDeliveryAddress: string,
+  cardOrderedBy: string,
 ): Promise<BillingUsageDetail> {
   const detail = await createPaidServiceDetail(
     companyId,
@@ -343,6 +345,8 @@ export async function createPaidServiceDetailAction(
     adminUrl,
     loginId,
     loginPw,
+    cardDeliveryAddress,
+    cardOrderedBy,
   );
   revalidatePath("/billing");
   return detail;
@@ -355,8 +359,18 @@ export async function updatePaidServiceCredentialsAction(
   adminUrl: string,
   loginId: string,
   loginPw: string,
+  cardDeliveryAddress: string,
+  cardOrderedBy: string,
 ) {
-  await updatePaidServiceCredentials(companyId, id, adminUrl, loginId, loginPw);
+  await updatePaidServiceCredentials(
+    companyId,
+    id,
+    adminUrl,
+    loginId,
+    loginPw,
+    cardDeliveryAddress,
+    cardOrderedBy,
+  );
   revalidatePath("/billing");
 }
 
