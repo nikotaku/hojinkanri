@@ -620,3 +620,204 @@ export const CASE_PRIORITY_LABELS: Record<CasePriority, string> = {
 
 /** 進行中とみなす案件ステータス */
 export const OPEN_CASE_STATUSES: CaseStatus[] = ["new", "in_progress", "on_hold"];
+
+/* ------------------------------------------------------------------ *
+ * 請求書払いで Mac mini を買える仕入先
+ * ------------------------------------------------------------------ */
+
+/** 請求書払いの可否 */
+export type SupplierVerdict = "ok" | "maybe" | "no";
+
+export interface MacSupplier {
+  name: string;
+  url: string;
+  /** 業態 */
+  kind: string;
+  verdict: SupplierVerdict;
+  /** Mac mini 本体の取扱状況 */
+  macMini: string;
+  /** 請求書払いの方式 */
+  payment: string;
+  /** 締め日・支払サイト */
+  terms: string;
+  /** 申込方法・審査 */
+  apply: string;
+  /** 補足 */
+  note?: string;
+  /** 根拠にしたページ */
+  source: string;
+}
+
+/** 調査日 */
+export const MAC_SUPPLIERS_SURVEYED_ON = "2026-10-19";
+
+export const MAC_SUPPLIERS: MacSupplier[] = [
+  {
+    name: "法人専用ビックカメラ.com",
+    url: "https://houjin.biccamera.com/",
+    kind: "家電量販店（Apple認定 Authorized Reseller）",
+    verdict: "ok",
+    macMini: "Mac mini のカテゴリあり。Apple製品取扱店として明記。",
+    payment:
+      "「売掛会員」になると売掛（請求書払い）。請求書は web（楽々明細）で発行。",
+    terms: "原則、納品日締めの月末締め翌末払い。",
+    apply:
+      "問い合わせ窓口から「新規売掛会員申込みご希望」と連絡 → 営業担当が対応。",
+    note:
+      "もう一方の「マルチペイメント会員」はカード・コンビニ・ネットバンクの事前支払いなので、申込時に売掛会員を選ぶこと。",
+    source:
+      "https://houjin.biccamera.com/topics/index.aspx?id=guide&sid=00&tid=SHOPPING",
+  },
+  {
+    name: "秋葉館",
+    url: "https://akibakan.com/",
+    kind: "Mac専門店",
+    verdict: "ok",
+    macMini: "Mac専門店。Mac mini を通常在庫で取扱。",
+    payment:
+      "ラクーンフィナンシャルの「Paid（ペイド）」による請求書払い。カート上部のバナーから申込。",
+    terms: "Paid の規定（月末締め翌月末払いが標準）。",
+    apply:
+      "事前審査あり。審査は3営業日程度。秋葉館の会員登録が必須。",
+    note:
+      "「法人様向けお見積り」ページ経由は銀行振込（前払い）のみ。請求書払いにしたいときは見積ルートではなく通常のカートから Paid を選ぶ。公費・校費の後払いは問い合わせフォームへ。",
+    source: "https://akibakan.com/pages/guide-payment",
+  },
+  {
+    name: "Too（Netshop.Too）",
+    url: "https://www.too.com/apple/",
+    kind: "Apple Premium Business Partner",
+    verdict: "ok",
+    macMini: "「Macは現行のモデルは全種類お取り扱い」。Mac mini を含む。",
+    payment:
+      "請求書払い（購入）。請求書発行に基づく買掛金決済で、月単位でまとめて支払い。",
+    terms: "月単位でまとめて請求。締め日・支払期限はサイト上に記載なし（要確認）。",
+    apply:
+      "オンライン（Netshop.Too）で締め支払いを使うには買掛取引口座の登録が必要。",
+    note:
+      "「初めての取引の場合は、事前入金をお願いする場合がございます」との注記あり。リース（分割）も扱う。",
+    source: "https://www.too.com/apple/products/payment/",
+  },
+  {
+    name: "Amazonビジネス",
+    url: "https://business.amazon.co.jp/",
+    kind: "法人向け通販",
+    verdict: "ok",
+    macMini: "Amazon上に Mac mini の出品多数。",
+    payment: "請求書払い。手数料無料で1ヶ月分をまとめて後払い。",
+    terms: "締め日は 5日・10日・15日・20日・25日・末日 から選択。",
+    apply: "法人登録のうえ、請求書払いの利用には Amazon による審査あり。",
+    note:
+      "出品者や商品によって請求書払いを選べないことがある。Mac mini を請求書払いで買えるかは購入画面で都度確認が必要。適格請求書は注文履歴からまとめてダウンロード可。",
+    source: "https://business.amazon.co.jp/ja/solutions/payment-options",
+  },
+  {
+    name: "NetRICOH（リコージャパン）",
+    url: "https://www.netricoh.com/",
+    kind: "法人向け通販（Apple製品取扱）",
+    verdict: "ok",
+    macMini:
+      "リコージャパンのApple製品ページに「MacBook Pro / MacBook Air / MacBook Neo / iMac / Mac mini / Mac Studio」と明記。",
+    payment:
+      "法人モードでの掛売。「リコー販売窓口でのご購入もあわせて、1月分の掛売上としてまとめて請求書を発行」。",
+    terms: "月単位でまとめて請求。締め日・支払期限の記載なし（要確認）。",
+    apply: "法人専用サイトのため、無料の「ご利用登録」が必要。",
+    note:
+      "掛売はリコー販売窓口との取引が前提に読める。NetRICOH 上で Mac mini を単品購入できるかは未確認。",
+    source: "https://www.netricoh.com/netricoh/guide/sub/faq/shop.html",
+  },
+  {
+    name: "パソコン工房（ユニットコム）",
+    url: "https://www.pc-koubou.jp/",
+    kind: "PC専門店",
+    verdict: "maybe",
+    macMini: "中古Macのカテゴリあり。新品 Mac mini の取扱は確認できず。",
+    payment:
+      "「企業のお客様を対象に売掛での販売を行っております」。B2Bメンバーカード（ブラック）で売掛。",
+    terms: "末締め・翌27日支払いの後払い。",
+    apply:
+      "事前審査あり（審査・カード発行はオリコ）。商業登記簿謄本または印鑑登録証明書が必要。500万円以上の与信希望は郵送申込。",
+    note:
+      "売掛の対象に Apple 製品が含まれるかは要確認。法人相談窓口 0570-550-922。",
+    source: "https://www.pc-koubou.jp/unitcom_business/business_pay.php",
+  },
+  {
+    name: "法人専用ソフマップ",
+    url: "https://houjin.sofmap.com/",
+    kind: "家電量販店（Apple認定 Authorized Reseller）",
+    verdict: "maybe",
+    macMini: "Apple特設ページに Mac mini のカテゴリあり。",
+    payment:
+      "法人専用ビックカメラ.com と同じ基盤だが、売掛会員の記載はログイン前では確認できず。",
+    terms: "未確認。",
+    apply: "法人窓口に問い合わせ（houjin@sofmap.com / 本社 03-6260-7281）。",
+    note:
+      "ビックカメラグループなので売掛会員の仕組みがある可能性が高いが、サイト上で裏が取れていない。",
+    source: "https://houjin.sofmap.com/topics/?id=apple_sof&sid=0",
+  },
+  {
+    name: "じゃんぱら",
+    url: "https://www.janpara.co.jp/",
+    kind: "中古PC店",
+    verdict: "maybe",
+    macMini: "中古 Mac mini を取扱。",
+    payment:
+      "通販の支払いはカード・ペイディ・銀行振込・ペイジー・代引・コンビニのみで、請求書払いの記載なし。",
+    terms: "—",
+    apply: "別途「法人様窓口」があるので、そちら経由で掛売が可能かは要確認。",
+    source: "https://www.janpara.co.jp/corporate/",
+  },
+  {
+    name: "アスクル / たのめーる / カウネット",
+    url: "https://www.askul.co.jp/",
+    kind: "オフィス通販",
+    verdict: "no",
+    macMini:
+      "カウネットで「Mac mini」を検索しても周辺機器のみ。アスクル・たのめーるも本体の取扱を確認できず。",
+    payment:
+      "いずれも月1回の締め支払い（請求書あり）には対応している。",
+    terms: "アスクルは10日締めまたは月末締め。たのめーるは毎月決まった日。",
+    apply: "—",
+    note:
+      "支払い方法は問題ないが、Mac mini 本体を売っていないため今回の用途には使えない。",
+    source: "https://www.askul.co.jp/guide/knowledge/payment.html",
+  },
+  {
+    name: "ヨドバシカメラ 法人営業部",
+    url: "https://www.yodobashi.com/ec/support/service/hojin/index.html",
+    kind: "家電量販店",
+    verdict: "no",
+    macMini: "店頭・通販とも Apple 製品を取扱。",
+    payment:
+      "「銀行振り込みで承ります」。クレジットカード・ゴールドポイントは利用不可。",
+    terms: "入金確認後に配送手配＝前払い。請求書払いではない。",
+    apply: "—",
+    note: "見積書・請求書・納品書の発行自体はしてくれるが、支払いは前払い。",
+    source: "https://www.yodobashi.com/ec/support/service/hojin/index.html",
+  },
+  {
+    name: "イートレンド",
+    url: "https://www.e-trend.co.jp/",
+    kind: "PC通販",
+    verdict: "no",
+    macMini: "記載なし。",
+    payment:
+      "「再販目的でのご購入や掛け売りには応じられませんのでご了承下さい」と明記。",
+    terms: "—",
+    apply: "—",
+    source: "https://www.e-trend.co.jp/corporation/",
+  },
+  {
+    name: "MonotaRO",
+    url: "https://www.monotaro.com/",
+    kind: "法人向け通販",
+    verdict: "no",
+    macMini:
+      "「Mac mini」で検索してもヒットするのは盗難防止ホルダーなどの周辺機器のみ。本体の取扱なし。",
+    payment: "請求書払いには対応。",
+    terms: "—",
+    apply: "—",
+    note: "支払い方法は使えるが、本体を売っていない。",
+    source: "https://www.monotaro.com/s/q-Mac+mini/",
+  },
+];
