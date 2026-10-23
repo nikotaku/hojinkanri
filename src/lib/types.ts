@@ -13,7 +13,7 @@ export type CasePriority = "low" | "medium" | "high";
 export interface MobileContractDetail {
   id: string;
   company_id: string;
-  service: "ドコモ" | "UQ";
+  service: "au" | "ドコモ" | "UQ" | "ワイモバイル" | "エクスモバイル";
   device_model: string | null;
   sale_price: number | null;
   sale_destination: string | null;
@@ -155,6 +155,7 @@ export const ACCOUNT_SERVICES = [
 
 /** 法人モバイル回線で表示するサービス列 */
 export const MOBILE_SERVICES = [
+  "au",
   "ドコモ",
   "UQ",
   "ワイモバイル",

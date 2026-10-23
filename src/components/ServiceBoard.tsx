@@ -11,6 +11,7 @@ import { BillingStatusFields } from "@/components/BillingStatusFields";
 import { BillingUsageDetails } from "@/components/BillingUsageDetails";
 import { PaidServiceDetails } from "@/components/PaidServiceDetails";
 import { reorderCompaniesAction } from "@/app/actions";
+import { evaluateMobileFlow } from "@/lib/mobileFlow";
 
 // サービス群ごとの保存先フィールド定義
 const FIELD_SETS = {
@@ -61,6 +62,37 @@ function statusClass(value: string): string {
   if (/(落ち|不可|中止|解約)/.test(value)) return "bg-red-100 text-red-700";
   if (/(未着手|未設定|未)/.test(value)) return "bg-gray-100 text-gray-500";
   return "bg-amber-100 text-amber-700";
+}
+
+/** 法人モバイル回線の「次にやること」を1行で出す */
+function NextActionChip({ company }: { company: Company }) {
+  const { message, next, done } = evaluateMobileFlow(company);
+
+  if (done) {
+    return (
+      <p className="mt-1 pl-7 text-[11px] text-green-700">
+        ✓ au → ドコモ MNP まで完了
+      </p>
+    );
+  }
+  if (!message || !next) return null;
+
+  const tone =
+    next.state === "blocked"
+      ? "bg-red-50 text-red-700"
+      : next.state === "review"
+        ? "bg-amber-50 text-amber-700"
+        : "bg-brand-50 text-brand-700";
+
+  return (
+    <p className="mt-1 pl-7">
+      <span
+        className={`inline-flex items-center rounded-md px-2 py-0.5 text-[11px] font-medium ${tone}`}
+      >
+        次: {message}
+      </span>
+    </p>
+  );
 }
 
 function StatusPill({ value }: { value?: string }) {
@@ -151,6 +183,8 @@ export function ServiceBoard({
                 {c.name}
               </Link>
             </div>
+
+            {prefix === "mobile" && <NextActionChip company={c} />}
 
             <div className="mt-1.5 space-y-1">
               {services.map((s) => (
