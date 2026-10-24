@@ -4,7 +4,7 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>TOSHO株式会社</title>
-<meta name="description" content="TOSHO株式会社の会社案内。北海道札幌市中央区。" />
+<meta name="description" content="TOSHO株式会社の会社案内。北海道札幌市中央区。経営コンサルティング、ビルメンテナンス、飲食、宿泊、運輸ほか。" />
 <style>
   :root {
     --ink: #111827;
@@ -41,13 +41,22 @@
     backdrop-filter: blur(8px);
     border-bottom: 1px solid var(--line);
   }
-  .bar { display: flex; align-items: center; justify-content: space-between; height: 64px; }
-  .logo { font-size: 18px; font-weight: 700; letter-spacing: .02em; }
+  .bar { display: flex; align-items: center; justify-content: space-between; gap: 10px; height: 64px; }
+  .logo { font-size: 18px; font-weight: 700; letter-spacing: .02em; white-space: nowrap; }
+  nav { white-space: nowrap; }
   nav a {
     color: var(--muted); text-decoration: none; font-size: 14px; margin-left: 20px;
   }
   nav a:hover { color: var(--accent); }
-  @media (max-width: 560px) { nav a { margin-left: 14px; font-size: 13px; } }
+  @media (max-width: 560px) {
+    .bar { height: 56px; }
+    .logo { font-size: 15px; }
+    nav a { margin-left: 10px; font-size: 12px; }
+  }
+  @media (max-width: 400px) {
+    .logo { font-size: 13px; }
+    nav a { margin-left: 6px; font-size: 10px; }
+  }
 
   .hero { padding: 84px 0 72px; border-bottom: 1px solid var(--line); }
   .hero h1 { margin: 0 0 14px; font-size: clamp(28px, 6vw, 44px); line-height: 1.35; letter-spacing: .01em; }
@@ -64,6 +73,15 @@
     background: var(--soft); border: 1px solid var(--line);
     border-radius: 10px; padding: 16px; color: var(--muted); font-size: 15px;
   }
+
+  .biz { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; grid-template-columns: 1fr 1fr; }
+  @media (max-width: 640px) { .biz { grid-template-columns: 1fr; } }
+  .biz li {
+    background: var(--soft); border: 1px solid var(--line); border-radius: 10px;
+    padding: 12px 14px; font-size: 15px; display: flex; gap: 10px; align-items: baseline;
+  }
+  .biz .n { color: var(--accent); font-weight: 700; font-size: 13px; font-variant-numeric: tabular-nums; }
+  .biz + .note { margin-top: 16px; }
 
   table { width: 100%; border-collapse: collapse; }
   th, td { text-align: left; padding: 14px 4px; border-bottom: 1px solid var(--line); vertical-align: top; font-size: 15px; }
@@ -109,8 +127,24 @@
     <section id="business">
       <h2>Business</h2>
       <p class="lead">事業内容</p>
+      <ul class="biz">
+        <li><span class="n">01</span><span>経営コンサルタント及び各種マーケティングリサーチ業務</span></li>
+        <li><span class="n">02</span><span>ビルクリーニング・ビルメンテナンス事業</span></li>
+        <li><span class="n">03</span><span>食品製造業</span></li>
+        <li><span class="n">04</span><span>空港グランドハンドリング業務</span></li>
+        <li><span class="n">05</span><span>建設業</span></li>
+        <li><span class="n">06</span><span>旅行業</span></li>
+        <li><span class="n">07</span><span>宿泊業</span></li>
+        <li><span class="n">08</span><span>請負業</span></li>
+        <li><span class="n">09</span><span>日本語学校及び研修センターの運営</span></li>
+        <li><span class="n">10</span><span>飲食店の経営</span></li>
+        <li><span class="n">11</span><span>生活雑貨の輸出入販売に伴うWEBサイト運営</span></li>
+        <li><span class="n">12</span><span>洋服の輸出入販売及びアパレル関連事業</span></li>
+        <li><span class="n">13</span><span>コールセンター事業</span></li>
+        <li><span class="n">14</span><span>旅客運輸事業</span></li>
+      </ul>
       <p class="note">
-        準備中です。内容が決まり次第、掲載いたします。
+        上記は登記簿上の事業目的です。このほか、前各号に附帯関連する一切の業務を行います。
       </p>
     </section>
 
