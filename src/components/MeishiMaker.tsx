@@ -44,7 +44,7 @@ async function saveImage(dataUrl: string, fileName: string) {
   setTimeout(() => URL.revokeObjectURL(url), 10_000);
 }
 
-/** 名刺キャンバスをハガキ中央に配置し、四隅にトンボを付けた印刷用画像を作る */
+/** 名刺キャンバスをハガキ中央に配置し、水色の余白と切り取り線を付けた印刷用画像を作る */
 function buildHagakiDataUrl(cardCanvas: HTMLCanvasElement): string {
   const canvas = document.createElement("canvas");
   canvas.width = HAGAKI_W;
@@ -52,32 +52,20 @@ function buildHagakiDataUrl(cardCanvas: HTMLCanvasElement): string {
   const ctx = canvas.getContext("2d");
   if (!ctx) return "";
 
-  ctx.fillStyle = "#ffffff";
+  // 切り落とす余白を薄い水色にし、白い名刺との境界を明確にする。
+  ctx.fillStyle = "#e0f2fe";
   ctx.fillRect(0, 0, HAGAKI_W, HAGAKI_H);
 
   const x = (HAGAKI_W - CARD_W) / 2;
   const y = (HAGAKI_H - CARD_H) / 2;
   ctx.drawImage(cardCanvas, x, y);
 
-  // 切り取り用トンボ
-  ctx.strokeStyle = "#9ca3af";
-  ctx.lineWidth = 2;
-  const m = 24; // カードからの距離
-  const len = 40;
-  const corners: [number, number, number, number][] = [
-    [x - m, y - m, 1, 1],
-    [x + CARD_W + m, y - m, -1, 1],
-    [x - m, y + CARD_H + m, 1, -1],
-    [x + CARD_W + m, y + CARD_H + m, -1, -1],
-  ];
-  for (const [cx, cy, dx, dy] of corners) {
-    ctx.beginPath();
-    ctx.moveTo(cx, cy);
-    ctx.lineTo(cx + len * dx, cy);
-    ctx.moveTo(cx, cy);
-    ctx.lineTo(cx, cy + len * dy);
-    ctx.stroke();
-  }
+  // 仕上がり寸法に沿った破線（300dpiで約0.25mm）。
+  ctx.strokeStyle = "#7dd3fc";
+  ctx.lineWidth = 3;
+  ctx.setLineDash([18, 12]);
+  ctx.strokeRect(x, y, CARD_W, CARD_H);
+  ctx.setLineDash([]);
   return canvas.toDataURL("image/png");
 }
 
@@ -374,6 +362,7 @@ export function MeishiMaker({ companies }: { companies: Company[] }) {
             に画像を登録すると<span className="font-medium">ユーザー番号</span>が発行されます
           </li>
           <li>店頭のマルチコピー機で番号を入力し、「はがきプリント」を選んで印刷</li>
+          <li>水色の破線に沿ってハサミで切り、薄い水色の余白を取り除く</li>
         </ol>
         <p className="mt-2 text-xs text-gray-400">
           ※ 各サービスの規約により、番号の自動発行（API連携）は提供されていないため、登録は公式アプリ/サイトから行ってください。
