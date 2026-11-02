@@ -88,14 +88,15 @@ export function ServiceBoard({
   services,
   statusOptions,
   prefix,
+  additionalGroups = [],
 }: {
   companies: Company[];
   services: readonly string[];
   statusOptions: readonly string[];
   prefix: Prefix;
+  additionalGroups?: { prefix: Prefix; services: readonly string[]; statusOptions: readonly string[] }[];
 }) {
   const listRef = useRef<HTMLUListElement>(null);
-  const fields = FIELD_SETS[prefix];
 
   useEffect(() => {
     const el = listRef.current;
@@ -119,17 +120,6 @@ export function ServiceBoard({
   return (
     <ul ref={listRef} className="space-y-2">
       {companies.map((c) => {
-        const statusMap = (c[fields.status] ?? {}) as Record<string, string>;
-        const phoneMap = (c[fields.phone] ?? {}) as Record<string, string>;
-        const emailMap = (c[fields.email] ?? {}) as Record<string, string>;
-        const nameMap = (c[fields.name] ?? {}) as Record<string, string>;
-        const adminUrlMap = (c[fields.adminUrl] ?? {}) as Record<string, string>;
-        const loginIdMap = (c[fields.loginId] ?? {}) as Record<string, string>;
-        const loginPwMap = (c[fields.loginPw] ?? {}) as Record<string, string>;
-        const unavailableReasonMap =
-          prefix === "billing"
-            ? ((c.billing_unavailable_reason ?? {}) as Record<string, string>)
-            : {};
         return (
           <li
             key={c.id}
@@ -153,6 +143,37 @@ export function ServiceBoard({
             </div>
 
             <div className="mt-1.5 space-y-1">
+              {[{ prefix, services, statusOptions }, ...additionalGroups].map((group) => (
+                <CompanyServiceRows key={group.prefix} company={c} {...group} />
+              ))}
+            </div>
+          </li>
+        );
+      })}
+    </ul>
+  );
+}
+
+function CompanyServiceRows({ company: c, prefix, services, statusOptions }: {
+  company: Company;
+  prefix: Prefix;
+  services: readonly string[];
+  statusOptions: readonly string[];
+}) {
+  const fields = FIELD_SETS[prefix];
+        const statusMap = (c[fields.status] ?? {}) as Record<string, string>;
+        const phoneMap = (c[fields.phone] ?? {}) as Record<string, string>;
+        const emailMap = (c[fields.email] ?? {}) as Record<string, string>;
+        const nameMap = (c[fields.name] ?? {}) as Record<string, string>;
+        const adminUrlMap = (c[fields.adminUrl] ?? {}) as Record<string, string>;
+        const loginIdMap = (c[fields.loginId] ?? {}) as Record<string, string>;
+        const loginPwMap = (c[fields.loginPw] ?? {}) as Record<string, string>;
+        const unavailableReasonMap =
+          prefix === "billing"
+            ? ((c.billing_unavailable_reason ?? {}) as Record<string, string>)
+            : {};
+  return (
+    <>
               {services.map((s) => (
                 <details
                   key={s}
@@ -291,10 +312,6 @@ export function ServiceBoard({
                   </div>
                 </details>
               ))}
-            </div>
-          </li>
-        );
-      })}
-    </ul>
+    </>
   );
 }
