@@ -10,6 +10,7 @@ const nav = [
   { href: "/companies", label: "法人管理", icon: "🏢" },
   { href: "/cases", label: "案件管理", icon: "📁" },
   { href: "/mobile", label: "法人モバイル回線", icon: "📱" },
+  { href: "/phone-050", label: "050番号管理", icon: "☎" },
   { href: "/billing", label: "掛け払い・タクシー関連", icon: "🧾" },
   { href: "/accounts", label: "口座関連", icon: "🏦" },
   { href: "/gmo-atobarai", label: "GMO後払い", icon: "🛒" },
