@@ -8,6 +8,7 @@ const nav = [
   { href: "/", label: "ダッシュボード", icon: "📊" },
   { href: "/companies", label: "法人管理", icon: "🏢" },
   { href: "/cases", label: "案件管理", icon: "📁" },
+  { href: "/phone-050", label: "050番号管理", icon: "☎" },
 ];
 
 export function Sidebar() {
