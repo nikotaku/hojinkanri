@@ -9,6 +9,8 @@ import {
   createCase,
   createCaseTasks,
   setCaseTaskCompleted,
+  setCaseArchived,
+  updateCaseNotes,
   setCompanyService,
   setCompanyHp,
   setCompanyDomain,
@@ -532,6 +534,34 @@ export async function toggleCaseTaskAction(formData: FormData) {
     str(formData, "is_completed") === "true",
   );
   revalidatePath("/cases");
+  revalidatePath(`/cases/${caseId}`);
+}
+
+/** 案件をアーカイブする / アーカイブから戻す */
+export async function setCaseArchivedAction(formData: FormData) {
+  const caseId = str(formData, "case_id");
+  if (!caseId) return;
+  const archived = str(formData, "archived") === "true";
+  await setCaseArchived(caseId, archived);
+  revalidatePath("/cases");
+  revalidatePath("/cases/archived");
+  revalidatePath(`/cases/${caseId}`);
+  redirect(archived ? "/cases" : `/cases/${caseId}`);
+}
+
+/** 「次にやるべきこと」「準備物」を保存する */
+export async function updateCaseNotesAction(formData: FormData) {
+  const caseId = str(formData, "case_id");
+  if (!caseId) return;
+  const fields: { next_action?: string | null; materials?: string | null } = {};
+  if (formData.has("next_action")) {
+    fields.next_action = str(formData, "next_action") ?? null;
+  }
+  if (formData.has("materials")) {
+    fields.materials = str(formData, "materials") ?? null;
+  }
+  await updateCaseNotes(caseId, fields);
+  revalidatePath(`/cases/${caseId}`);
 }
 
 export async function setCompanyDomainAction(companyId: string, input: string): Promise<{ ok: true; domain: string | null } | { ok: false; error: string }> {

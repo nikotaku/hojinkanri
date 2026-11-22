@@ -2,6 +2,7 @@ import { listCompaniesWithMobileContracts } from "@/lib/data";
 import { MOBILE_SERVICES, MOBILE_STATUS_OPTIONS } from "@/lib/types";
 import { PageHeader } from "@/components/PageHeader";
 import { ServiceBoard } from "@/components/ServiceBoard";
+import { MobileFlowSummary } from "@/components/MobileFlowSummary";
 
 export const dynamic = "force-dynamic";
 
@@ -22,12 +23,15 @@ export default async function MobilePage() {
           まだ法人が登録されていません。
         </div>
       ) : (
-        <ServiceBoard
-          companies={companies}
-          services={MOBILE_SERVICES}
-          statusOptions={MOBILE_STATUS_OPTIONS}
-          prefix="mobile"
-        />
+        <>
+          <MobileFlowSummary companies={companies} />
+          <ServiceBoard
+            companies={companies}
+            services={MOBILE_SERVICES}
+            statusOptions={MOBILE_STATUS_OPTIONS}
+            prefix="mobile"
+          />
+        </>
       )}
     </div>
   );
