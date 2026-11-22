@@ -192,6 +192,20 @@ export default async function EditCompanyPage({
               placeholder="1234567890123456"
             />
           </Field>
+          <Field label="雇用保険適用事業所番号">
+            <TextInput
+              name="employment_insurance_number"
+              defaultValue={company.employment_insurance_number ?? ""}
+              placeholder="0401-633227-6"
+            />
+          </Field>
+          <Field label="労働保険番号">
+            <TextInput
+              name="labour_insurance_number"
+              defaultValue={company.labour_insurance_number ?? ""}
+              placeholder="043-01-633227"
+            />
+          </Field>
           <Field label="架電確認">
             <TextInput
               name="call_check"

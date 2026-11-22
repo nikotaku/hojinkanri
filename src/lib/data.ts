@@ -48,6 +48,8 @@ export interface CompanyInput {
   incorporation_filing_status?: string | null;
   payment_target_on?: string | null;
   etax_id?: string | null;
+  employment_insurance_number?: string | null;
+  labour_insurance_number?: string | null;
   call_check?: string | null;
   reason?: string | null;
   status: CompanyStatus;
@@ -333,6 +335,8 @@ export async function createCompany(input: CompanyInput): Promise<Company> {
     incorporation_filing_status: input.incorporation_filing_status ?? null,
     payment_target_on: input.payment_target_on ?? null,
     etax_id: input.etax_id ?? null,
+    employment_insurance_number: input.employment_insurance_number ?? null,
+    labour_insurance_number: input.labour_insurance_number ?? null,
     call_check: input.call_check ?? null,
     reason: input.reason ?? null,
     status: input.status,
@@ -369,6 +373,8 @@ export async function updateCompany(
     incorporation_filing_status: input.incorporation_filing_status ?? null,
     payment_target_on: input.payment_target_on ?? null,
     etax_id: input.etax_id ?? null,
+    employment_insurance_number: input.employment_insurance_number ?? null,
+    labour_insurance_number: input.labour_insurance_number ?? null,
     call_check: input.call_check ?? null,
     reason: input.reason ?? null,
     status: input.status,

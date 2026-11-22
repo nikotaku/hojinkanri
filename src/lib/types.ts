@@ -72,6 +72,10 @@ export interface Company {
   call_check?: string | null;
   /** e-tax利用者識別番号 */
   etax_id?: string | null;
+  /** 雇用保険適用事業所番号 */
+  employment_insurance_number?: string | null;
+  /** 労働保険番号 */
+  labour_insurance_number?: string | null;
   /** 審査落ちなどの原因メモ */
   reason?: string | null;
   /** 進行ステータス（未着手/書類準備中/審査開始/完了/中止） */

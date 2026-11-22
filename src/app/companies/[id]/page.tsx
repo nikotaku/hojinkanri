@@ -180,6 +180,18 @@ export default async function CompanyDetailPage({
             </dd>
           </div>
           <div>
+            <dt className="text-sm text-gray-500">雇用保険適用事業所番号</dt>
+            <dd className="mt-1 font-mono text-sm text-gray-900">
+              {company.employment_insurance_number ?? "—"}
+            </dd>
+          </div>
+          <div>
+            <dt className="text-sm text-gray-500">労働保険番号</dt>
+            <dd className="mt-1 font-mono text-sm text-gray-900">
+              {company.labour_insurance_number ?? "—"}
+            </dd>
+          </div>
+          <div>
             <dt className="text-sm text-gray-500">架電確認</dt>
             <dd className="mt-1 text-sm text-gray-900">
               {company.call_check ?? "—"}
