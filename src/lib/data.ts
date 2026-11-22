@@ -966,13 +966,21 @@ export async function deleteMobileContractDetail(
 
 // --- 案件 ---
 
-export async function listCases(): Promise<CaseWithCompany[]> {
+export async function listCases(
+  options: { archived?: boolean } = {},
+): Promise<CaseWithCompany[]> {
+  const archived = options.archived ?? false;
   const supabase = getSupabase();
   if (supabase) {
-    const { data, error } = await supabase
+    let query = supabase
       .from("cases")
-      .select("*, companies(name), case_tasks(*)")
-      .order("created_at", { ascending: false });
+      .select("*, companies(name), case_tasks(*)");
+    query = archived
+      ? query.not("archived_at", "is", null)
+      : query.is("archived_at", null);
+    const { data, error } = await query.order("created_at", {
+      ascending: false,
+    });
     if (error) throw new Error(error.message);
     return (data as (Case & {
       companies: { name: string } | null;
@@ -990,6 +998,7 @@ export async function listCases(): Promise<CaseWithCompany[]> {
   const db = getMockDb();
   const byId = new Map(db.companies.map((c) => [c.id, c.name]));
   return [...db.cases]
+    .filter((c) => Boolean(c.archived_at) === archived)
     .sort((a, b) => b.created_at.localeCompare(a.created_at))
     .map((c) => ({
       ...c,
@@ -998,6 +1007,86 @@ export async function listCases(): Promise<CaseWithCompany[]> {
         .filter((task) => task.case_id === c.id)
         .sort((a, b) => a.sort_order - b.sort_order),
     }));
+}
+
+/** 案件1件を小タスクごと取得する */
+export async function getCase(id: string): Promise<CaseWithCompany | null> {
+  const supabase = getSupabase();
+  if (supabase) {
+    const { data, error } = await supabase
+      .from("cases")
+      .select("*, companies(name), case_tasks(*)")
+      .eq("id", id)
+      .maybeSingle();
+    if (error) throw new Error(error.message);
+    if (!data) return null;
+    const { companies, case_tasks, ...rest } = data as Case & {
+      companies: { name: string } | null;
+      case_tasks: CaseTask[] | null;
+    };
+    return {
+      ...rest,
+      company_name: companies?.name ?? "—",
+      case_tasks: [...(case_tasks ?? [])].sort(
+        (a, b) => a.sort_order - b.sort_order,
+      ),
+    };
+  }
+
+  const db = getMockDb();
+  const found = db.cases.find((c) => c.id === id);
+  if (!found) return null;
+  const company = db.companies.find((c) => c.id === found.company_id);
+  return {
+    ...found,
+    company_name: company?.name ?? "—",
+    case_tasks: db.caseTasks
+      .filter((task) => task.case_id === id)
+      .sort((a, b) => a.sort_order - b.sort_order),
+  };
+}
+
+/** 案件をアーカイブする / アーカイブから戻す */
+export async function setCaseArchived(
+  id: string,
+  archived: boolean,
+): Promise<void> {
+  const archivedAt = archived ? new Date().toISOString() : null;
+  const supabase = getSupabase();
+  if (supabase) {
+    const { error } = await supabase
+      .from("cases")
+      .update({ archived_at: archivedAt })
+      .eq("id", id);
+    if (error) throw new Error(error.message);
+    return;
+  }
+  const found = getMockDb().cases.find((c) => c.id === id);
+  if (found) found.archived_at = archivedAt;
+}
+
+/** 「次にやるべきこと」「準備物」を保存する */
+export async function updateCaseNotes(
+  id: string,
+  fields: { next_action?: string | null; materials?: string | null },
+): Promise<void> {
+  const patch: Record<string, string | null> = {};
+  for (const key of ["next_action", "materials"] as const) {
+    if (key in fields) {
+      const value = fields[key];
+      patch[key] = value && value.trim() ? value.trim() : null;
+    }
+  }
+  if (Object.keys(patch).length === 0) return;
+
+  const supabase = getSupabase();
+  if (supabase) {
+    const { error } = await supabase.from("cases").update(patch).eq("id", id);
+    if (error) throw new Error(error.message);
+    return;
+  }
+  const found = getMockDb().cases.find((c) => c.id === id);
+  if (found) Object.assign(found, patch);
 }
 
 /** 法人に紐づく案件を、進捗表示のために小タスクごと取得する */

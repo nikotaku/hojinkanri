@@ -578,6 +578,12 @@ export interface Case {
   assignee: string | null;
   amount: number | null;
   due_date: string | null;
+  /** アーカイブした日時。null なら進行中の一覧に出る */
+  archived_at?: string | null;
+  /** 次にやるべきこと。未入力なら未完了の小タスクの先頭を表示する */
+  next_action?: string | null;
+  /** 準備物。1行につき1つ */
+  materials?: string | null;
   created_at: string;
   updated_at: string;
 }
