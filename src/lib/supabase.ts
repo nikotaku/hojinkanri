@@ -33,6 +33,14 @@ export function getSupabase(): SupabaseClient | null {
   if (!client) {
     client = createClient(url as string, anonKey as string, {
       auth: { persistSession: false },
+      global: {
+        // Next.js は fetch の結果を Data Cache に載せる。これが効くと、
+        // DB を直接書き換えたときや別のセッションが更新したときに、
+        // 画面だけ古いままになる（再読み込みしても直らない）。
+        // 管理画面なので常に最新を読む。
+        fetch: (input, init) =>
+          fetch(input, { ...init, cache: "no-store" as RequestCache }),
+      },
     });
   }
   return client;
