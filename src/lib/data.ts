@@ -1,3 +1,4 @@
+import { normalizeCompanyDomain } from "./domain";
 import { getSupabase } from "./supabase";
 import { getMockDb } from "./mock-store";
 import {
@@ -1548,4 +1549,18 @@ export async function getDashboardStats(): Promise<DashboardStats> {
     casesByStatus,
     upcomingCases,
   };
+}
+
+export async function setCompanyDomain(id: string, input: string): Promise<string | null> {
+  const domain = normalizeCompanyDomain(input);
+  const supabase = getSupabase();
+  if (supabase) {
+    const { data, error } = await supabase.from("companies").update({ custom_domain: domain }).eq("id", id).select("id").single();
+    if (error || !data) throw new Error("独自ドメインを保存できませんでした。");
+  } else {
+    const company = getMockDb().companies.find(c => c.id === id);
+    if (!company) throw new Error("法人が見つかりません。");
+    company.custom_domain = domain;
+  }
+  return domain;
 }

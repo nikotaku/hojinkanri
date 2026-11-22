@@ -1,5 +1,5 @@
 import { listCompaniesWithBillingUsage } from "@/lib/data";
-import { BILLING_SERVICES, BILLING_STATUS_OPTIONS } from "@/lib/types";
+import { BILLING_SERVICES, BILLING_STATUS_OPTIONS, TAXI_SERVICES, TAXI_STATUS_OPTIONS } from "@/lib/types";
 import { PageHeader } from "@/components/PageHeader";
 import { ServiceBoard } from "@/components/ServiceBoard";
 
@@ -11,10 +11,8 @@ export default async function BillingPage() {
   return (
     <div>
       <PageHeader
-        title="掛け払い"
-        description={`各法人の掛け払いサービス（${BILLING_SERVICES.join(
-          " / ",
-        )}）｜⠿ をドラッグで並び替え・各社をタップで開閉`}
+        title="掛け払い・タクシー関連"
+        description="各法人の掛け払い・タクシー各社の申請状況と登録情報をまとめて確認できます。各サービスをタップして詳細を開閉できます。"
       />
 
       {companies.length === 0 ? (
@@ -27,6 +25,7 @@ export default async function BillingPage() {
           services={BILLING_SERVICES}
           statusOptions={BILLING_STATUS_OPTIONS}
           prefix="billing"
+          additionalGroups={[{ prefix: "taxi", services: TAXI_SERVICES, statusOptions: TAXI_STATUS_OPTIONS }]}
         />
       )}
     </div>

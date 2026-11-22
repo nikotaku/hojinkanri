@@ -1,34 +1,5 @@
-import { listCompanies } from "@/lib/data";
-import { TAXI_SERVICES, TAXI_STATUS_OPTIONS } from "@/lib/types";
-import { PageHeader } from "@/components/PageHeader";
-import { ServiceBoard } from "@/components/ServiceBoard";
+import { redirect } from "next/navigation";
 
-export const dynamic = "force-dynamic";
-
-export default async function TaxiPage() {
-  const companies = await listCompanies();
-
-  return (
-    <div>
-      <PageHeader
-        title="タクシー関連"
-        description={`各法人のタクシー配車サービス（${TAXI_SERVICES.join(
-          " / ",
-        )}）｜⠿ をドラッグで並び替え・各社をタップで開閉`}
-      />
-
-      {companies.length === 0 ? (
-        <div className="rounded-xl border border-dashed border-gray-300 bg-white p-12 text-center text-gray-500">
-          まだ法人が登録されていません。
-        </div>
-      ) : (
-        <ServiceBoard
-          companies={companies}
-          services={TAXI_SERVICES}
-          statusOptions={TAXI_STATUS_OPTIONS}
-          prefix="taxi"
-        />
-      )}
-    </div>
-  );
+export default function TaxiPage() {
+  redirect("/billing");
 }

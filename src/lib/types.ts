@@ -58,6 +58,8 @@ export interface Company {
   notes: string | null;
   /** 会社HPのURL */
   hp?: string | null;
+  /** 法人の独自ドメイン（ホスト名） */
+  custom_domain?: string | null;
   /** 適格請求書発行事業者の登録番号（インボイス番号 / T+13桁） */
   invoice_number?: string | null;
   /** 会社法人等番号（登記簿に記載される12桁） */

@@ -11,6 +11,7 @@ import {
   setCaseTaskCompleted,
   setCompanyService,
   setCompanyHp,
+  setCompanyDomain,
   setCompanyInvoiceNumber,
   normalizeInvoiceNumber,
   normalizeCompanyNumber,
@@ -531,4 +532,15 @@ export async function toggleCaseTaskAction(formData: FormData) {
     str(formData, "is_completed") === "true",
   );
   revalidatePath("/cases");
+}
+
+export async function setCompanyDomainAction(companyId: string, input: string): Promise<{ ok: true; domain: string | null } | { ok: false; error: string }> {
+  try {
+    const domain = await setCompanyDomain(companyId, input);
+    revalidatePath(`/companies/${companyId}`);
+    revalidatePath("/companies");
+    return { ok: true, domain };
+  } catch (error) {
+    return { ok: false, error: error instanceof Error ? error.message : "保存できませんでした。" };
+  }
 }

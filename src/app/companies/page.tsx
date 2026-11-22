@@ -1,3 +1,4 @@
+import { CompanyDomainBadge } from "@/components/CompanyDomainBadge";
 import Link from "next/link";
 import { listCompanies } from "@/lib/data";
 import { formatCurrency, formatDate } from "@/lib/format";
@@ -28,7 +29,10 @@ export default async function CompaniesPage() {
             <li key={c.id}>
               <details className="group overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
                 <summary className="flex cursor-pointer list-none items-center justify-between gap-4 px-4 py-4 font-medium text-gray-900 transition hover:bg-gray-50 sm:px-6 [&::-webkit-details-marker]:hidden">
-                  <span className="min-w-0 truncate">{c.name}</span>
+                  <span className="flex min-w-0 flex-1 flex-wrap items-center gap-2">
+                    <span className="min-w-0 break-words">{c.name}</span>
+                    <CompanyDomainBadge domain={c.custom_domain} />
+                  </span>
                   <svg
                     width="18"
                     height="18"

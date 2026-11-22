@@ -1,3 +1,5 @@
+import { CompanyDomainInput } from "@/components/CompanyDomainInput";
+import { CompanyDomainBadge } from "@/components/CompanyDomainBadge";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import {
@@ -45,6 +47,7 @@ export default async function CompanyDetailPage({
 
       <PageHeader title={company.name} description={company.name_kana ?? undefined}>
         <CompanyStatusBadge status={company.status} />
+        <CompanyDomainBadge domain={company.custom_domain} />
       </PageHeader>
 
       <section className="mb-6 rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
@@ -56,6 +59,9 @@ export default async function CompanyDetailPage({
           >
             編集
           </Link>
+        </div>
+        <div className="mb-5 max-w-xl">
+          <CompanyDomainInput key={`${company.id}:${company.custom_domain ?? ""}`} companyId={company.id} value={company.custom_domain} />
         </div>
         <dl className="grid grid-cols-1 gap-x-8 gap-y-5 sm:grid-cols-2 lg:grid-cols-3">
           <div>
