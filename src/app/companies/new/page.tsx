@@ -24,18 +24,6 @@ export default function NewCompanyPage() {
           <Field label="業種">
             <TextInput name="industry" placeholder="IT・ソフトウェア" />
           </Field>
-          <Field label="ステータス">
-            <Select name="status" defaultValue="prospect">
-              {Object.entries(COMPANY_STATUS_LABELS).map(([value, label]) => (
-                <option key={value} value={value}>
-                  {label}
-                </option>
-              ))}
-            </Select>
-          </Field>
-          <Field label="担当者名">
-            <TextInput name="contact_person" placeholder="田中 一郎" />
-          </Field>
           <Field label="電話番号">
             <TextInput name="phone" placeholder="03-1234-5678" />
           </Field>
@@ -44,7 +32,7 @@ export default function NewCompanyPage() {
           </Field>
           <PostalCodeField />
           <Field label="会社URL">
-            <TextInput type="url" name="hp" placeholder="https://example.com" />
+            <TextInput name="hp" inputMode="url" placeholder="example.com" />
           </Field>
           <Field label="代表者名">
             <TextInput name="representative_name" placeholder="田中 一郎" />
@@ -71,11 +59,16 @@ export default function NewCompanyPage() {
               placeholder="1000000"
             />
           </Field>
+          <Field label="GビズID">
+            <TextInput name="gbiz_id" placeholder="example@example.com" />
+          </Field>
+          <Field label="パスワード">
+            <TextInput name="gbiz_password" placeholder="GビズIDのパスワード" />
+          </Field>
+          <Field label="登録電話番号">
+            <TextInput type="tel" name="gbiz_phone" placeholder="090-1234-5678" />
+          </Field>
         </div>
-
-        <Field label="メモ">
-          <TextArea name="notes" rows={3} placeholder="補足情報など" />
-        </Field>
 
         <div className="flex items-center gap-3 pt-2">
           <SubmitButton>登録する</SubmitButton>

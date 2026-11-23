@@ -392,7 +392,6 @@ export async function createCompanyAction(formData: FormData) {
     name,
     name_kana: str(formData, "name_kana"),
     industry: str(formData, "industry"),
-    contact_person: str(formData, "contact_person"),
     email: str(formData, "email"),
     phone: str(formData, "phone"),
     address: str(formData, "address"),
@@ -400,7 +399,7 @@ export async function createCompanyAction(formData: FormData) {
     representative_name: str(formData, "representative_name"),
     established_on: str(formData, "established_on"),
     capital: capital != null && Number.isFinite(capital) ? capital : null,
-    hp: str(formData, "hp"),
+    hp: normalizeUrl(str(formData, "hp")),
     invoice_number: normalizeInvoiceNumber(str(formData, "invoice_number") ?? ""),
     company_number: normalizeCompanyNumber(str(formData, "company_number") ?? ""),
     corporate_number: normalizeCorporateNumber(
@@ -408,19 +407,29 @@ export async function createCompanyAction(formData: FormData) {
     ),
     progress_status: str(formData, "progress_status"),
     incorporation_filing_status: str(formData, "incorporation_filing_status"),
-    payment_target_on: str(formData, "payment_target_on"),
     etax_id: str(formData, "etax_id"),
     employment_insurance_number: str(formData, "employment_insurance_number"),
     labour_insurance_number: str(formData, "labour_insurance_number"),
-    call_check: str(formData, "call_check"),
-    reason: str(formData, "reason"),
-    status: (str(formData, "status") as CompanyStatus) ?? "prospect",
-    notes: str(formData, "notes"),
+    gbiz_id: str(formData, "gbiz_id"),
+    gbiz_password: str(formData, "gbiz_password"),
+    gbiz_phone: str(formData, "gbiz_phone"),
   });
 
   revalidatePath("/companies");
   revalidatePath("/");
   redirect(`/companies/${company.id}`);
+}
+
+/**
+ * 会社URL を保存できる形にそろえる。
+ * スキームが無いと入力欄の検証で弾かれて保存ボタンが無反応になるため、
+ * 「example.com」のように書かれていたら https:// を補う。
+ */
+function normalizeUrl(value: string | null | undefined): string | null {
+  const url = (value ?? "").trim();
+  if (!url) return null;
+  if (/^https?:\/\//i.test(url)) return url;
+  return `https://${url}`;
 }
 
 /** 法人の基本情報を更新する */
@@ -438,7 +447,6 @@ export async function updateCompanyAction(formData: FormData) {
     name,
     name_kana: str(formData, "name_kana"),
     industry: str(formData, "industry"),
-    contact_person: str(formData, "contact_person"),
     email: str(formData, "email"),
     phone: str(formData, "phone"),
     address: str(formData, "address"),
@@ -446,7 +454,7 @@ export async function updateCompanyAction(formData: FormData) {
     representative_name: str(formData, "representative_name"),
     established_on: str(formData, "established_on"),
     capital: capital != null && Number.isFinite(capital) ? capital : null,
-    hp: str(formData, "hp"),
+    hp: normalizeUrl(str(formData, "hp")),
     invoice_number: normalizeInvoiceNumber(str(formData, "invoice_number") ?? ""),
     company_number: normalizeCompanyNumber(str(formData, "company_number") ?? ""),
     corporate_number: normalizeCorporateNumber(
@@ -454,14 +462,12 @@ export async function updateCompanyAction(formData: FormData) {
     ),
     progress_status: str(formData, "progress_status"),
     incorporation_filing_status: str(formData, "incorporation_filing_status"),
-    payment_target_on: str(formData, "payment_target_on"),
     etax_id: str(formData, "etax_id"),
     employment_insurance_number: str(formData, "employment_insurance_number"),
     labour_insurance_number: str(formData, "labour_insurance_number"),
-    call_check: str(formData, "call_check"),
-    reason: str(formData, "reason"),
-    status: (str(formData, "status") as CompanyStatus) ?? "prospect",
-    notes: str(formData, "notes"),
+    gbiz_id: str(formData, "gbiz_id"),
+    gbiz_password: str(formData, "gbiz_password"),
+    gbiz_phone: str(formData, "gbiz_phone"),
   });
 
   revalidatePath("/companies");

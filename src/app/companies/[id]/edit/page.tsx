@@ -3,7 +3,6 @@ import { notFound } from "next/navigation";
 import { getCompany } from "@/lib/data";
 import { updateCompanyAction } from "@/app/actions";
 import {
-  COMPANY_STATUS_LABELS,
   PROGRESS_STATUS_OPTIONS,
   INCORPORATION_FILING_OPTIONS,
 } from "@/lib/types";
@@ -64,22 +63,6 @@ export default async function EditCompanyPage({
               placeholder="IT・ソフトウェア"
             />
           </Field>
-          <Field label="ステータス">
-            <Select name="status" defaultValue={company.status}>
-              {Object.entries(COMPANY_STATUS_LABELS).map(([value, label]) => (
-                <option key={value} value={value}>
-                  {label}
-                </option>
-              ))}
-            </Select>
-          </Field>
-          <Field label="担当者名">
-            <TextInput
-              name="contact_person"
-              defaultValue={company.contact_person ?? ""}
-              placeholder="田中 一郎"
-            />
-          </Field>
           <Field label="電話番号">
             <TextInput
               name="phone"
@@ -101,10 +84,10 @@ export default async function EditCompanyPage({
           />
           <Field label="会社URL">
             <TextInput
-              type="url"
               name="hp"
+              inputMode="url"
               defaultValue={company.hp ?? ""}
-              placeholder="https://example.com"
+              placeholder="example.com"
             />
           </Field>
           <Field label="代表者名">
@@ -177,13 +160,6 @@ export default async function EditCompanyPage({
               ))}
             </Select>
           </Field>
-          <Field label="着金目標日">
-            <TextInput
-              type="date"
-              name="payment_target_on"
-              defaultValue={company.payment_target_on ?? ""}
-            />
-          </Field>
           <Field label="e-tax利用者識別番号">
             <TextInput
               name="etax_id"
@@ -206,27 +182,29 @@ export default async function EditCompanyPage({
               placeholder="043-01-633227"
             />
           </Field>
-          <Field label="架電確認">
+          <Field label="GビズID">
             <TextInput
-              name="call_check"
-              defaultValue={company.call_check ?? ""}
-              placeholder="例: 2026-10-01 繋がった"
+              name="gbiz_id"
+              defaultValue={company.gbiz_id ?? ""}
+              placeholder="example@example.com"
+            />
+          </Field>
+          <Field label="パスワード">
+            <TextInput
+              name="gbiz_password"
+              defaultValue={company.gbiz_password ?? ""}
+              placeholder="GビズIDのパスワード"
+            />
+          </Field>
+          <Field label="登録電話番号">
+            <TextInput
+              type="tel"
+              name="gbiz_phone"
+              defaultValue={company.gbiz_phone ?? ""}
+              placeholder="090-1234-5678"
             />
           </Field>
         </div>
-
-        <Field label="原因（審査落ちの理由など）">
-          <TextArea name="reason" rows={2} defaultValue={company.reason ?? ""} />
-        </Field>
-
-        <Field label="メモ">
-          <TextArea
-            name="notes"
-            rows={3}
-            defaultValue={company.notes ?? ""}
-            placeholder="補足情報など"
-          />
-        </Field>
 
         <div className="flex items-center gap-3 pt-2">
           <SubmitButton>保存する</SubmitButton>
