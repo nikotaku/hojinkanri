@@ -50,9 +50,12 @@ export interface CompanyInput {
   etax_id?: string | null;
   employment_insurance_number?: string | null;
   labour_insurance_number?: string | null;
+  gbiz_id?: string | null;
+  gbiz_password?: string | null;
+  gbiz_phone?: string | null;
   call_check?: string | null;
   reason?: string | null;
-  status: CompanyStatus;
+  status?: CompanyStatus;
   notes?: string | null;
 }
 
@@ -337,9 +340,12 @@ export async function createCompany(input: CompanyInput): Promise<Company> {
     etax_id: input.etax_id ?? null,
     employment_insurance_number: input.employment_insurance_number ?? null,
     labour_insurance_number: input.labour_insurance_number ?? null,
+    gbiz_id: input.gbiz_id ?? null,
+    gbiz_password: input.gbiz_password ?? null,
+    gbiz_phone: input.gbiz_phone ?? null,
     call_check: input.call_check ?? null,
     reason: input.reason ?? null,
-    status: input.status,
+    status: input.status ?? "prospect",
     notes: input.notes ?? null,
     created_at: ts,
     updated_at: ts,
@@ -353,33 +359,43 @@ export async function updateCompany(
   id: string,
   input: CompanyInput,
 ): Promise<Company> {
-  const patch = {
-    name: input.name,
-    name_kana: input.name_kana ?? null,
-    industry: input.industry ?? null,
-    contact_person: input.contact_person ?? null,
-    email: input.email ?? null,
-    phone: input.phone ?? null,
-    address: input.address ?? null,
-    postal_code: input.postal_code ?? null,
-    representative_name: input.representative_name ?? null,
-    established_on: input.established_on ?? null,
-    capital: input.capital ?? null,
-    hp: input.hp ?? null,
-    invoice_number: input.invoice_number ?? null,
-    company_number: input.company_number ?? null,
-    corporate_number: input.corporate_number ?? null,
-    progress_status: input.progress_status ?? null,
-    incorporation_filing_status: input.incorporation_filing_status ?? null,
-    payment_target_on: input.payment_target_on ?? null,
-    etax_id: input.etax_id ?? null,
-    employment_insurance_number: input.employment_insurance_number ?? null,
-    labour_insurance_number: input.labour_insurance_number ?? null,
-    call_check: input.call_check ?? null,
-    reason: input.reason ?? null,
-    status: input.status,
-    notes: input.notes ?? null,
-  };
+  // 渡された項目だけを更新する。画面から外した項目は input に入ってこないので、
+  // DB の値をそのまま残す（空で上書きして消してしまわないように）。
+  const OPTIONAL_FIELDS = [
+    "name_kana",
+    "industry",
+    "contact_person",
+    "email",
+    "phone",
+    "address",
+    "postal_code",
+    "representative_name",
+    "established_on",
+    "capital",
+    "hp",
+    "invoice_number",
+    "company_number",
+    "corporate_number",
+    "progress_status",
+    "incorporation_filing_status",
+    "payment_target_on",
+    "etax_id",
+    "employment_insurance_number",
+    "labour_insurance_number",
+    "gbiz_id",
+    "gbiz_password",
+    "gbiz_phone",
+    "call_check",
+    "reason",
+    "notes",
+  ] as const;
+
+  const patch: Record<string, unknown> = { name: input.name };
+  for (const key of OPTIONAL_FIELDS) {
+    if (key in input) patch[key] = input[key] ?? null;
+  }
+  // status は NOT NULL。値が来たときだけ更新する。
+  if (input.status) patch.status = input.status;
 
   const supabase = getSupabase();
   if (supabase) {
@@ -1144,7 +1160,7 @@ export async function createCase(input: CaseInput): Promise<Case> {
     company_id: input.company_id ?? null,
     title: input.title,
     description: input.description ?? null,
-    status: input.status,
+    status: input.status ?? "prospect",
     priority: input.priority,
     assignee: input.assignee ?? null,
     amount: input.amount ?? null,

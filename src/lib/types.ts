@@ -76,6 +76,12 @@ export interface Company {
   employment_insurance_number?: string | null;
   /** 労働保険番号 */
   labour_insurance_number?: string | null;
+  /** GビズID（アカウントID。通常はメールアドレス） */
+  gbiz_id?: string | null;
+  /** GビズID のパスワード */
+  gbiz_password?: string | null;
+  /** GビズID の登録電話番号 */
+  gbiz_phone?: string | null;
   /** 審査落ちなどの原因メモ */
   reason?: string | null;
   /** 進行ステータス（未着手/書類準備中/審査開始/完了/中止） */

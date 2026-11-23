@@ -10,7 +10,6 @@ import {
 import { formatCurrency, formatDate } from "@/lib/format";
 import { PageHeader } from "@/components/PageHeader";
 import {
-  CompanyStatusBadge,
   CaseStatusBadge,
   PriorityBadge,
 } from "@/components/StatusBadge";
@@ -46,7 +45,6 @@ export default async function CompanyDetailPage({
       </div>
 
       <PageHeader title={company.name} description={company.name_kana ?? undefined}>
-        <CompanyStatusBadge status={company.status} />
         <CompanyDomainBadge domain={company.custom_domain} />
       </PageHeader>
 
@@ -135,12 +133,6 @@ export default async function CompanyDetailPage({
             </dd>
           </div>
           <div>
-            <dt className="text-sm text-gray-500">担当者名</dt>
-            <dd className="mt-1 text-sm text-gray-900">
-              {company.contact_person ?? "—"}
-            </dd>
-          </div>
-          <div>
             <dt className="text-sm text-gray-500">電話番号</dt>
             <dd className="mt-1 text-sm">
               {company.phone ? (
@@ -168,12 +160,6 @@ export default async function CompanyDetailPage({
             </dd>
           </div>
           <div>
-            <dt className="text-sm text-gray-500">着金目標日</dt>
-            <dd className="mt-1 text-sm text-gray-900">
-              {formatDate(company.payment_target_on)}
-            </dd>
-          </div>
-          <div>
             <dt className="text-sm text-gray-500">e-tax利用者識別番号</dt>
             <dd className="mt-1 font-mono text-sm text-gray-900">
               {company.etax_id ?? "—"}
@@ -192,15 +178,30 @@ export default async function CompanyDetailPage({
             </dd>
           </div>
           <div>
-            <dt className="text-sm text-gray-500">架電確認</dt>
-            <dd className="mt-1 text-sm text-gray-900">
-              {company.call_check ?? "—"}
+            <dt className="text-sm text-gray-500">GビズID</dt>
+            <dd className="mt-1 break-all text-sm text-gray-900">
+              {company.gbiz_id ?? "—"}
             </dd>
           </div>
           <div>
-            <dt className="text-sm text-gray-500">原因</dt>
-            <dd className="mt-1 whitespace-pre-wrap text-sm text-gray-900">
-              {company.reason ?? "—"}
+            <dt className="text-sm text-gray-500">パスワード</dt>
+            <dd className="mt-1 break-all font-mono text-sm text-gray-900">
+              {company.gbiz_password ?? "—"}
+            </dd>
+          </div>
+          <div>
+            <dt className="text-sm text-gray-500">登録電話番号</dt>
+            <dd className="mt-1 text-sm">
+              {company.gbiz_phone ? (
+                <a
+                  href={`tel:${company.gbiz_phone.replace(/[^\d+]/g, "")}`}
+                  className="text-brand-600 hover:text-brand-700 hover:underline"
+                >
+                  {company.gbiz_phone}
+                </a>
+              ) : (
+                <span className="text-gray-900">—</span>
+              )}
             </dd>
           </div>
           <div>
@@ -219,15 +220,6 @@ export default async function CompanyDetailPage({
             </dd>
           </div>
         </dl>
-
-        {company.notes && (
-          <div className="mt-5 border-t border-gray-100 pt-4">
-            <dt className="text-sm text-gray-500">メモ</dt>
-            <dd className="mt-1 whitespace-pre-wrap text-sm text-gray-900">
-              {company.notes}
-            </dd>
-          </div>
-        )}
       </section>
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
