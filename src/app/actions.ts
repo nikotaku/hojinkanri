@@ -10,6 +10,7 @@ import {
   createCaseTasks,
   setCaseTaskCompleted,
   setCaseArchived,
+  setCaseCompany,
   updateCaseNotes,
   setCompanyService,
   setCompanyHp,
@@ -557,6 +558,26 @@ export async function setCaseArchivedAction(formData: FormData) {
   revalidatePath("/cases/archived");
   revalidatePath(`/cases/${caseId}`);
   redirect(archived ? "/cases" : `/cases/${caseId}`);
+}
+
+/** 法人未設定の既存案件を、選択した法人へまとめて紐付ける */
+export async function linkCasesToCompanyAction(formData: FormData) {
+  const companyId = str(formData, "company_id");
+  const caseIds = formData
+    .getAll("case_ids")
+    .map((value) => String(value).trim())
+    .filter(Boolean);
+
+  if (!companyId) throw new Error("法人が指定されていません。");
+  if (caseIds.length === 0) throw new Error("案件を1件以上選択してください。");
+
+  await Promise.all(caseIds.map((caseId) => setCaseCompany(caseId, companyId)));
+
+  revalidatePath("/");
+  revalidatePath("/cases");
+  revalidatePath(`/companies/${companyId}`);
+  for (const caseId of caseIds) revalidatePath(`/cases/${caseId}`);
+  redirect(`/companies/${companyId}`);
 }
 
 /** 「次にやるべきこと」「準備物」を保存する */

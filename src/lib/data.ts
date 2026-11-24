@@ -1087,6 +1087,24 @@ export async function setCaseArchived(
   if (found) found.archived_at = archivedAt;
 }
 
+/** 既存案件を法人へ紐付ける（null を渡すと紐付けを解除する） */
+export async function setCaseCompany(
+  id: string,
+  companyId: string | null,
+): Promise<void> {
+  const supabase = getSupabase();
+  if (supabase) {
+    const { error } = await supabase
+      .from("cases")
+      .update({ company_id: companyId })
+      .eq("id", id);
+    if (error) throw new Error(error.message);
+    return;
+  }
+  const found = getMockDb().cases.find((c) => c.id === id);
+  if (found) found.company_id = companyId;
+}
+
 /** 「次にやるべきこと」「準備物」を保存する */
 export async function updateCaseNotes(
   id: string,

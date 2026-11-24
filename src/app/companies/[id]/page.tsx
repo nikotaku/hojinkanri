@@ -254,7 +254,7 @@ export default async function CompanyDetailPage({
               案件 ({cases.length})
             </h2>
             <Link
-              href={`/cases/new?company=${company.id}`}
+              href={`/companies/${company.id}/cases/link`}
               className="text-sm font-medium text-brand-600 hover:text-brand-700"
             >
               + 案件を追加
