@@ -32,6 +32,11 @@ export default async function CompaniesPage() {
                   <span className="flex min-w-0 flex-1 flex-wrap items-center gap-2">
                     <span className="min-w-0 break-words">{c.name}</span>
                     <CompanyDomainBadge domain={c.custom_domain} />
+                    {c.gbiz_id?.trim() ? (
+                      <span className="inline-flex shrink-0 items-center rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-700">
+                        Gビズ登録済み
+                      </span>
+                    ) : null}
                   </span>
                   <svg
                     width="18"
