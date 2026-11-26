@@ -6,12 +6,29 @@ import Sortable from "sortablejs";
 import type { Company } from "@/lib/types";
 import { ServiceStatusSelect } from "@/components/ServiceStatusSelect";
 import { ServiceContactInput } from "@/components/ServiceContactInput";
+import { ServiceDateInput } from "@/components/ServiceDateInput";
 import { MobileContractDetails } from "@/components/MobileContractDetails";
 import { BillingStatusFields } from "@/components/BillingStatusFields";
 import { BillingUsageDetails } from "@/components/BillingUsageDetails";
 import { PaidServiceDetails } from "@/components/PaidServiceDetails";
 import { reorderCompaniesAction } from "@/app/actions";
 import { evaluateMobileFlow } from "@/lib/mobileFlow";
+import { formatDate } from "@/lib/format";
+
+/**
+ * 回線ごとの契約日。行に入力した日付を優先し、無ければ
+ * 契約端末に入っている契約日のうち一番古いものを使う。
+ */
+function contractDateFor(company: Company, service: string): string | undefined {
+  const own = ((company.mobile_contracted_on ?? {}) as Record<string, string>)[
+    service
+  ];
+  if (own) return own;
+  return (company.mobile_contract_details ?? [])
+    .filter((detail) => detail.service === service && detail.contracted_on)
+    .map((detail) => detail.contracted_on as string)
+    .sort()[0];
+}
 
 // サービス群ごとの保存先フィールド定義
 const FIELD_SETS = {
@@ -202,6 +219,10 @@ function CompanyServiceRows({ company: c, prefix, services, statusOptions }: {
         const adminUrlMap = (c[fields.adminUrl] ?? {}) as Record<string, string>;
         const loginIdMap = (c[fields.loginId] ?? {}) as Record<string, string>;
         const loginPwMap = (c[fields.loginPw] ?? {}) as Record<string, string>;
+        const contractedOnMap =
+          prefix === "mobile"
+            ? ((c.mobile_contracted_on ?? {}) as Record<string, string>)
+            : {};
         const unavailableReasonMap =
           prefix === "billing"
             ? ((c.billing_unavailable_reason ?? {}) as Record<string, string>)
@@ -222,7 +243,14 @@ function CompanyServiceRows({ company: c, prefix, services, statusOptions }: {
                         {s}
                       </span>
                     </span>
-                    <StatusPill value={statusMap[s]} />
+                    <span className="flex min-w-0 items-center gap-1.5">
+                      {prefix === "mobile" && contractDateFor(c, s) && (
+                        <span className="shrink-0 whitespace-nowrap text-[10px] tabular-nums text-gray-500">
+                          {formatDate(contractDateFor(c, s))}
+                        </span>
+                      )}
+                      <StatusPill value={statusMap[s]} />
+                    </span>
                   </summary>
                   <div className="space-y-1.5 px-2.5 pb-2.5 pt-1">
                     {prefix === "billing" ? (
@@ -257,6 +285,15 @@ function CompanyServiceRows({ company: c, prefix, services, statusOptions }: {
                         details={(c.billing_usage_details ?? []).filter(
                           (detail) => detail.service === "Paid",
                         )}
+                      />
+                    )}
+                    {prefix === "mobile" && (
+                      <ServiceDateInput
+                        companyId={c.id}
+                        field="mobile_contracted_on"
+                        service={s}
+                        value={contractedOnMap[s]}
+                        label="契約日"
                       />
                     )}
                     {prefix === "mobile" && (
