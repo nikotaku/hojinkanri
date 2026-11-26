@@ -522,6 +522,7 @@ export type ServiceField =
   | "taxi_login_id"
   | "taxi_login_pw"
   | "mobile"
+  | "mobile_contracted_on"
   | "mobile_phone"
   | "mobile_email"
   | "mobile_name"

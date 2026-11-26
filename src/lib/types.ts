@@ -128,6 +128,8 @@ export interface Company {
   mobile_login_id?: Record<string, string> | null;
   /** 法人モバイル回線のログインPW (サービス名 -> PW) */
   mobile_login_pw?: Record<string, string> | null;
+  /** 法人モバイル回線の契約日 (サービス名 -> YYYY-MM-DD) */
+  mobile_contracted_on?: Record<string, string> | null;
   /** 法人モバイル回線で契約した端末（モバイル回線ページで取得） */
   mobile_contract_details?: MobileContractDetail[];
   /** 掛け払いサービスの申請・利用状況 (サービス名 -> ステータス) */

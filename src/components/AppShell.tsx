@@ -34,7 +34,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
   function isActive(href: string): boolean {
     if (href === "/") return pathname === "/";
-    return pathname === href || pathname.startsWith(`${href}/`);
+    // src/pages が増えたことで usePathname() の型が string | null になった。
+    return pathname === href || (pathname?.startsWith(`${href}/`) ?? false);
   }
 
   const navLinks = (
