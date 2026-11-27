@@ -59,6 +59,8 @@ export function BillingUsageDetails({
         admin_url: null,
         login_id: null,
         login_pw: null,
+        card_delivery_address: null,
+        card_ordered_by: null,
         created_at: now,
         updated_at: now,
         persisted: false,
