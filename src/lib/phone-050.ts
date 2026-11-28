@@ -9,6 +9,8 @@ export type Phone050 = {
   id: string; phone_number: string; provider: string | null;
   purchased_on: string | null; monthly_cost: number | null;
   contract_company_id: string | null; status: NumberStatus;
+  /** この番号を使ったサービス名のタグ */
+  service_tags: string[] | null;
   notes: string | null; created_at: string; updated_at: string;
 };
 export type IvryApplication = {

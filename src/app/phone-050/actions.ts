@@ -34,6 +34,24 @@ export async function updatePhone050(form:FormData) {
   if(error)throw new Error(error.message);
   revalidatePath("/phone-050");
 }
+/** 050番号に「使ったサービス」のタグを付け替える */
+export async function setPhone050ServiceTagsAction(phoneId:string, tags:string[]) {
+  if(!phoneId)throw new Error("番号が不正です。");
+  if(!Array.isArray(tags))throw new Error("タグが不正です。");
+  const cleaned:string[]=[];
+  for(const raw of tags){
+    if(typeof raw!=="string")continue;
+    const tag=raw.trim().slice(0,40);
+    if(!tag||cleaned.includes(tag))continue;
+    cleaned.push(tag);
+  }
+  if(cleaned.length>20)throw new Error("タグは20個までにしてください。");
+  const {error}=await phoneDb().from("phone_050_numbers").update({
+    service_tags:cleaned,updated_at:new Date().toISOString(),
+  }).eq("id",phoneId);
+  if(error)throw new Error(error.message);
+  revalidatePath("/phone-050");
+}
 export async function createIvryApplication(form:FormData) {
   const phoneId=value(form,"phone_id");
   if(!phoneId)throw new Error("番号を選択してください。");
