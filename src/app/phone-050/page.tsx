@@ -1,6 +1,8 @@
 import { get050Data } from "@/lib/phone-050";
 import { createPhone050, createIvryApplication, updateIvryApplication, updatePhone050 } from "./actions";
 import { PageHeader } from "@/components/PageHeader";
+import { Phone050ServiceTags } from "@/components/Phone050ServiceTags";
+import { ACCOUNT_SERVICES, BILLING_SERVICES, MOBILE_SERVICES, OTHER_SERVICES, TAXI_SERVICES } from "@/lib/types";
 
 export const dynamic="force-dynamic";
 const numberLabels:Record<string,string>={available:"未使用",applying:"申込中",active:"利用中",suspended:"停止中",cancelled:"解約済"};
@@ -13,6 +15,10 @@ export default async function Phone050Page(){
   const {phones,applications,companies}=await get050Data();
   const names=new Map(companies.map(c=>[c.id,c.name]));
   const counts={total:phones.length,free:phones.filter(p=>p.status==="available").length,applying:phones.filter(p=>p.status==="applying").length,active:phones.filter(p=>p.status==="active").length};
+  // 候補タグ：すでに他の番号で使っているものを先に出し、入力補完にはアプリが扱うサービス名も並べる。
+  const usedTags=[...new Set(phones.flatMap(p=>p.service_tags??[]))].sort((a,b)=>a.localeCompare(b,"ja"));
+  const quickTags=[...new Set(["アイブリー",...usedTags])];
+  const tagOptions=[...new Set([...quickTags,...TAXI_SERVICES,...MOBILE_SERVICES,...BILLING_SERVICES,...OTHER_SERVICES,...ACCOUNT_SERVICES])];
   return <div className="space-y-7">
     <PageHeader title="050番号管理" description="購入番号の在庫・法人・アイブリー申込と開通状況を一元管理" />
     <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
@@ -36,11 +42,15 @@ export default async function Phone050Page(){
       {phones.length===0?<p className="text-sm text-gray-500">登録番号はありません。</p>:
       <div className="space-y-3">{phones.map(p=>{
         const related=applications.filter(a=>a.phone_id===p.id);
-        return <details key={p.id} className="rounded-lg border p-3">
-          <summary className="flex cursor-pointer flex-wrap items-center justify-between gap-2">
-            <span className="font-semibold">{p.phone_number}</span><span className="text-sm text-gray-600">{numberLabels[p.status]||p.status}｜{p.contract_company_id?names.get(p.contract_company_id)||"法人不明":"法人未設定"}｜申込履歴 {related.length}件</span>
+        return <details key={p.id} className="group rounded-lg border p-3">
+          <summary className="cursor-pointer">
+            <span className="flex flex-wrap items-center justify-between gap-2">
+              <span className="font-semibold">{p.phone_number}</span><span className="text-sm text-gray-600">{numberLabels[p.status]||p.status}｜{p.contract_company_id?names.get(p.contract_company_id)||"法人不明":"法人未設定"}｜申込履歴 {related.length}件</span>
+            </span>
+            {(p.service_tags??[]).length>0&&<span className="mt-1.5 flex flex-wrap gap-1.5 group-open:hidden">{(p.service_tags??[]).map(tag=><span key={tag} className="rounded-full bg-brand-50 px-2.5 py-0.5 text-xs font-medium text-brand-700">{tag}</span>)}</span>}
           </summary>
           <div className="mt-4 space-y-4">
+            <Phone050ServiceTags phoneId={p.id} tags={p.service_tags??[]} suggestions={quickTags} allOptions={tagOptions} />
             <p className="text-sm text-gray-600">購入先：{p.provider||"未登録"} ／ 購入日：{p.purchased_on||"未登録"} ／ 月額：{p.monthly_cost==null?"未登録":Number(p.monthly_cost).toLocaleString()+"円"}</p>
             {p.notes&&<p className="whitespace-pre-wrap text-sm">{p.notes}</p>}
             <form action={updatePhone050} className="flex flex-wrap items-end gap-2"><input name="id" type="hidden" value={p.id}/><label className="text-xs">番号の状態<select name="status" defaultValue={p.status} className={field}>{numberOptions.map(([v,l])=><option key={v} value={v}>{l}</option>)}</select></label><button className={btn}>変更</button></form>
